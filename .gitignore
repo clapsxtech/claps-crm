@@ -1,0 +1,27 @@
+.DS_Store
+Thumbs.db
+
+# Laravel environment & credentials
+.env
+.env.*
+*.env
+*.key
+credentials.json
+*/credentials.json
+public_html/storage/credentials.json
+
+# Dependencies
+vendor/
+node_modules/
+public_html/vendor/
+public_html/node_modules/
+
+# Logs and cache
+*.log
+public_html/storage/logs/*
+!public_html/storage/logs/.gitignore
+public_html/storage/framework/cache/*
+public_html/storage/framework/sessions/*
+!public_html/storage/framework/sessions/.gitignore
+public_html/storage/framework/views/*
+!public_html/storage/framework/views/.gitignore

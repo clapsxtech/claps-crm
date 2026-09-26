@@ -1,0 +1,7 @@
+/* These styles used in jquery validation */
+.my-error-class {
+    color:red;
+}
+.my-valid-class {
+    color:rgb(4, 83, 4);
+}

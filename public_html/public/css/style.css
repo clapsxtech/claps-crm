@@ -1,0 +1,64 @@
+.fade-in {
+    opacity:0;  /* make things invisible upon start */
+    animation:fadeIn ease-in 1; /* call our keyframe named fadeIn, use animattion ease-in and repeat it only 1 time */
+
+    animation-fill-mode:forwards;  /* this makes sure that after animation is done we remain at the last keyframe value (opacity: 1)*/
+
+    animation-duration:1.5s;
+    animation-delay: .5s
+}
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.zentrona-topnav {
+    height: 80px;
+    width:100%;
+    position: relative;
+    z-index: 0;
+    right: 0;
+    top: 0;
+    background-color: transparent;
+    overflow: hidden;
+    
+}
+.zentrona-footer {
+	position: fixed;
+    height: 35px;
+    width: 100%;
+    text-decoration: none;
+    background-color: #FFFFFF;
+    left: 0;
+    right: 0;
+	bottom: 0px;
+    display: block;
+    
+}
+.zentrona-footer span{
+	padding:10px;
+	color:darkolivegreen;
+	font-weight:bold
+    
+}
+.left {
+    float:left;
+    padding:10px;
+}
+.right {
+    float:right;
+    padding:10px;
+}
+.logo {
+    float:left;
+    padding:10px;
+}
+.social {
+    font-size:35px;
+    color: #00bf9a;
+    float:right;
+    padding:10px;
+    text-indent :1em;
+}
+
+
+
+
