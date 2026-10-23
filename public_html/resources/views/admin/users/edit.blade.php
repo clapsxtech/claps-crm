@@ -1,242 +1,147 @@
+@php
+    $editing = isset($users) && $users->exists;
+    $address = $editing ? json_decode((string) $users->address, true) : [];
+    $address = is_array($address) ? $address : [];
+    $bank = $editing ? json_decode((string) $users->bank_details, true) : [];
+    $bank = is_array($bank) ? $bank : [];
+    $gender = strtoupper((string) old('gender', $editing ? $users->gender : ''));
+    $gender = $gender === 'OTHERS' ? 'OTHER' : $gender;
+@endphp
 <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
-        <form method="post" action="{{ route('users.update', $users->id) }}" accept-charset="UTF-8" id="edit_form">
-
-            <input name="_method" type="hidden" value="PUT">
+        <form method="post" action="{{ $editing ? route('users.update', $users->id) : route('users.store') }}"
+              enctype="multipart/form-data" accept-charset="UTF-8" data-staff-profile="true" id="{{ $editing ? 'edit_form' : 'createForm' }}">
             @csrf
+            @if ($editing)
+                @method('PUT')
+            @endif
             <div class="modal-header">
-                <h4 class="modal-title">{{ __('users.edit_users') }}</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">×</span></button>
+                <h4 class="modal-title">{{ __($editing ? 'users.edit_users' : 'users.add_users') }}</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
-            <div class="card-body">
-                <div id="example2_wrapper" class="dataTables_wrapper dt-bootstrap4">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label for="first_name">{{ __('common.name') }} :*</label>
-                            <div class="form-group">
-                                <input class="form-control" required="" placeholder="{{ __('common.name') }}"
-                                    value="{{ old('name', $users->name) }}" name="name" type="text" id="name">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="email">{{ __('common.email') }} :*</label>
-                                <input class="form-control" placeholder="{{ __('common.email') }}" name="email"
-                                    value="{{ old('email', $users->email) }}" type="text" id="email">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="email">{{ __('common.phone') }} :*</label>
-                                <input class="form-control" placeholder="{{ __('common.phone') }}" name="phone"
-                                    value="{{ old('phone', $users->phone) }}" type="text" id="phone" onkeyup="if (/\D/g.test(this.value))this.value = this.value.replace(/\D/g, '')">
-                            </div>
-                        </div>
+            <div class="modal-body">
+                <div class="row">
+                    @foreach (['name' => ['common.name', 'text', 100], 'email' => ['common.email', 'email', 255], 'phone' => ['common.phone', 'tel', 10]] as $field => $options)
                         <div class="form-group col-md-4">
-                            <label for="gender">{{ __('common.gender') }} :</label>
-                            <select class="form-control select2" id="gender" name="gender" style="width:100%">
-                                <option value="">Please Select</option>
-                                <option value="Male" @if (old('gender', $users->gender) == 'Male') selected @endif>Male</option>
-                                <option value="Female" @if (old('gender', $users->gender) == 'Female') selected @endif>Female</option>
-                                <option value="Others" @if (old('gender', $users->gender) == 'Others') selected @endif>Others</option>
-                            </select>
+                            <label for="staff_{{ $field }}">{{ __($options[0]) }} *</label>
+                            <input class="form-control" id="staff_{{ $field }}" name="{{ $field }}" type="{{ $options[1] }}"
+                                   maxlength="{{ $options[2] }}" value="{{ old($field, $editing ? $users->$field : '') }}" required
+                                   @if ($field === 'phone') inputmode="numeric" pattern="[0-9]{10}" @endif>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="email">{{ __('users.language') }} :</label>
-                                <input class="form-control" placeholder="Language" name="language"
-                                    value="{{ old('language', $users->language) }}" type="text" id="language">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="email">{{ __('users.position') }} :</label>
-                                <input class="form-control" placeholder="{{ __('users.position') }}" name="position"
-                                    value="{{ old('position', $users->position) }}" type="text" id="position">
-                            </div>
-                        </div>
+                    @endforeach
+                    <div class="form-group col-md-4">
+                        <label for="staff_gender">{{ __('common.gender') }} *</label>
+                        <select class="form-control select2" id="staff_gender" name="gender" required style="width:100%">
+                            <option value="">Please Select</option>
+                            @foreach (['MALE' => 'Male', 'FEMALE' => 'Female', 'OTHER' => 'Other'] as $value => $label)
+                                <option value="{{ $value }}" @if ($gender === $value) selected @endif>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @foreach (['language' => 'users.language', 'position' => 'users.position'] as $field => $label)
                         <div class="form-group col-md-4">
-                            <label for="user_dob">{{ __('users.date_of_birth') }} :</label>
-                            <input class="form-control" placeholder="{{ __('users.date_of_birth') }}"
-                                value="{{ old('dob', $users->dob) }}" id="user_dob" name="dob" type="date">
+                            <label for="staff_{{ $field }}">{{ __($label) }}</label>
+                            <input class="form-control" id="staff_{{ $field }}" name="{{ $field }}" type="text" maxlength="100"
+                                   value="{{ old($field, $editing ? $users->$field : '') }}">
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="name">{{ __('common.photo') }}:</label>
-                                <input class="form-control" name="profile_photo" type="file" id="name"
-                                    accept="image/*">
-                            </div>
+                    @endforeach
+                    @foreach (['dob' => 'users.date_of_birth', 'service_expiry' => 'users.service_expiry'] as $field => $label)
+                        <div class="form-group col-md-4">
+                            <label for="staff_{{ $field }}">{{ __($label) }}</label>
+                            <input class="form-control" id="staff_{{ $field }}" name="{{ $field }}" type="date"
+                                   value="{{ old($field, $editing ? $users->$field : '') }}" @if ($field === 'dob') max="{{ date('Y-m-d') }}" @endif>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                @if ($users->profile_photo)
-                                    <img style="height: 75px" class="img-circle"
-                                        src="{{ asset($users->profile_photo) }}" alt="{{ $users->name }}">
-                                @else
-                                    <img style="height: 75px" class="img-circle" src="{{ asset('img/user2.png') }}"
-                                        alt="{{ $users->name }}">
-                                @endif
-                            </div>
-                        </div>
+                    @endforeach
+                    <div class="form-group col-md-4">
+                        <label for="staff_profile_photo">{{ __('common.photo') }}</label>
+                        <input class="form-control" id="staff_profile_photo" name="profile_photo" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
+                        <small class="form-text text-muted">JPEG, PNG, GIF or WebP, up to 2 MB.</small>
+                        @if ($editing && $users->profile_photo)
+                            <img class="img-circle mt-2" style="height:75px" src="{{ asset($users->profile_photo) }}" alt="{{ $users->name }}">
+                        @endif
                     </div>
                 </div>
-            </div>
-            <hr>
-            <div class="card-body">
-
-                <div class="row col-md-12">
-                    <div class="col-md-6 form-group">
-                        <label for="password">{{ __('users.password') }} :*</label>
-                        <input class="form-control valid"  placeholder="{{ __('users.password') }}"
-                            name="password" type="password" id="password">
+                <hr>
+                @if ($editing)
+                    <p class="text-muted">Leave both password fields blank to keep the current password.</p>
+                @endif
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="staff_password">{{ __('users.password') }}{{ $editing ? '' : ' *' }}</label>
+                        <input class="form-control" id="staff_password" name="password" type="password" minlength="8" maxlength="72"
+                               autocomplete="new-password" @if (!$editing) required @endif>
+                        <small class="form-text text-muted">At least 8 characters, no more than 72 bytes.</small>
                     </div>
-                    <div class=" col-md-6 form-group">
-                        <label for="confirm_password">{{ __('users.confirm_password') }}:*</label>
-                        <input class="form-control"  placeholder="{{ __('users.confirm_password') }}"
-                            name="confirm_password" type="password" id="confirm_password">
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="card-body">
-                <div id="example2_wrapper" class="dataTables_wrapper dt-bootstrap4">
-                    <div class="header"><br>
-                        <div class="col-md-12">
-                            <h3>{{ __('users.more_informations') }}</h3>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class=" col-md-12">
-                            <div class="form-group">
-                                <label class=""><input id="is_commission_agent" name="is_commission_agent"
-                                        type="checkbox" value="1" @php
-                                            if ($users->is_commission_agent) {
-                                                echo 'checked';
-                                            }
-                                        @endphp>
-                                    {{ __('users.is_commission_agent') }}</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="role">{{ __('users.commission_type') }} :</label>
-                            <div class="form-group">
-                                <select class="form-control select2 " id="commission_type" name="commission_type"
-                                    style="width:100%">
-                                    <option value="sale_amount" @if (old('commission_type', $users->commission_type) == 'sale_amount') selected @endif>Sale
-                                        Amount</option>
-                                    <option value="profit_amount" @if (old('commission_type', $users->commission_type) == 'profit_amount') selected @endif>
-                                        Profit Amount</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="service_expiry">{{ __('users.service_expiry') }} :</label>
-                            <input class="form-control" placeholder="{{ __('users.service_expiry') }}"
-                                value="{{ old('service_expiry', $users->service_expiry) }}" id="service_expiry"
-                                name="service_expiry" type="date">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="blood_group">{{ __('users.blood_group') }} :</label>
-                            <select class="form-control select2 " id="blood_group" name="blood_group"
-                                style="width:100%">
-                                <option value="">Please Select</option>
-                                <option value="A+" @if (old('blood_group', $users->blood_group) == 'A+') selected @endif> A+</option>
-                                <option value="A-" @if (old('blood_group', $users->blood_group) == 'A-') selected @endif>A-</option>
-                                <option value="B+" @if (old('blood_group', $users->blood_group) == 'B+') selected @endif>B+</option>
-                                <option value="B-" @if (old('blood_group', $users->blood_group) == 'B-') selected @endif>B-</option>
-                                <option value="O+" @if (old('blood_group', $users->blood_group) == 'O+') selected @endif>O+</option>
-                                <option value="O-" @if (old('blood_group', $users->blood_group) == 'O-') selected @endif>O-</option>
-                                <option value="AB+" @if (old('blood_group', $users->blood_group) == 'AB+') selected @endif>AB+</option>
-                                <option value="AB-" @if (old('blood_group', $users->blood_group) == 'AB-') selected @endif>AB-</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="alt_number">{{ __('users.alternate_number') }} :</label>
-                            <input class="form-control" placeholder="{{ __('users.alternate_number') }}"
-                                value="{{ old('alternate_number', $users->alternate_number) }}" name="alternate_number"
-                                type="text" id="alternate_number" onkeyup="if (/\D/g.test(this.value))this.value = this.value.replace(/\D/g, '')">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="contact_number">{{ __('users.emergency_contact_number') }} :</label>
-                            <input class="form-control " placeholder="{{ __('users.emergency_contact_number') }}"
-                                value="{{ old('emergency_contact_number', $users->emergency_contact_number) }}"
-                                name="emergency_contact_number" type="text" id="emergency_contact_number" onkeyup="if (/\D/g.test(this.value))this.value = this.value.replace(/\D/g, '')">
-                        </div>
-
-                        <div class="form-group col-md-4">
-                            <label for="custom_fields">{{ __('users.custom_fields') }} :</label>
-                            <input class="form-control" placeholder="{{ __('users.custom_fields') }}"
-                                value="{{ old('custom_fields', $users->custom_fields) }}" name="custom_fields"
-                                type="text" id="custom_fields">
-                        </div>
-                        <?php $address = json_decode($users['address'], true, 4);
-                        ?>
-
-                        <div class="clearfix"></div>
-                        <div class="form-group col-md-4">
-                            <label for="permanent_address">{{ __('users.permanent_address') }} :</label>
-                            <textarea class="form-control valid" placeholder="{{ __('users.permanent_address') }}" rows="3"
-                                name="permanent_address" cols="50" id="permanent_address"
-                                aria-invalid="false">{{ old('permanent_address', $address['permanent_address']) }}</textarea>
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="current_address">{{ __('users.current_address') }}:</label>
-                            <textarea class="form-control valid" placeholder="{{ __('users.current_address') }}" rows="3" name="current_address"
-                                cols="50" id="current_address"
-                                aria-invalid="false">{{ old('current_address', $address['current_address']) }}</textarea>
-                        </div>
-                        <?php $bank_details = json_decode($users['bank_details'], true, 4); ?>
-                        <div class="col-md-12">
-                            <hr>
-                            <h4>{{ __('users.bank_details') }}:</h4>
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="account_holder_name">{{ __('users.account_holder_name') }} :</label>
-                            <input class="form-control" id="account_holder_name"
-                                placeholder="{{ __('users.account_holder_name') }}"
-                                value="{{ old('bank_details[account_holder_name]', $bank_details['account_holder_name']) }}"
-                                name="bank_details[account_holder_name]" type="text">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="account_number">{{ __('users.account_number') }} :</label>
-                            <input class="form-control" id="account_number"
-                                placeholder="{{ __('users.account_number') }}"
-                                value="{{ old('bank_details[account_number]', $bank_details['account_number']) }}"
-                                name="bank_details[account_number]" name="bank_details[account_number]" type="text">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="bank_name">{{ __('users.bank_name') }} :</label>
-                            <input class="form-control" id="bank_name" placeholder="{{ __('users.bank_name') }}"
-                                value="{{ old('bank_details[bank_name]', $bank_details['bank_name']) }}"
-                                name="bank_details[bank_name]" type="text">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="bank_code">{{ __('users.bank_code') }} :</label>
-                            <input class="form-control" id="bank_code" placeholder="{{ __('users.bank_code') }}"
-                                value="{{ old('bank_details[bank_code]', $bank_details['bank_code']) }}"
-                                name="bank_details[bank_code]" type="text">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="branch">{{ __('users.branch') }} :</label>
-                            <input class="form-control" id="branch" placeholder="{{ __('users.branch') }}"
-                                value="{{ old('bank_details[branch]', $bank_details['branch']) }}"
-                                name="bank_details[branch]" type="text">
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="tax_payer_id">{{ __('users.tax_payer_id') }} :</label>
-                            <input class="form-control" id="tax_payer_id"
-                                placeholder="{{ __('users.tax_payer_id') }}"
-                                value="{{ old('bank_details[tax_payer_id]', $bank_details['tax_payer_id']) }}"
-                                name="bank_details[tax_payer_id]" type="text">
-                        </div>
+                    <div class="form-group col-md-6">
+                        <label for="staff_confirm_password">{{ __('users.confirm_password') }}{{ $editing ? '' : ' *' }}</label>
+                        <input class="form-control" id="staff_confirm_password" name="confirm_password" type="password" minlength="8" maxlength="72"
+                               autocomplete="new-password" @if (!$editing) required @endif>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary pull-right save_button">SAVE</button>
+                <hr>
+                <h5>{{ __('users.more_informations') }}</h5>
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <input name="is_commission_agent" type="hidden" value="0">
+                        <label for="staff_is_commission_agent">
+                            <input id="staff_is_commission_agent" name="is_commission_agent" type="checkbox" value="1"
+                                   @if (old('is_commission_agent', $editing ? $users->is_commission_agent : false)) checked @endif>
+                            {{ __('users.is_commission_agent') }}
+                        </label>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="staff_commission_type">{{ __('users.commission_type') }}</label>
+                        <select class="form-control select2" id="staff_commission_type" name="commission_type" style="width:100%">
+                            <option value="">Please Select</option>
+                            @foreach (['sale_amount' => 'Sale Amount', 'profit_amount' => 'Profit Amount'] as $value => $label)
+                                <option value="{{ $value }}" @if (old('commission_type', $editing ? $users->commission_type : '') === $value) selected @endif>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="staff_blood_group">{{ __('users.blood_group') }}</label>
+                        <select class="form-control select2" id="staff_blood_group" name="blood_group" style="width:100%">
+                            <option value="">Please Select</option>
+                            @foreach (['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] as $value)
+                                <option value="{{ $value }}" @if (old('blood_group', $editing ? $users->blood_group : '') === $value) selected @endif>{{ $value }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @foreach (['alternate_number', 'emergency_contact_number'] as $field)
+                        <div class="form-group col-md-4">
+                            <label for="staff_{{ $field }}">{{ __('users.'.$field) }}</label>
+                            <input class="form-control" id="staff_{{ $field }}" name="{{ $field }}" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10"
+                                   value="{{ old($field, $editing ? $users->$field : '') }}">
+                        </div>
+                    @endforeach
+                    <div class="form-group col-md-4">
+                        <label for="staff_custom_fields">{{ __('users.custom_fields') }}</label>
+                        <input class="form-control" id="staff_custom_fields" name="custom_fields" type="text" maxlength="1000"
+                               value="{{ old('custom_fields', $editing ? $users->custom_fields : '') }}">
+                    </div>
+                    @foreach (['permanent_address', 'current_address'] as $field)
+                        <div class="form-group col-md-6">
+                            <label for="staff_{{ $field }}">{{ __('users.'.$field) }}</label>
+                            <textarea class="form-control" id="staff_{{ $field }}" name="{{ $field }}" rows="3" maxlength="200">{{ old($field, $address[$field] ?? '') }}</textarea>
+                        </div>
+                    @endforeach
+                </div>
+                <hr>
+                <h5>{{ __('users.bank_details') }}</h5>
+                <div class="row">
+                    @foreach (['account_holder_name', 'account_number', 'bank_name', 'bank_code', 'branch', 'tax_payer_id'] as $field)
+                        <div class="form-group col-md-4">
+                            <label for="staff_bank_{{ $field }}">{{ __('users.'.$field) }}</label>
+                            <input class="form-control" id="staff_bank_{{ $field }}" name="bank_details[{{ $field }}]" type="text" maxlength="100"
+                                   value="{{ old('bank_details.'.$field, $bank[$field] ?? '') }}">
+                        </div>
+                    @endforeach
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary save_button">SAVE</button>
+            </div>
+        </form>
     </div>
-    </form>
-</div><!-- /.modal-content -->
-</div><!-- /.modal-dialog -->
+</div>

@@ -1,13 +1,13 @@
 <?php
- 
+
  namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Google\Client;
-use Google\Service\Sheets;
+use App\Modules\Integrations\Services\SheetSnapshotReader;
+use App\Modules\Integrations\Services\ReplaceSnapshot;
 use Yajra\DataTables\Facades\DataTables;
 
 class GoogleSpreadsheetController extends Controller
@@ -21,8 +21,8 @@ class GoogleSpreadsheetController extends Controller
                 ->filter(function ($instance) use ($request) {
                     if (!empty($request->get('search'))) {
                         $instance->where(function ($w) use ($request) {
-                            $search = $request->get('search');
-                            $w->Where('name', 'LIKE', "%$search%");
+                            $search = \App\Support\TableSearch::term($request);
+                            $w->where('teacher_name', 'LIKE', "%$search%")->orWhere('teacher_code', 'LIKE', "%$search%");
                         });
                     }
                 })
@@ -33,54 +33,18 @@ class GoogleSpreadsheetController extends Controller
 
     public function sheetData()
     {
-        $client = new Client();
-        $client->setApplicationName('example-app');
-        $client->setScopes([Sheets::SPREADSHEETS]);
-        $client->setAuthConfig(storage_path('credentials.json'));
-
-        $service = new Sheets($client);
-
-        $spreadsheetId = '13ydSEHAwYqTFCd1DE_IUXOa457jVcPdSY7vPk-3faNs';
-        $sheetName = 'TEACHER';
-
-        // Fetch data from the specified sheet
-        $response = $service->spreadsheets_values->get($spreadsheetId, $sheetName);
-        $values = $response->getValues();
-
-        if ($values) {
-            $dataRows = array_slice($values, 1);
-            Teacher::truncate();
-            foreach ($dataRows as $row) {
-                $teacher = Teacher::where('teacher_code', $row[1])->where('teacher_name', $row[0])->first();
-
-                if ($teacher) {
-                    $teacher->update([
-                        'teacher_name' => $row[0],
-                        'teacher_code' => $row[1],
-                        'status' => $row[2],
-                        'type' => $row[3],
-                        'subject' => $row[4],
-                        'medium' => $row[5],
-                    ]);
-                } else {
-                    // Create a new teacher record if not found
-                    $teacher = Teacher::create([
-                        'teacher_name' => $row[0],
-                        'teacher_code' => $row[1],
-                        'status' => $row[2],
-                        'type' => $row[3],
-                        'subject' => $row[4],
-                        'medium' => $row[5],
-                    ]);
-                }
-            }
-            $timestamp = Carbon::now();
-            return response()->json([
-            'message' => 'Data synced successfully',
-            'last_synced' => $timestamp->format('Y-m-d H:i:s'),
-        ]);
-    } else {
-        return response()->json(['message' => 'Data not found']);
+        $this->importSnapshot(app(SheetSnapshotReader::class)->read('TEACHER'));
+        return response()->json(['message' => 'Data synced successfully', 'last_synced' => now()->format('Y-m-d H:i:s')]);
     }
+
+    public function importSnapshot(array $values): void
+    {
+        $records = [];
+        foreach (SheetSnapshotReader::rows($values, 2) as $row) {
+            $record = array_combine(['teacher_name', 'teacher_code', 'status', 'type', 'subject', 'medium'], array_slice(array_pad($row, 6, ''), 0, 6));
+            SheetSnapshotReader::requireFields($record, ['teacher_name', 'teacher_code']);
+            $records[] = $record;
+        }
+        app(ReplaceSnapshot::class)->reconcile(Teacher::class, $records, 'teacher_code', 'teacher_name');
     }
 }

@@ -26,24 +26,19 @@ class WorkHourReportController extends Controller
                 if (!empty($request->get('end_date'))) {
                     $data->whereDate('work_hours.date', '<=', $request->get('end_date'));
                 }
-          
+
                 return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('action', function ($row) {
-                    $button = '<button type="button" data-href="' . route('subjects.edit', $row->id) . '" class="btn btn-xs btn-primary edit_button" data-container=".modal_class"><i class="fa fa-edit"></i></button>&nbsp';
-                    $button .= '<button data-href="' . route('delete', ['subjects', $row->id]) . '" class="btn btn-xs btn-primary btn-modal"><i class="fa fa-trash"></i></button>';
-                    return $button;
-                })
                 ->filter(function ($instance) use ($request) {
                     if (!empty($request->get('search'))) {
-                        $search = $request->get('search');
+                        $search = \App\Support\TableSearch::term($request);
                         $instance->where(function ($query) use ($search) {
                             $query->orWhere('get_students.student_name', 'LIKE', "%$search%")
                                 ->orWhere('get_students.student_code', 'LIKE', "%$search%");
                         });
                     }
                 })
-                ->rawColumns(['action'])
+
                 ->make(true);
         }
         return view('admin.report.index');

@@ -15,7 +15,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('fetch:sheet-data')->cron('*/15 * * * *');
+        if (config('integrations.sheets.enabled', false)) {
+            $schedule->command('fetch:sheet-data')->everyFifteenMinutes()->withoutOverlapping();
+            $schedule->command('integration:deliver-outbox --limit=100')->everyMinute()->withoutOverlapping();
+        }
     }
 
     /**

@@ -110,7 +110,8 @@
 
     $.ajax({
         url: url,
-        type: 'GET',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        type: 'POST',
         dataType: 'json',
         success: function(response) {
             console.log(response);
@@ -126,7 +127,7 @@
             table.ajax.reload();
         },
         error: function(xhr, status, error) {
-            console.error(error);
+            alert((xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) || 'Unable to synchronize. Existing data was not changed.');
         }
     });
     });

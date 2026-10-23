@@ -9,6 +9,7 @@ class CommonController extends Controller
 {
     public function delete($route,$id)
     {   
+        abort_unless(in_array($route, ['workhour', 'roles'], true) && \Illuminate\Support\Facades\Route::has($route.'.destroy'), 404);
         if (request()->ajax()) {
             return view('admin.layouts.delete')->with(compact('route','id'));
         }

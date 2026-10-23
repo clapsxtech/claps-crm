@@ -12,10 +12,11 @@ fi
 if [ -n "${MYSQL_SSL_CA_BASE64:-}" ]; then
     printf '%s' "$MYSQL_SSL_CA_BASE64" | base64 -d > /tmp/mysql-ca.pem
     chmod 600 /tmp/mysql-ca.pem
+    chown www-data:www-data /tmp/mysql-ca.pem
     export MYSQL_ATTR_SSL_CA=/tmp/mysql-ca.pem
 fi
 
-mkdir -p public/uploads storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+mkdir -p public/uploads storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 
 if [ -n "${R2_ACCOUNT_ID:-}" ] && [ -n "${R2_BUCKET_NAME:-}" ]; then
     /usr/local/bin/tigrisfs \

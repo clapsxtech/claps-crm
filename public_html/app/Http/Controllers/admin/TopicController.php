@@ -24,14 +24,13 @@ class TopicController extends Controller
                     ->addIndexColumn()
                     ->addColumn('action', function ($row) {
                         $button = '<button type="button" data-href="'.route('topics.edit',$row->id).'" class="btn btn-xs btn-primary edit_button" data-container=".modal_class"><i class="fa fa-edit"></i></button>&nbsp';
-                        $button .='<button data-href="'.route('delete',['topics',$row->id]).'" class="btn btn-xs btn-primary btn-modal"><i class="fa fa-trash"></i></button>';
                         return $button;
                     })
                    
                     ->filter(function ($instance) use ($request) {
                         if (!empty($request->get('search'))) {
                              $instance->where(function($w) use($request){
-                                $search = $request->get('search');
+                                $search = \App\Support\TableSearch::term($request);
                                 $w->Where('name', 'LIKE', "%$search%");
                             });
                         }

@@ -328,7 +328,8 @@
                 if (teacher_name) {
                     $.ajax({
                         url: '{{ route('get-student') }}',
-                        type: 'GET',
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        type: 'POST',
                         data: {
                             teacher_name: teacher_name
                         },
@@ -354,7 +355,8 @@
                 if (student_name) {
                     $.ajax({
                         url: '{{ route('get-teacher') }}',
-                        type: 'GET',
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        type: 'POST',
                         data: {
                             student_name: student_name
                         },
@@ -387,7 +389,8 @@
 
             $.ajax({
                 url: url,
-                type: 'GET',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                type: 'POST',
                 dataType: 'json',
                 success: function(response) {
                     console.log(response);
@@ -402,7 +405,7 @@
                     table.ajax.reload();
                 },
                 error: function(xhr, status, error) {
-                    console.error(error);
+                    alert((xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) || 'Unable to synchronize. Existing data was not changed.');
                 }
             });
         });

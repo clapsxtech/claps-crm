@@ -6,8 +6,8 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    {{-- <button type="button" class="btn btn-primary btn-modal" data-href="{{route('users.create')}}" data-container=".modal_class">
-                        <i class="fa fa-plus-circle"></i> {{__('common.add')}}</button> --}}
+                    <button type="button" class="btn btn-primary btn-modal" data-href="{{route('users.create')}}" data-container=".modal_class">
+                        <i class="fa fa-plus-circle"></i> {{__('common.add')}}</button>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -40,7 +40,7 @@
                                                 <th>{{__('common.name')}}</th>
                                                 <th>{{__('common.email')}}</th>
                                                 <th>{{__('common.phone')}}</th>
-                                                {{-- <th>{{__('common.action')}}</th> --}}
+                                                <th>{{__('common.action')}}</th>
                                             </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -81,77 +81,23 @@
             {data: 'name', name: 'name'},
             {data: 'email', name: 'email'},
             {data: 'phone', name: 'phone'},
-            // {data: 'action', name: 'action', orderable: false, searchable: false},
+            {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
       });  
-        /*CREATE MODAL POST AJAX CALL */
-        $(document).unbind('submit').on('submit', 'form#createForm', function(e) {
-            e.preventDefault();
-            $(this).find('button[type="submit"]').attr('disabled', true);
-            var form = $('form#createForm')[0];
-            var formData = new FormData(form);
-            $.ajax({
-                method: "post",
-                url: $(this).attr("action"),
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                },
-                dataType: "json",
-                data: formData,
-                async: false,
-                cache: false,
-                contentType: false,
-                enctype: 'multipart/form-data',
-                processData: false,
-                success: function(result) {
-                    if (result.success == true) {
-                        $('div.modal_class').modal('hide');
-                        toastr.success(result.msg);
-                        $('.data-table').DataTable().ajax.reload();
-                    } else {
-                        toastr.error(result.msg);
-                         $('.save_button').attr('disabled', false);
-                    }
-                }
-            });
+        $(document).off('staff:updated.staffTable').on('staff:updated.staffTable', function() {
+            table.ajax.reload(null, false);
         });
-         //EDIT FORM APPEND TO modal_class AND POST ACTIONS
-    $(document).on('click', 'button.edit_button', function() {
-        $('div.modal_class').load($(this).data('href'), function() {
-            $(this).modal('show');
-            $('form#edit_form').submit(function(e) {
-                $(this).find('button[type="submit"]').attr('disabled', true);
-                e.preventDefault();
-                var form = $('form#edit_form')[0];
-                var formData = new FormData(form);
-                $.ajax({
-                    method: 'POST',
-                    url: $(this).attr('action'),
-                    dataType: 'json',   
-                    headers: {
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    },
-                    dataType: "json", 
-                    data: formData, 
-                    async: false,
-                    cache: false,
-                    contentType: false,
-                    enctype: 'multipart/form-data',
-                    processData: false,
-                    success: function(result) {
-                        if (result.success === true) {
-                            $('div.modal_class').modal('hide');
-                            toastr.success(result.msg);
-                            $('.data-table').DataTable().ajax.reload();
-                        } else {
-                            toastr.error(result.msg);
-                                $('.save_button').attr('disabled', false);
-                        }
-                    },
+        $(document).off('click.staffProfiles', 'button.edit_button')
+            .on('click.staffProfiles', 'button.edit_button', function() {
+                $('div.modal_class').load($(this).data('href'), function(response, status) {
+                    if (status === 'error') {
+                        $(this).empty();
+                        toastr.error('Unable to load the staff profile.');
+                        return;
+                    }
+                    $(this).modal('show');
                 });
             });
-        });
-    });
     });
 </script>
 @include('admin.layouts.scripts')

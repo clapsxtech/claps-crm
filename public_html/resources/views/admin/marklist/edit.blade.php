@@ -5,7 +5,7 @@
             <input name="_method" type="hidden" value="PUT">
             @csrf
             <div class="modal-header">
-                <h4 class="modal-title">{{__('brand.edit_brands')}}</h4>
+                <h4 class="modal-title">Edit Mark List</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body">
@@ -13,12 +13,17 @@
                 <div class="col-md-6">
                 <div class="form-group">
                     <label for="name" class="control-label">Teacher Code:*</label>
-                    <input class="form-control" required="" placeholder="Enter Teacher Code" autocomplete="off" name="teacher_code" id="teacher_code" value="{{ $marklist->teacher_code }}" type="text" minlength="3" maxlength="15">
+                    <input class="form-control" required="" placeholder="Enter Teacher Code" autocomplete="off" name="teacher_code" id="teacher_code" readonly value="{{ $marklist->teacher_code }}" type="text" minlength="3" maxlength="15">
                 </div></div>
                 <div class="col-md-6">
                 <div class="form-group">
                     <label for="name" class="control-label">Teacher Name:*</label>
-                    <input class="form-control" required="" placeholder="Enter Teacher Code" autocomplete="off" name="teacher_name" id="teacher_name" value="{{ $marklist->teacher_name }}" type="text" minlength="3" maxlength="15">
+                    <select class="form-control select2" required name="teacher_name" id="teacher_name">
+                        <option value="">Select Teacher</option>
+                        @foreach($teachers as $teacher)
+                        <option value="{{ $teacher->id }}" data-teacher-code="{{ $teacher->teacher_code }}" {{ ($selectedTeacher && $selectedTeacher->id == $teacher->id) ? 'selected' : '' }}>{{ $teacher->teacher_name }}</option>
+                        @endforeach
+                    </select>teacher_name }}" type="text" minlength="3" maxlength="15">
                 </div>
              </div>
              <div class="col-md-6">
@@ -27,7 +32,7 @@
                         <select class="form-control select2 " id="student_name" style="width:100%"  required name="student_name">
                             <option value="">Select Student</option>
                             @foreach($students as $value)
-                            <option value="{{ $value->id }}" {{ ($marklist->student_name == $value->id) ? 'selected' : '' }}>{{ $value->student_name }}</option>
+                            <option value="{{ $value->id }}" {{ ($selectedStudent && $selectedStudent->id == $value->id) ? 'selected' : '' }}>{{ $value->student_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -97,20 +102,10 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
   <script>
-    $(document).ready(function() {
-        $('.select2').select2({
-        });
-        $('#teacher_name').prop('readonly', true); 
-        $('#teacher_code').on('input', function() {
-            var teacherCode = $(this).val();
-            $.ajax({
-                url: '{{ route("teacherinfo")}}',
-                type: 'GET',
-                data: { teacher_code: teacherCode },
-                success: function(response) {
-                    $('#teacher_name').val(response.teacher_name);
-                }
-            });
+    $(function () {
+        $('.select2').select2();
+        $('#teacher_name').on('change', function () {
+            $('#teacher_code').val($(this).find(':selected').attr('data-teacher-code') || '');
         });
     });
 </script>

@@ -81,8 +81,10 @@
                   </div>
                 </div>
               </div>
-              <form  class="px-md-2" action="{{ route('upload-workhour') }}" method="POST" id="markUploadForm">
+              <p class="text-muted">Select a teacher and enter the password to load assigned students. Rates and totals are calculated securely when you submit.</p>
+<form  class="px-md-2" action="{{ route('upload-workhour') }}" method="POST" id="markUploadForm">
                 @csrf
+<input type="hidden" name="submission_key" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
@@ -206,7 +208,7 @@
                     <div class="form-group">
                       <label for="name" class="control-label">Password:*('dd/mm/yyyy')</label>
                       <input class="form-control" required="" placeholder="DD/MM/YYYY"
-                       autocomplete="off" name="password" id="password" type="text" >
+                       autocomplete="off" name="password" id="password" type="password" >
                   </div>
                   </div>
                   <div id="error-alert" class="alert alert-danger alert-dismissible fade show" style="display: none;" role="alert">
@@ -233,37 +235,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 <script>
   $('.select2').select2();
-      $('#teacher_name').on('change', function() {
-          var selectedOption = $(this).find(':selected');
-          var teacherId = selectedOption.val();
-          var teacherName = selectedOption.data('teacher-name');
-  
-          if (teacherName) {
-              $.ajax({
-                  url: '{{ route("studentinfom") }}', 
-                  type: 'GET',
-                  data: { teacher_name: teacherName },
-                  success: function(response) {
-                      $('#student_name').empty();
-                      $('#student_name').append('<option value="">Select Student</option>');
-                      
-                      $.each(response.students, function(key, value) {
-                          $('#student_name').append('<option value="' + value.student_name + '" data-student-code="' + value.student_code + '" data-student-name="' + '" data-hour-payment="' + value.hour_payment + '" data-profit-per-hour="' + value.profit_per_hour +'" data-payment-per-hour="' + value.payment_per_hour + '">' + value.student_name + '</option>');
-                      });
-                      $('#teacher_code').val(response.teacher_code);
-                      $('#hour_payment').val(response.hour_payment);
-                      $('#profit_per_hour').val(response.profit_per_hour);
-                      $('#payment_per_hour').val(response.payment_per_hour);
-
-
-                  }
-              });
-          } else {
-              $('#student_name').empty().append('<option value="">Select Student</option>');
-              $('#teacher_code').val('');
-          }
+      $('#teacher_name, #password').on('change', function() {
+          var teacherName = $('#teacher_name').find(':selected').data('teacher-name') || $('#teacher_name').val();
+          var password = $('#password').val();
+          $('#student_name').empty().append(new Option('Select Student', ''));
+          $('#teacher_code, #student_code').val('');
+          if (!teacherName || !password) return;
+          $.ajax({
+              url: '{{ route("studentinfom") }}', type: 'POST',
+              data: { teacher_name: teacherName, password: password, _token: $('input[name="_token"]').val() },
+              success: function(response) {
+                  $.each(response.students || [], function(_, student) {
+                      $(new Option(student.student_name, student.student_name))
+                          .attr('data-student-code', student.student_code).appendTo('#student_name');
+                  });
+                  $('#teacher_code').val(response.teacher_code);
+              },
+              error: function(xhr) { $('#error-alert').text((xhr.responseJSON || {}).message || 'Teacher verification failed.').show(); }
+          });
       });
-  
       $('#student_name').on('change', function() {
           var selectedStudent = $(this).find(':selected');
           var studentCode = selectedStudent.data('student-code');
@@ -279,28 +269,6 @@
 
       });
       $(document).ready(function() {
-      $('#password').on('input', function(e) {
-       var inputValue = $(this).val();
-       var key = e.originalEvent.data;
-
-      if (key === null) {
-         var newValue = inputValue.slice(0, -1);
-         $(this).val(newValue);
-     } else {
-        if (/^[\d\/]$/.test(key)) { 
-            if (/^\d$/.test(key)) {
-                if (inputValue.length === 2 || inputValue.length === 5) { 
-                    $(this).val(inputValue + '/');
-                }
-                if (inputValue.length > 10) {
-                    $(this).val(inputValue.slice(0, 10));
-                }
-            }
-        } else {
-            $(this).val(inputValue.replace(/[^\d\/]/g, ''));
-         }
-     }
-    });
         $('#markUploadForm').submit(function (event) {
         event.preventDefault(); 
         var form = $(this);
@@ -323,7 +291,7 @@
             },
             error: function (err) {
                 console.error(err);
-                showErrorAlert('An error occurred while submitting the form.');
+                showErrorAlert((err.responseJSON || {}).message || 'Unable to submit. Correct the details or retry with the same form.');
                                 $('button[type="submit"]').prop('disabled', false);
 
             }

@@ -10,10 +10,11 @@
         "production": "NODE_OPTIONS=--openssl-legacy-provider mix --production",
         "cf:dev": "wrangler dev",
         "cf:deploy": "wrangler deploy",
-        "cf:types": "wrangler types"
+        "cf:types": "wrangler types",
+        "test:deployment": "node --test tests/Deployment/*.test.cjs"
     },
     "engines": {
-        "node": ">=18 <21"
+        "node": ">=22 <23"
     },
     "devDependencies": {
         "axios": "^0.21",

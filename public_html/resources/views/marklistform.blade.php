@@ -30,7 +30,7 @@
     }
     .radio-inline {
     display: inline-block;
-    margin-right: 10px; 
+    margin-right: 10px;
 }
 .radio-label {
     cursor: pointer; /* Show pointer cursor on label for better interaction */
@@ -42,7 +42,7 @@
      display: flex;
      align-items: center;
      justify-content: center;
-     min-height: calc(100% - 1rem); 
+     min-height: calc(100% - 1rem);
    }
    #error-alert,
     #successModal .modal-content {
@@ -82,6 +82,7 @@
               </div>
               <form  class="px-md-2" action="{{ route('upload-result') }}" method="POST" id="markUploadForm">
                 @csrf
+                <input type="hidden" name="submission_key" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
@@ -90,9 +91,9 @@
                      required name="teacher_name">
                         <option value="">Select Teacher</option>
                         @foreach($teachers as $value)
-                        <option  data-teacher-name="{{$value->teacher_name}}">{{$value->teacher_name}}</option>
+                        <option value="{{$value->teacher_name}}" data-teacher-name="{{$value->teacher_name}}">{{$value->teacher_name}}</option>
                         @endforeach
-                    </select>  
+                    </select>
                   </div>
                   </div>
                   <div class="col-md-6">
@@ -103,6 +104,15 @@
                   </div>
                 </div>
                 <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="name" class="control-label">Teacher verification code:*</label>
+                      <input class="form-control" required="" placeholder="DD/MM/YYYY"
+                       autocomplete="off" name="password" id="password" type="password" >
+                      <small class="form-text text-muted">Select your teacher name and enter your verification code, then load your students.</small>
+                      <button type="button" class="btn btn-outline-success mt-2" id="verify-teacher">Verify and load students</button>
+                  </div>
+                  </div>
                   <div class="col-md-6 mb-4">
                     <label for="student_name" class="control-label">Students:*</label>
                     <select class="form-control select2" id="student_name" style="width:100%" required name="student_name">
@@ -152,7 +162,7 @@
                     <div class="form-group">
                       <label for="name">Date of Examination:*</label>
                       <input class="form-control" required="" value="{{old('examination_date')}}"  placeholder="YYYY/MM/DD" name="examination_date" type="date"  autocomplete="off">
-                  
+
                   </div>
                   </div>
                 </div> <div class="row">
@@ -174,13 +184,7 @@
                       <textarea class="form-control"  placeholder="Remarks" autocomplete="off" name="remark" type="text" maxlength="130"></textarea>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="name" class="control-label">Password:*(dd/mm/yyyy)</label>
-                      <input class="form-control" required="" placeholder="DD/MM/YYYY"
-                       autocomplete="off" name="password" id="password" type="text" >
-                  </div>
-                  </div>
+
                   <div id="error-alert" class="alert alert-danger alert-dismissible fade show" style="display: none;" role="alert">
                     Error occurred while submitting the form. Please try again later.
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -204,103 +208,84 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 <script>
-  $('.select2').select2();
-      $('#teacher_name').on('change', function() {
-          var selectedOption = $(this).find(':selected');
-          var teacherId = selectedOption.val();
-          var teacherName = selectedOption.data('teacher-name');
-  
-          if (teacherName) {
-              $.ajax({
-                  url: '{{ route("studentinforesult") }}', 
-                  type: 'GET',
-                  data: { teacher_name: teacherName },
-                  success: function(response) {
-                      $('#student_name').empty();
-                      $('#student_name').append('<option value="">Select Student</option>');
-                      
-                      $.each(response.students, function(key, value) {
-                          $('#student_name').append('<option value="' + value.student_name + '" data-student-code="' + value.student_code + '" data-student-name="' + '">' + value.student_name + '</option>');
-                      });
-                      $('#teacher_code').val(response.teacher_code);
-                  }
-              });
-          } else {
-              $('#student_name').empty().append('<option value="">Select Student</option>');
-              $('#teacher_code').val('');
-          }
-      });
-  
-      $('#student_name').on('change', function() {
-          var selectedStudent = $(this).find(':selected');
-          var studentCode = selectedStudent.data('student-code');
-          $('#student_code').val(studentCode);
-      });
-      $(document).ready(function() {
-      $('#password').on('input', function(e) {
-       var inputValue = $(this).val();
-       var key = e.originalEvent.data;
+$(function () {
+    $('.select2').select2();
+    var form = $('#markUploadForm');
+    var pendingLookup = null;
 
-      if (key === null) {
-         var newValue = inputValue.slice(0, -1);
-         $(this).val(newValue);
-     } else {
-        if (/^[\d\/]$/.test(key)) { 
-            if (/^\d$/.test(key)) {
-                if (inputValue.length === 2 || inputValue.length === 5) { 
-                    $(this).val(inputValue + '/');
-                }
-                if (inputValue.length > 10) {
-                    $(this).val(inputValue.slice(0, 10));
-                }
-            }
-        } else {
-            $(this).val(inputValue.replace(/[^\d\/]/g, ''));
-         }
-     }
+    function showError(message) {
+        $('#error-alert').text(message).show();
+    }
+
+    function clearAssignment() {
+        if (pendingLookup) { pendingLookup.abort(); pendingLookup = null; }
+        $('#student_name').empty().append(new Option('Verify your teacher identity first', '')).trigger('change');
+        $('#student_code, #teacher_code').val('');
+    }
+
+    $('#teacher_name, #password').on('change', clearAssignment);
+    $('#password').on('input', clearAssignment);
+    $('#student_name').on('change', function () {
+        $('#student_code').val($(this).find(':selected').attr('data-student-code') || '');
     });
-    $('#markUploadForm').submit(function (event) {
-        event.preventDefault();
-        var form = $(this);
-        var submitButton = $('button[type="submit"]'); 
 
-             submitButton.prop('disabled', true);
-
-        $.ajax({
-            url: '{{ route("upload-result") }}',
+    $('#verify-teacher').on('click', function () {
+        clearAssignment();
+        var teacher = $('#teacher_name').val();
+        var password = $('#password').val();
+        if (!teacher || !password) {
+            showError('Select a teacher and enter your verification code first.');
+            return;
+        }
+        var button = $(this).prop('disabled', true);
+        pendingLookup = $.ajax({
+            url: '{{ route("studentinforesult") }}',
             type: 'POST',
-            data: form.serialize(),
+            headers: { Accept: 'application/json' },
+            data: { _token: form.find('[name="_token"]').val(), teacher_name: teacher, password: password },
             success: function (response) {
-                console.log(response);
-                if (response.success) {
-                    form[0].reset();
-                    $('#successModal').modal('show');
-                    $('.select2').val(null).trigger('change');
-                } else {
-                    showErrorAlert(response.msg);
-                    submitButton.prop('disabled', false);
-
+                $('#student_name').empty().append(new Option('Select Student', ''));
+                $.each(response.students || [], function (_, student) {
+                    var option = new Option(student.student_name, student.student_name);
+                    $(option).attr('data-student-code', student.student_code);
+                    $('#student_name').append(option);
+                });
+                $('#teacher_code').val(response.teacher_code);
+                $('#student_name').trigger('change');
+                $('#error-alert').hide();
+            },
+            error: function (xhr, status) {
+                if (status !== 'abort') {
+                    showError((xhr.responseJSON || {}).msg || (xhr.responseJSON || {}).message || 'Teacher verification failed.');
                 }
             },
-            error: function (err) {
-                console.error(err);
-
-                showErrorAlert('An error occurred while submitting the form.');
-
-            }
-            
+            complete: function () { pendingLookup = null; button.prop('disabled', false); }
         });
     });
 
-    function showErrorAlert(message) {
-        $('#error-alert').text(message);
-        $('#error-alert').fadeIn();
-
-        setTimeout(function () {
-            $('#error-alert').fadeOut();
-        }, 5000);
-    }
+    form.on('submit', function (event) {
+        event.preventDefault();
+        var submitButton = form.find('button[type="submit"]').prop('disabled', true);
+        $.ajax({
+            url: '{{ route("upload-result") }}',
+            type: 'POST',
+            headers: { Accept: 'application/json' },
+            data: form.serialize(),
+            success: function (response) {
+                if (!response.success) { showError(response.msg || 'Unable to save the record.'); return; }
+                form[0].reset();
+                // Advance the key only after an acknowledged save, including a
+                // successful replay. Failures retain the same key and input.
+                form.find('[name="submission_key"]').val(response.next_submission_key).attr('value', response.next_submission_key);
+                $('.select2').val(null).trigger('change');
+                $('#error-alert').hide();
+                $('#successModal').modal('show');
+            },
+            error: function (xhr) {
+                showError((xhr.responseJSON || {}).msg || (xhr.responseJSON || {}).message || 'The response was interrupted. Retry without changing the form to avoid a duplicate.');
+            },
+            complete: function () { submitButton.prop('disabled', false); }
+        });
+    });
 });
- 
 </script>
- 

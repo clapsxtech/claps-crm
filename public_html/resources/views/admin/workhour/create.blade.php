@@ -2,6 +2,7 @@
     <div class="modal-content">
         <form method="post" action="{{ route('workhour.store') }}" accept-charset="UTF-8" id="createForm">
             @csrf
+<input type="hidden" name="submission_key" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
             <div class="modal-header">
                 <h4 class="modal-title">Work Hour</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">

@@ -199,153 +199,41 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script>
-         $(document).ready(function() {
-        $('.select2').select2();
-        $('#daterange').daterangepicker({
-            autoUpdateInput: false,
-            locale: {
-                format: 'DD/MM/YYYY'
-            },
-            opens: 'left',
-            autoApply: true,
-            ranges: {
-                'Today': [moment(), moment()],
-                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            }
-        });
-
-        $('#daterange').on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
-            table.ajax.reload();
-        });
-
-        $('#daterange').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
-        });
-        var table = $('.data-table').DataTable({
-            processing: true,
-            serverSide: true,
-            dom: "<'row'<'col-sm-2'l><'col-sm-7 text-center'B><'col-sm-3'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-6'i><'col-sm-6'p>>",
-            buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
-           
-            ajax: {
-                url: "{{ route('attendanceReport') }}",
-                data: function(d) {
-                    d.search = $('input[type="search"]').val();
-                    d.teacher_name = $('#teacher_name').val();
-                    d.dob = $('#dob').val();
-                    d.student_name = $('#student_name').val();
-                    d.start_date = $('#daterange').data('daterangepicker').startDate.format('YYYY/MM/DD');
-                    d.end_date = $('#daterange').data('daterangepicker').endDate.format('YYYY/MM/DD');
-                }
-            },
-            columns: [{
-                    data: 'student_name',
-                    name: 'student_name'
-                },
-                {
-                    data: 'date',
-                    name: 'date'
-                },
-                {
-                    data: 'hour_taken',
-                    name: 'hour_taken'
-                },
-                {
-                    data: 'subject',
-                    name: 'subject'
-                },
-                {
-                    data: 'topic',
-                    name: 'topic'
-                },
-            ],
-             footerCallback: function(row, data, start, end, display) {
-                var api = this.api();
-                var data;
-                var intVal = function(i) {
-                    if (typeof i === 'string') {
-                        i = i.replace(/[\a-zA-Z₹]/g, '') * 1;
-                    }
-                    if (Number.isNaN(i)) {
-                        return 0;
-                    }
-                    return i;
-                };
-
-                var hour_taken = api
-                    .column(2, {
-                        page: 'current'
-                    })
-                    .data()
-                    .reduce(function(a, b) {
-                        return intVal(a) + intVal(b);
-                    }, 0);
-
-                $(api.column(0).footer()).html('Total');
-                $(api.column(2).footer()).html(hour_taken);
-            },
-             lengthMenu: [
-                [10, 50, 100, -1],
-                [10, 50, 100, "All"]
-            ],
-            pageLength: -1
-        });
-      
-        $('#teacher_name, #dob, #fromdate, #todate').on('change', function() {
-             $('#attendanceMessage').hide();
-            var teacher_name = $('#teacher_name').val();
-            var dob = $('#dob').val();
-           
-          if (teacher_name && dob) {
-              $.ajax({
-                  url: '{{ route("get-students") }}', 
-                  type: 'GET',
-                  data: { teacher_name: teacher_name,dob:dob },
-                  success: function(response) {
-                    $('#student_name').empty();
-                      $('#student_name').append('<option value="all">Select Student</option>');
-                      
-                      $.each(response.students, function(key, value) {
-                          $('#student_name').append('<option data-student-name="' + value.student_name + '">' + value.student_name + '</option>');
-                      });
-                  }
-              });
-          } else {
-              $('#student_name').empty().append('<option value="all">Select Student</option>');
-          }
-          table.ajax.reload();
-        });
-     
-        $('#teacher_name, #student_name').on('change', function() {
+$(function () {
+    $('.select2').select2();
+    var admin = @json(app(\App\Modules\IdentityAccess\Services\SiteAccessPolicy::class)->isAdministrator(auth()->user()));
+    $('#dob').attr('type', 'password');
+    if (admin) $('#dob').attr('placeholder', 'Administrator: optional');
+    $('#daterange').daterangepicker({ autoUpdateInput: false, locale: {format: 'YYYY-MM-DD'} });
+    $('#daterange').on('apply.daterangepicker', function(_, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
         table.ajax.reload();
-    });
-        $('#dob').on('input', function(e) {
-       var inputValue = $(this).val();
-       var key = e.originalEvent.data;
-
-      if (key === null) {
-         var newValue = inputValue.slice(0, -1);
-         $(this).val(newValue);
-     } else {
-        if (/^[\d\/]$/.test(key)) { 
-            if (/^\d$/.test(key)) {
-                if (inputValue.length === 2 || inputValue.length === 5) { 
-                    $(this).val(inputValue + '/');
-                }
-                if (inputValue.length > 10) {
-                    $(this).val(inputValue.slice(0, 10));
-                }
+    }).on('cancel.daterangepicker', function() { $(this).val(''); table.ajax.reload(); });
+    function credentials() { return {teacher_name: $('#teacher_name').val(), dob: $('#dob').val(), _token: @json(csrf_token())}; }
+    var table = $('.data-table').DataTable({
+        processing: true, serverSide: true, pageLength: 25,
+        ajax: function(data, callback) {
+            if (!admin && (!$('#teacher_name').val() || !$('#dob').val())) {
+                callback({draw:data.draw, recordsTotal:0, recordsFiltered:0, data:[]}); return;
             }
-        } else {
-            $(this).val(inputValue.replace(/[^\d\/]/g, ''));
-         }
-     }
+            var payload = $.extend({}, data, credentials(), {student_name: $('#student_name').val()});
+            var dates = $('#daterange').val().split(' - ');
+            if (dates.length === 2) { payload.start_date = dates[0]; payload.end_date = dates[1]; }
+            $.ajax({url: @json(route($reportRoute ?? 'attendanceReport')), type:'POST', data:payload,
+                success:function(response) { $('#attendanceMessage').hide(); callback(response); },
+                error:function(xhr) { $('#attendanceMessage').text((xhr.responseJSON || {}).message || 'Unable to verify access.').show(); callback({draw:data.draw,recordsTotal:0,recordsFiltered:0,data:[]}); }
+            });
+        },
+        columns:[{data:'student_name'},{data:'date'},{data:'hour_taken'},{data:'subject'},{data:'topic'}]
     });
+    $('#teacher_name, #dob').on('change', function() {
+        $('#student_name').empty().append(new Option('All assigned students', 'all'));
+        if (!admin && (!$('#teacher_name').val() || !$('#dob').val())) { table.ajax.reload(); return; }
+        $.ajax({url:@json(route('get-students')),type:'POST',data:credentials(),success:function(response) {
+            $.each(response.students || [], function(_, student) { $('#student_name').append(new Option(student.student_name, student.student_name)); });
+            table.ajax.reload();
+        },error:function(xhr) { $('#attendanceMessage').text((xhr.responseJSON || {}).message || 'Verification failed.').show(); table.ajax.reload(); }});
     });
-   
+    $('#student_name').on('change', function() {table.ajax.reload();});
+});
 </script>

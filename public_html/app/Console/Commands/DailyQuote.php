@@ -41,6 +41,10 @@ class DailyQuote extends Command
      */
     public function handle()
     {
+        if (!config('integrations.sheets.enabled', false)) {
+            $this->warn('Spreadsheet synchronization is disabled.');
+            return self::SUCCESS;
+        }
         Log::info('Google Sheets synchronization started.', ['started_at' => now()]);
 
         try {
@@ -51,7 +55,7 @@ class DailyQuote extends Command
             Log::info('Google Sheets synchronization completed.', ['completed_at' => now()]);
             return self::SUCCESS;
         } catch (\Exception $e) {
-            report($e);
+            Log::error('Spreadsheet synchronization failed.', ['exception_type' => get_class($e)]);
             return self::FAILURE;
         }
     }

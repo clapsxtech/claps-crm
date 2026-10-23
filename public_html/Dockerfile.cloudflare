@@ -1,3 +1,12 @@
+FROM node:22-bookworm-slim AS assets
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY webpack.mix.js artisan ./
+COPY resources ./resources
+RUN npm run production
+
 FROM composer:2 AS vendor
 
 WORKDIR /app
@@ -44,12 +53,13 @@ RUN sed -ri 's!Listen 80!Listen 8080!g' /etc/apache2/ports.conf \
 WORKDIR /var/www/html
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
+COPY --from=assets /app/public ./public
 COPY cloudflare/apache.conf /etc/apache2/conf-available/laravel.conf
 COPY cloudflare/start-container.sh /usr/local/bin/start-container
 
 RUN a2enconf laravel \
     && chmod +x /usr/local/bin/start-container \
-    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache public/uploads/profile_photo \
+    && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache public/uploads/profile_photo \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && php artisan package:discover --ansi
 

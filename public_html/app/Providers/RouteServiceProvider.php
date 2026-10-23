@@ -17,7 +17,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/home';
+    public const HOME = '/';
 
     /**
      * The controller namespace for the application.
@@ -56,6 +56,15 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting()
     {
+        // Shared across all compatibility-credential endpoints. Never key on DOB,
+        // a caller-controlled teacher code, or the container's proxy IP.
+        RateLimiter::for('teacher-credentials', function (Request $request) {
+            if (!$request->isMethod('post')) return Limit::none();
+            if (app(\App\Modules\IdentityAccess\Services\SiteAccessPolicy::class)->isAdministrator($request->user())) return Limit::none();
+            $teacher = $request->input('teacher_name', '');
+            $teacher = is_string($teacher) ? mb_strtolower(trim($teacher)) : '';
+            return Limit::perMinute(30)->by('teacher:'.hash('sha256', $teacher));
+        });
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });

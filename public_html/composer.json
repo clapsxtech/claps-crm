@@ -22,7 +22,8 @@
         "socialiteproviders/microsoft": "^4.1",
         "spatie/laravel-permission": "^5.5",
         "yajra/laravel-datatables-oracle": "~9.0",
-        "yoeunes/toastr": "^1.2"
+        "yoeunes/toastr": "^1.2",
+        "ext-bcmath": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

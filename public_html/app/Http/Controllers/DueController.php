@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\DueReport;
 use Carbon\Carbon;
-use Google\Client;
-use Google\Service\Sheets;
+use App\Modules\Integrations\Services\SheetSnapshotReader;
+use App\Modules\Integrations\Services\ReplaceSnapshot;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class DueController extends Controller
@@ -22,7 +21,7 @@ class DueController extends Controller
 
 
         if ($request->ajax()) {
-            $data = DueReport::select( 
+            $data = DueReport::select(
             'id',
             'student_name',
             'student_code',
@@ -40,7 +39,7 @@ class DueController extends Controller
             'c_amount',
             'error',
             'balance',
-            'current_status'); 
+            'current_status');
             return DataTables::of($data)
                     ->addIndexColumn()
                     ->filter(function ($instance) use ($request) {
@@ -58,8 +57,10 @@ class DueController extends Controller
                         }
                         if (!empty($request->get('search'))) {
                              $instance->where(function($w) use($request){
-                                $search = $request->get('search');
-                                $w->Where('name', 'LIKE', "%$search%");
+                                $search = \App\Support\TableSearch::term($request);
+                                $w->where('student_name', 'LIKE', "%$search%")
+                                    ->orWhere('student_code', 'LIKE', "%$search%")
+                                    ->orWhere('admin_staff', 'LIKE', "%$search%");
                             });
                         }
                     })
@@ -70,75 +71,24 @@ class DueController extends Controller
 
     public function syncDueReportData()
     {
-        $client = new Client();
-        $client->setApplicationName('example-app');
-        $client->setScopes([Sheets::SPREADSHEETS]);
-        $client->setAuthConfig(storage_path('credentials.json'));
-
-        $service = new Sheets($client);
-
-        $spreadsheetId = '13ydSEHAwYqTFCd1DE_IUXOa457jVcPdSY7vPk-3faNs';
-        $sheetName = 'Due';
-
-        $response = $service->spreadsheets_values->get($spreadsheetId, $sheetName);
-        $values = $response->getValues();
-
-        if ($values) {
-            $dataRows = array_slice($values, 1);
-            $records = [];
-       
-            foreach ($dataRows as $row) {
-                if (empty($row[0])) {
-                    continue;
-                }
-
-                if (count($row) < 20) {
-                    throw new \UnexpectedValueException('A due-report spreadsheet row has fewer than 20 columns.');
-                }
-
-                    $records[] = [
-                        'student_name' => $row[0],
-                        'student_code' => $row[1],
-                        'phone' => $row[2],
-                        'status' => $row[3],
-                        'hour_rate' => $row[4],
-                        'monthly' => $row[6],
-                        'advance_expected' => $row[9],
-                        'section' => $row[10],
-                        'admin_staff' => $row[11],
-                        'last_month_balance' => $row[12],
-                        'recived' => $row[13],
-                        'total_advance' => $row[14],
-                        'hour_taken' => $row[15],
-                        'c_amount' => $row[16],
-                        'error' => $row[17],
-                        'balance' => $row[18],
-                        'current_status' => $row[19],
-
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-            }
-
-            if (empty($records)) {
-                throw new \UnexpectedValueException('The due-report spreadsheet contains no importable rows.');
-            }
-
-            DB::transaction(function () use ($records) {
-                DueReport::query()->delete();
-                foreach (array_chunk($records, 500) as $chunk) {
-                    DueReport::insert($chunk);
-                }
-            });
-            $timestamp = Carbon::now();
-
-            return response()->json([
-            'message' => 'Data synced successfully',
-            'last_synced' => $timestamp->format('Y-m-d H:i:s'),
-        ]);
-    } else {
-        return response()->json(['message' => 'Data not found']);
-    }
+        $this->importSnapshot(app(SheetSnapshotReader::class)->read('Due'));
+        return response()->json(['message' => 'Data synced successfully', 'last_synced' => now()->format('Y-m-d H:i:s')]);
     }
 
+    public function importSnapshot(array $values): void
+    {
+        $records = [];
+        $columns = ['student_name' => 0, 'student_code' => 1, 'phone' => 2, 'status' => 3,
+            'hour_rate' => 4, 'monthly' => 6, 'advance_expected' => 9, 'section' => 10,
+            'admin_staff' => 11, 'last_month_balance' => 12, 'recived' => 13, 'total_advance' => 14,
+            'hour_taken' => 15, 'c_amount' => 16, 'error' => 17, 'balance' => 18, 'current_status' => 19];
+        foreach (SheetSnapshotReader::rows($values, 2) as $row) {
+            $row = array_pad($row, 20, '');
+            $record = [];
+            foreach ($columns as $column => $index) $record[$column] = $row[$index];
+            SheetSnapshotReader::requireFields($record, ['student_name', 'student_code']);
+            $records[] = $record;
+        }
+        app(ReplaceSnapshot::class)->replace(DueReport::class, $records);
+    }
 }

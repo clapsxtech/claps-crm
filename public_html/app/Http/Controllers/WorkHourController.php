@@ -89,7 +89,7 @@ class WorkHourController extends Controller
             })
             ->filter(function ($query) use ($request) {
                 if (!empty($request->get('search'))) {
-                    $search = $request->get('search');
+                    $search = \App\Support\TableSearch::term($request);
                     $query->where(function ($searchQuery) use ($search) {
                         $searchQuery->where('teacher_name', 'LIKE', "%$search%")
                             ->orWhere('teacher_code', 'LIKE', "%$search%")
@@ -139,119 +139,28 @@ class WorkHourController extends Controller
     }
     public function getStudentinfo(Request $request)
     {
-        $teacherName = $request->input('teacher_name');
-        $teacher = Master::where('teacher_name', $teacherName)->first();
-
-        if ($teacher) {
-            $students = Master::where('teacher_name', $teacherName)->get();
-            $studentData = [];
-
-            foreach ($students as $student) {
-                $studentData[] = [
-                    'id' => $student->id,
-                    'student_name' => $student->student_name,
-                    'student_code' => $student->student_code,
-                    'hour_payment' => $student->hour_payment,
-                    'profit_per_hour' => $student->profit_per_hour,
-                    'payment_per_hour' => $student->payment_per_hour,
-
-
-                ];
-            }
-
-            return response()->json(['students' => $studentData, 'teacher_code' => $teacher->teacher_code]);
+        $policy = app(\App\Modules\IdentityAccess\Services\SiteAccessPolicy::class);
+        if ($policy->isAdministrator($request->user())) {
+            $request->validate(['teacher_name' => ['required', 'string', 'max:255']]);
+            $matches = Master::where('teacher_name', $request->teacher_name)->get();
+            abort_unless($matches->pluck('teacher_code')->unique()->count() === 1, 422, 'Choose an unambiguous teacher identity.');
+            $teacher = $matches->first();
         } else {
-            return response()->json(['message' => 'Teacher not found']);
+            $teacher = app(\App\Modules\People\Services\TeacherIdentityVerifier::class)->verifyTeacher($request->all());
         }
+        $students = Master::where('teacher_name', $teacher->teacher_name)
+            ->where('teacher_code', $teacher->teacher_code)
+            ->select('student_name', 'student_code')->distinct()->get();
+        return response()->json(['students' => $students, 'teacher_code' => $teacher->teacher_code])->header('Cache-Control', 'no-store, private');
     }
     public function getStudentedit(Request $request)
     {
-        $teacherName = $request->input('teacher_name');
-        $teacher = Master::where('teacher_name', $teacherName)->first();
-
-        if ($teacher) {
-            $students = Master::where('teacher_name', $teacherName)->get();
-            $studentData = [];
-
-            foreach ($students as $student) {
-                $studentData[] = [
-                    'id' => $student->id,
-                    'student_name' => $student->student_name,
-                    'student_code' => $student->student_code,
-                    'hour_payment' => $student->hour_payment,
-                    'profit_per_hour' => $student->profit_per_hour,
-                    'payment_per_hour' => $student->payment_per_hour,
-
-                ];
-            }
-
-            return response()->json(['students' => $studentData, 'teacher_code' => $teacher->teacher_code]);
-        } else {
-            return response()->json(['message' => 'Teacher not found']);
-        }
+        return $this->getStudentinfo($request);
     }
     public function store(Request $request)
     {
-        $rules = [
-            'teacher_name' => ['required', 'regex:/^[a-zA-Z0-9\s,.-]+$/'],
-            'teacher_code' => 'required',
-            'student_name' => 'required',
-            'student_code' => 'required',
-            'subject' => 'required',
-            'date' => 'required',
-            'chapter' => 'required',
-            'topic' => 'required',
-            'hour_taken' => 'required',
-            'homework_status' => 'required|in:yes,no',
-        ];
-
-        $messages = [
-            'teacher_code.required' => 'Teacher Code is required',
-            'homework_status.required' => 'Mark Confirmation is required',
-            'homework_status.in' => 'Mark Confirmation must be either "yes" or "no"',
-        ];
-
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'msg' => $validator->errors()->first()]);
-        }
-
-        try {
-            $subjectId = $request->input('subject');
-            $selectedSubject = Subject::findOrFail($subjectId);
-            $workhour = new WorkHour();
-            $workhour->teacher_name = $request->teacher_name;
-            $workhour->teacher_code = $request->teacher_code;
-            $workhour->student_name = $request->student_name;
-            $workhour->student_code = $request->student_code;
-            $workhour->subject      = $selectedSubject->name;
-            $workhour->date         = $request->date;
-            $workhour->chapter      = $request->chapter;
-            $workhour->topic        = $request->topic;
-            $workhour->hour_payment        = $request->hour_payment;
-            $workhour->profit_per_hour        = $request->profit_per_hour;
-            $workhour->payment_per_hour        = $request->payment_per_hour;
-            $workhour->total_amount        = $request->total_amount;
-            $workhour->date_submitted    = Carbon::now();
-            $workhour->dob          = $request->password;
-            $workhour->hour_taken   = $request->hour_taken;
-            $workhour->homework_status = $request->homework_status;
-            $workhour->created_at = Carbon::now();
-            $workhour->updated_at = Carbon::now();
-            $teacherDob = Master::where('teacher_code', $request->teacher_code)->value('teacher_dob');
-            if ($teacherDob !== $request->password) {
-                $response = ['success' => false, 'msg' => 'Passwords do not match.'];
-                return response()->json($response);
-            }
-
-            $workhour->save();
-
-            return response()->json(['success' => true, 'msg' => 'Successfully created']);
-        } catch (\Exception $e) {
-            report($e);
-            return response()->json(['success' => false, 'msg' => 'Unable to save the work-hour record.'], 500);
-        }
+        $record = app(\App\Modules\Attendance\Services\RecordWorkHour::class)->record($request);
+        return response()->json(['success' => true, 'msg' => 'Successfully created', 'id' => $record->id]);
     }
     public function frontetHourUploadCreate()
     {
@@ -274,236 +183,52 @@ class WorkHourController extends Controller
     }
     public function update(Request $request, $id)
     {
-        if (request()->ajax()) {
-            $rules = [
-                'teacher_name' => 'required',
-                'teacher_code' => 'required',
-                'student_names' => 'required',
-                'student_code' => 'required',
-                'subject' => 'required',
-                'date' => 'required',
-                'chapter' => 'required',
-                'topic' => 'required',
-                'hour_taken' => 'required',
-                'homework_status' => 'required|in:yes,no',
-            ];
-            $messages = [
-                'name.required'    => 'Name Required',
-            ];
-            $validator = Validator::make(request()->all(), $rules, $messages);
-            if ($validator->fails()) {
-                return response()->json(['success' => false, 'msg' => $validator->errors()->first()]);
-            }
-            try {
-                $workhour = WorkHour::findOrFail($id);
-                $workhour->teacher_code = $request->teacher_code;
-                $workhour->student_name = $request->student_names;
-                $workhour->student_code = $request->student_code;
-                $workhour->subject      = $request->subject;
-                $workhour->date         = $request->date;
-                $workhour->chapter      = $request->chapter;
-                $workhour->topic        = $request->topic;
-                $workhour->hour_taken   = $request->hour_taken;
-                $workhour->total_amount = $request->total_amount;
-                $workhour->date_submitted   = $request->date_submitted;
-                $workhour->hour_payment = $request->hour_payment;
-                $workhour->payment_per_hour = $request->payment_per_hour;
-                $workhour->profit_per_hour = $request->profit_per_hour;
-
-                $workhour->homework_status = $request->homework_status;
-                $workhour->updated_at = Carbon::now();
-                $workhour->save();
-                return ['success' => true, 'msg' => 'successfully updated'];
-            } catch (\Exception $e) {
-                report($e);
-                return ['success' => false, 'msg' => 'Unable to update the work-hour record.'];
-            }
-        }
+        $record = app(\App\Modules\Attendance\Services\UpdateWorkHour::class)->update($id, $request);
+        return response()->json(['success' => true, 'msg' => 'Successfully updated', 'id' => $record->id]);
     }
 
     public function syncWorkHoureReportData()
     {
-        $client = new Client();
-        $client->setApplicationName('example-app');
-        $client->setScopes([Sheets::SPREADSHEETS]);
-        $client->setAuthConfig(storage_path('credentials.json'));
-
-        $service = new Sheets($client);
-
-        $spreadsheetId = '13ydSEHAwYqTFCd1DE_IUXOa457jVcPdSY7vPk-3faNs';
-        $sheetName = 'TEST';
-
-        $response = $service->spreadsheets_values->get($spreadsheetId, $sheetName);
-        $values = $response->getValues();
-
-        if ($values) {
-            $dataRows = array_slice($values, 1);
-            $records = [];
-
-            foreach ($dataRows as $row) {
-                if (count($row) < 16) {
-                    throw new \UnexpectedValueException('A work-hour spreadsheet row has fewer than 16 columns.');
-                }
-
-                    $dateString = $row[5];
-                    $date = Carbon::createFromFormat('d/m/Y', $dateString)->format('Y-m-d');
-                    $records[] = [
-                        'teacher_name' => $row[0],
-                        'teacher_code' => $row[1],
-                        'student_name' => $row[2],
-                        'student_code' => $row[3],
-                        'subject' => $row[4],
-                        'date' => $date,
-                        'date_submitted' => $row[6],
-                        'chapter' => $row[7],
-                        'topic' => $row[8],
-                        'hour_taken' => $row[9],
-                        'homework_status' => $row[10],
-                        'dob' => $row[11],
-                        'hour_payment' => $row[12],
-                        'profit_per_hour' => $row[13],
-                        'payment_per_hour' => $row[14],
-                        'total_amount' => $row[15],
-
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-            }
-
-            if (empty($records)) {
-                throw new \UnexpectedValueException('The work-hour spreadsheet contains no importable rows.');
-            }
-
-            DB::transaction(function () use ($records) {
-                WorkHour::query()->delete();
-                foreach (array_chunk($records, 500) as $chunk) {
-                    WorkHour::insert($chunk);
-                }
-            });
-            $timestamp = Carbon::now();
-
-            return response()->json([
-                'message' => 'Data synced successfully',
-                'last_synced' => $timestamp->format('Y-m-d H:i:s'),
-            ]);
-        } else {
-            return response()->json(['message' => 'Data not found']);
-        }
+        // A snapshot cannot safely overwrite locally accepted submissions. This
+        // guard does not choose the long-term DB-vs-Sheets source of truth.
+        abort_if(WorkHour::whereNotNull('submission_key')->exists(), 409,
+            'Attendance contains local submissions. Reconcile these records before replacing a spreadsheet snapshot.');
+        $values = app(\App\Modules\Integrations\Services\SheetSnapshotReader::class)->read('TEST');
+        app(\App\Modules\Attendance\Services\ImportAttendanceSnapshot::class)->replace($values);
+        return response()->json(['message' => 'Data synced successfully', 'last_synced' => now()->format('Y-m-d H:i:s')]);
     }
     public function attendanceReport(Request $request)
     {
-        if ($request->ajax()) {
-
-            $data = WorkHour::select('id', 'teacher_name', 'student_name', 'dob', 'subject', 'topic', 'date', 'hour_taken', 'date_submitted')->orderBy('date', 'desc');
-            if ($request->has('student_name')) {
-                if ($request->input('student_name') !== "all") {
-                    $data->where('student_name', $request->input('student_name'));
-                }
-            }
-            if ($request->has('teacher_name')) {
-                $data->where('teacher_name', $request->input('teacher_name'));
-            }
-            if ($request->has('dob')) {
-                $data->where('dob', $request->input('dob'));
-            }
-            if (!empty($request->get('start_date'))) {
-                $data->whereDate('date', '>=', $request->get('start_date'));
-            }
-            if (!empty($request->get('end_date'))) {
-                $data->whereDate('date', '<=', $request->get('end_date'));
-            }
-            return DataTables::of($data)
-                ->addColumn('date', function ($row) {
-                    return date('d-m-Y', strtotime($row->date));
-                })
-                ->addIndexColumn()
-                ->make(true);
+        app(\App\Modules\IdentityAccess\Services\SiteAccessPolicy::class)->assertSiteMember($request->user());
+        if ($request->ajax() || $request->isMethod('post')) {
+            abort_unless($request->isMethod('post'), 405, 'Use POST for report verification.');
+            $data = WorkHour::select('id', 'teacher_name', 'teacher_code', 'student_name', 'student_code', 'subject', 'topic', 'date', 'hour_taken', 'date_submitted');
+            app(\App\Modules\IdentityAccess\Services\ReportAccess::class)->scopeTeacherReport($data, $request);
+            $request->validate(['start_date' => ['nullable', 'date'], 'end_date' => ['nullable', 'date']]);
+            if ($request->filled('start_date')) $data->whereDate('date', '>=', $request->start_date);
+            if ($request->filled('end_date')) $data->whereDate('date', '<=', $request->end_date);
+            return DataTables::of($data->orderBy('date', 'desc'))->addIndexColumn()->make(true)->header('Cache-Control', 'no-store, private');
         }
-
-        $teachers = WorkHour::select('teacher_name')
-            ->distinct()
-            ->get();
-
-        return view('hourreport', compact('teachers'));
+        $teachers = Master::select('teacher_name')->distinct()->orderBy('teacher_name')->get();
+        $reportRoute = $request->route()->getName();
+        return view('hourreport', compact('teachers', 'reportRoute'));
     }
 
     public function getStudentData(Request $request)
     {
-
-
-        $teacherName = $request->input('teacher_name');
-        $password = $request->input('dob');
-        $teacher = WorkHour::where('teacher_name', $teacherName)
-            ->where('dob', $password)
-            ->first();
-        if ($teacher) {
-            $students = WorkHour::where('teacher_name', $teacherName)
-                ->where('dob', $password)
-                ->select('student_name')
-                ->distinct()
-                ->get();
-            $studentData = [];
-            foreach ($students as $student) {
-                $studentData[] = [
-                    'student_name' => $student->student_name,
-                ];
-            }
-
-            return response()->json(['students' => $studentData]);
-        } else {
-            return response()->json(['message' => 'Student not found']);
-        }
+        $query = WorkHour::query();
+        app(\App\Modules\IdentityAccess\Services\ReportAccess::class)->scopeTeacherReport($query, $request);
+        return response()->json(['students' => $query->select('student_name')->distinct()->get()])->header('Cache-Control', 'no-store, private');
     }
     public function getStudent(Request $request)
     {
-        $teacherName = $request->input('teacher_name');
-
-        if ($teacherName === 'all') {
-            $students = WorkHour::select('student_name')
-                ->distinct()
-                ->get();
-        } else {
-            $students = WorkHour::where('teacher_name', $teacherName)
-                ->select('student_name')
-                ->distinct()
-                ->get();
-        }
-
-        $studentData = [];
-
-        foreach ($students as $student) {
-            $studentData[] = [
-                'student_name' => $student->student_name,
-            ];
-        }
-
-        return response()->json(['students' => $studentData]);
+        return $this->getStudentData($request);
     }
     public function getTeachers(Request $request)
     {
-        $studentName = $request->input('student_name');
-
-
-        if ($studentName === 'all') {
-            $teachers = WorkHour::select('student_name')
-                ->distinct()
-                ->get();
-        } else {
-            $teachers = WorkHour::where('student_name', $studentName)
-                ->select('teacher_name')
-                ->distinct()
-                ->get();
-        }
-
-        $teachersData = [];
-
-        foreach ($teachers as $teacher) {
-            $teachersData[] = [
-                'teacher_name' => $teacher->teacher_name,
-            ];
-        }
-
-        return response()->json(['teachers' => $teachers]);
+        $query = WorkHour::query();
+        app(\App\Modules\IdentityAccess\Services\ReportAccess::class)->scopeTeacherReport($query, $request);
+        return response()->json(['teachers' => $query->select('teacher_name')->distinct()->get()])->header('Cache-Control', 'no-store, private');
     }
 
 
@@ -523,67 +248,13 @@ class WorkHourController extends Controller
     }
     public function studentsAttendanceReport(Request $request)
     {
-        if ($request->ajax()) {
-
-            $data = WorkHour::select('id', 'teacher_name', 'student_name', 'student_code', 'subject', 'topic', 'date', 'hour_taken', 'date_submitted')->orderBy('date', 'desc');
-            if ($request->has('teacher_name')) {
-                if ($request->input('teacher_name') !== "all") {
-                    $data->where('teacher_name', $request->input('teacher_name'));
-                }
-            }
-            if ($request->has('student_name')) {
-                $data->where('student_name', $request->input('student_name'));
-            }
-            if ($request->has('student_code')) {
-                $data->where('student_code', $request->input('student_code'));
-            }
-            if (!empty($request->get('start_date'))) {
-                $data->whereDate('date', '>=', $request->get('start_date'));
-            }
-            if (!empty($request->get('end_date'))) {
-                $data->whereDate('date', '<=', $request->get('end_date'));
-            }
-            return DataTables::of($data)
-                ->addColumn('date', function ($row) {
-                    return date('d-m-Y', strtotime($row->date));
-                })
-                ->addIndexColumn()
-                ->make(true);
-        }
-
-        $students = WorkHour::select('student_name')
-            ->distinct()
-            ->get();
-
-        return view('hourreportstudents', compact('students'));
+        // Student codes are identifiers, not authentication credentials. Until an
+        // account-to-student mapping exists, use the same verified teacher scope.
+        return $this->attendanceReport($request);
     }
     public function getTeachersData(Request $request)
     {
-        $studentName = $request->input('student_name');
-        $studentCode = $request->input('student_code');
-
-        $matchingStudent = WorkHour::where('student_name', $studentName)
-            ->where('student_code', $studentCode)
-            ->first();
-
-        if ($matchingStudent) {
-            $teachers = WorkHour::where('student_name', $studentName)
-                ->where('student_code', $studentCode)
-                ->select('teacher_name')
-                ->distinct()
-                ->get();
-            $teachersData = [];
-
-            foreach ($teachers as $teacher) {
-                $teachersData[] = [
-                    'teacher_name' => $teacher->teacher_name,
-                ];
-            }
-
-            return response()->json(['teachers' => $teachersData]);
-        } else {
-            return response()->json(['message' => 'Student not found']);
-        }
+        return $this->getTeachers($request);
     }
     public function exportWorkHours(Request $request)
     {

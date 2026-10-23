@@ -30,7 +30,7 @@
                          <div class="form-group">
                              <label for="name" class="control-label">Student:</label>
                             <input type="text" class="form-control" id="student_names" name="student_names"
-                             value="{{$workhours->student_names}}" readonly>
+                             value="{{$workhours->student_name}}" readonly>
                          </div>
                      </div>
                      <div class="col-md-6">
@@ -81,17 +81,17 @@
                              <select class="form-control select2" id="hour_taken" style="width:100%" required
                                  name="hour_taken">
                                  <option value="">Choose</option>
-                                 <option value="0.5" {{ $workhours->hour_taken === '0.5' ? 'selected' : '' }}>0.5
+                                 <option value="0.5" {{ (float) $workhours->hour_taken === (float) '0.5' ? 'selected' : '' }}>0.5
                                  </option>
-                                 <option value="0.75" {{ $workhours->hour_taken === '0.75' ? 'selected' : '' }}>0.75
+                                 <option value="0.75" {{ (float) $workhours->hour_taken === (float) '0.75' ? 'selected' : '' }}>0.75
                                  </option>
-                                 <option value="1" {{ $workhours->hour_taken === '1' ? 'selected' : '' }}>1
+                                 <option value="1" {{ (float) $workhours->hour_taken === (float) '1' ? 'selected' : '' }}>1
                                  </option>
-                                  <option value="1.25" {{ $workhours->hour_taken === '1.25' ? 'selected' : '' }}>1.25
+                                  <option value="1.25" {{ (float) $workhours->hour_taken === (float) '1.25' ? 'selected' : '' }}>1.25
                                  </option>
-                                 <option value="1.5" {{ $workhours->hour_taken === '1.5' ? 'selected' : '' }}>1.5
+                                 <option value="1.5" {{ (float) $workhours->hour_taken === (float) '1.5' ? 'selected' : '' }}>1.5
                                  </option>
-                                 <option value="2" {{ $workhours->hour_taken === '2' ? 'selected' : '' }}>2
+                                 <option value="2" {{ (float) $workhours->hour_taken === (float) '2' ? 'selected' : '' }}>2
                                  </option>
                              </select>
 
@@ -102,35 +102,35 @@
                              <label for="name" class="control-label">Hour Rate:*</label>
                              <input class="form-control" required="" placeholder="hour_payment"
                                  autocomplete="off" name="hour_payment" id="hour_payment" type="text"
-                                 value="{{ $workhours->hour_payment }}" maxlength="15" >
+                                 value="{{ $workhours->hour_payment }}" readonly maxlength="15" >
                          </div>
                      </div>
                      <div class="col-md-6 total-amount">
                         <div class="form-group">
                             <label for="total_amount" class="control-label">payment Per Hour:</label>
                             <input type="text" class="form-control" id="payment_per_hour" name="payment_per_hour"
-                                value="{{ $workhours->payment_per_hour }}" >
+                                value="{{ $workhours->payment_per_hour }}" readonly >
                         </div>
                     </div>
                     <div class="col-md-6 total-amount">
                         <div class="form-group">
                             <label for="total_amount" class="control-label">Profit Per Hour:</label>
                             <input type="text" class="form-control" id="profit_per_hour" name="profit_per_hour"
-                                value="{{ $workhours->profit_per_hour }}" >
+                                value="{{ $workhours->profit_per_hour }}" readonly >
                         </div>
                     </div>
                      <div class="col-md-6 total-amount">
                          <div class="form-group">
                              <label for="total_amount" class="control-label">Total Amount:</label>
                              <input type="text" class="form-control" id="total_amount" name="total_amount"
-                                 value="{{ $workhours->total_amount }}" >
+                                 value="{{ $workhours->total_amount }}" readonly >
                          </div>
                      </div>
                      <div class="col-md-6">
                          <div class="form-group">
                              <label for="name" class="control-label">Time Stamp:</label>
                              <input class="form-control" required="" name="date_submitted" type="text"
-                                 id="date_submitted" autocomplete="off" value="{{ $workhours->date_submitted }}">
+                                 id="date_submitted" autocomplete="off" value="{{ $workhours->date_submitted }}" readonly>
                          </div>
                      </div>
 

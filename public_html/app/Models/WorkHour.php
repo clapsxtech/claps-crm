@@ -9,6 +9,7 @@ class WorkHour extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+    protected $hidden = ['dob', 'submission_hash'];
     public function master()
     {
         return $this->belongsTo(Master::class, 'student_code', 'student_code');

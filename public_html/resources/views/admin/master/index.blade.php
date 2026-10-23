@@ -47,7 +47,6 @@
                                         <th>Student Code</th>
                                         <th>Teacher Name</th>
                                         <th>Teacher Code</th>
-                                        <th>Teacher Dob</th>
                                         <th>Hour Payment</th>
                                         <th>Profit Per Hour</th>
                                         <th>Payment Per hour</th>
@@ -89,7 +88,6 @@
             {data: 'student_code', name: 'student_code'},
             {data: 'teacher_name', name: 'teacher_name'},
             {data: 'teacher_code', name: 'teacher_code'},
-            {data: 'teacher_dob',  name: 'teacher_dob'},
             {data: 'hour_payment',  name: 'hour_payment'},
             {data: 'profit_per_hour',  name: 'profit_per_hour'},
             {data: 'payment_per_hour',  name: 'payment_per_hour'},
@@ -102,7 +100,8 @@
       var url = '{{ route("syncMasters") }}';
       $.ajax({
         url: url,
-        type: 'GET',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        type: 'POST',
         dataType: 'json',
         success: function(response) {
             console.log(response);
@@ -117,7 +116,7 @@
             table.ajax.reload();
         },
         error: function(xhr, status, error) {
-            console.error(error);
+            alert((xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) || 'Unable to synchronize. Existing data was not changed.');
         }
     });
     });

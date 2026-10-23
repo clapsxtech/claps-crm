@@ -2,25 +2,26 @@
 
 namespace App\Http\Middleware;
 
+use App\Modules\IdentityAccess\Services\SiteAccessPolicy;
 use Closure;
 use Illuminate\Http\Request;
 
 class RequireAdministrator
 {
+    private $access;
+
+    public function __construct(SiteAccessPolicy $access)
+    {
+        $this->access = $access;
+    }
+
     public function handle(Request $request, Closure $next)
     {
-        $user = $request->user();
-
-        if (!$user) {
+        if (!$request->user()) {
             return redirect()->guest(route('login'));
         }
 
-        $isAdministrator = (int) $user->getKey() === 1
-            || strtolower((string) $user->user_type) === 'admin'
-            || $user->hasRole('Admin')
-            || $user->can('administration');
-
-        abort_unless($isAdministrator, 403, 'Administrator access is required.');
+        $this->access->assertAdministrator($request->user());
 
         return $next($request);
     }

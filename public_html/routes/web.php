@@ -28,33 +28,33 @@ Route::get('/health', function () {
 Route::get('/timetableReport', [TimeTableController::class, 'timetableReport'])->name('timetableReport'); 
 Route::get('/timetable', [TimeTableController::class, 'timetableReport'])->name('timetable'); 
 
-Route::get('/get-teacher-dob', [TimeTableController::class, 'getTeacherDOB'])->name('get-teacher-dob');
+Route::post('/get-teacher-dob', [TimeTableController::class, 'getTeacherDOB'])->name('get-teacher-dob')->middleware('throttle:teacher-credentials');
 
-Route::middleware('auth:web')->group(function () {
-    Route::get('/student-attendance-report', [WorkHourController::class, 'studentsAttendanceReport'])->name('student-attendance-report');
-    Route::get('/get-teachers', [WorkHourController::class, 'getTeachersData'])->name('get-teachers');
-    Route::get('/get-teacher', [WorkHourController::class, 'getTeachers'])->name('get-teacher');
-    Route::get('/get-students', [WorkHourController::class, 'getStudentData'])->name('get-students');
-    Route::get('/get-student', [WorkHourController::class, 'getStudent'])->name('get-student');
-    Route::get('/attendanceReport', [WorkHourController::class, 'attendanceReport'])->name('attendanceReport');
-    Route::get('/get-students-mark', [MarklistReportController::class, 'getStudentData'])->name('get-students-mark');
-    Route::get('/markreport', [MarklistReportController::class, 'MarklistReport'])->name('markreport');
+Route::middleware(['auth:web', 'throttle:teacher-credentials'])->group(function () {
+    Route::match(['get', 'post'], '/student-attendance-report', [WorkHourController::class, 'studentsAttendanceReport'])->name('student-attendance-report');
+    Route::post('/get-teachers', [WorkHourController::class, 'getTeachersData'])->name('get-teachers');
+    Route::post('/get-teacher', [WorkHourController::class, 'getTeachers'])->name('get-teacher');
+    Route::post('/get-students', [WorkHourController::class, 'getStudentData'])->name('get-students');
+    Route::post('/get-student', [WorkHourController::class, 'getStudent'])->name('get-student');
+    Route::match(['get', 'post'], '/attendanceReport', [WorkHourController::class, 'attendanceReport'])->name('attendanceReport');
+    Route::post('/get-students-mark', [MarklistReportController::class, 'getStudentData'])->name('get-students-mark');
+    Route::match(['get', 'post'], '/markreport', [MarklistReportController::class, 'MarklistReport'])->name('markreport');
 });
 
 Route::get('/attendance', [WorkHourController::class, 'frontetHourUploadCreate'])->name('attendance'); 
-Route::get('studentinfom', [WorkHourController::class, 'getStudentinfo'])->name('studentinfom')->middleware('web');
-Route::post('/upload-workhour', [WorkHourController::class, 'store'])->name('upload-workhour')->middleware('web');
+Route::post('studentinfom', [WorkHourController::class, 'getStudentinfo'])->name('studentinfom')->middleware(['web', 'throttle:teacher-credentials']);
+Route::post('/upload-workhour', [WorkHourController::class, 'store'])->name('upload-workhour')->middleware(['web', 'throttle:teacher-credentials']);
 
 
 Route::get('/resultform', [MarkListFrontentController::class, 'frontetMarkUploadCreate'])->name('resultform'); 
-Route::get('studentinforesult', [MarkListFrontentController::class, 'getStudentinfo'])->name('studentinforesult')->middleware('web');
-Route::post('/upload-result', [MarkListFrontentController::class, 'store'])->name('upload-result')->middleware('web');
+Route::post('studentinforesult', [MarkListFrontentController::class, 'getStudentinfo'])->name('studentinforesult')->middleware(['web', 'throttle:teacher-credentials']);
+Route::post('/upload-result', [MarkListFrontentController::class, 'store'])->name('upload-result')->middleware(['web', 'throttle:teacher-credentials']);
 Route::get('/performance', [PerformanceController::class, 'create'])->name('performenceform'); 
-Route::post('/performnce-upload', [PerformanceController::class, 'store'])->name('performnce-upload')->middleware('web');
+Route::post('/performnce-upload', [PerformanceController::class, 'store'])->name('performnce-upload')->middleware(['web', 'throttle:teacher-credentials']);
 
 
 
-Route::post('/submit-application', [MarkListFrontentController::class, 'store'])->name('submit-application')->middleware('web');
+Route::post('/submit-application', [MarkListFrontentController::class, 'store'])->name('submit-application')->middleware(['web', 'throttle:teacher-credentials']);
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('backend', 'App\Http\Controllers\Auth\LoginController@showLoginForm');
 Route::prefix('admin')->group(function () {
@@ -81,18 +81,18 @@ Route::group(['middleware' => ['auth:web', 'admin']], function () {
         Route::get('teacherinfo', [MarklistController::class, 'getTeacherInfo'])->name('teacherinfo');
         Route::get('studentinfo', [WorkHourController::class, 'getStudentinfo'])->name('studentinfo');
         Route::resource('workreport', TeacherReportController::class);
-        Route::get('syncTeachers', [GoogleSpreadsheetController::class, 'sheetData'])->name('syncTeachers');
-        Route::get('syncStudents', [StudentsController::class, 'sheetData'])->name('syncStudents');
-        Route::get('syncMasters', [MasterController::class, 'MastersSynkdata'])->name('syncMasters');
-        Route::get('syncTeacherReportData', [TeacherReportController::class, 'syncTeacherReportData'])->name('syncTeacherReportData');
+        Route::post('syncTeachers', [GoogleSpreadsheetController::class, 'sheetData'])->name('syncTeachers');
+        Route::post('syncStudents', [StudentsController::class, 'sheetData'])->name('syncStudents');
+        Route::post('syncMasters', [MasterController::class, 'MastersSynkdata'])->name('syncMasters');
+        Route::post('syncTeacherReportData', [TeacherReportController::class, 'syncTeacherReportData'])->name('syncTeacherReportData');
         Route::resource('marklistreport', MarklistReportController::class);
-        Route::get('syncMarklistReportData', [MarklistReportController::class, 'syncMarklistReportData'])->name('syncMarklistReportData');
-        Route::get('syncWorkHoureReportData', [WorkHourController::class, 'syncWorkHoureReportData'])->name('syncWorkHoureReportData');
+        Route::post('syncMarklistReportData', [MarklistReportController::class, 'syncMarklistReportData'])->name('syncMarklistReportData');
+        Route::post('syncWorkHoureReportData', [WorkHourController::class, 'syncWorkHoureReportData'])->name('syncWorkHoureReportData');
         Route::resource('duereport', DueController::class);
-        Route::get('syncDueReportData', [DueController::class, 'syncDueReportData'])->name('syncDueReportData');
+        Route::post('syncDueReportData', [DueController::class, 'syncDueReportData'])->name('syncDueReportData');
         Route::resource('timetable', TimeTableController::class);
 
-        Route::get('syncTimeTableData', [TimeTableController::class, 'syncTimeTableData'])->name('syncTimeTableData');
+        Route::post('syncTimeTableData', [TimeTableController::class, 'syncTimeTableData'])->name('syncTimeTableData');
         Route::get('studentTimetable', [TimeTableController::class, 'studentTimetable'])->name('studentTimetable');
         Route::get('work-hours/export', [WorkHourController::class, 'exportWorkHours'])->name('work_hours.export');
 
