@@ -1,0 +1,2 @@
+@extends('erp.layout')
+@section('content')<section><h2>Payment acknowledgement</h2><p>{{ $business->name }}</p><p>Reference: {{ $receipt->reference }}</p><p>Student: {{ $student->name }} ({{ $student->code }})</p><p>Received: INR {{ number_format($receipt->amount_paise / 100,2) }}</p><p>Recorded at {{ $receipt->occurred_at }} UTC</p><p>This acknowledges a recorded payment. It is not a tax invoice or a payment request.</p><button onclick="window.print()">Print acknowledgement</button></section>@endsection

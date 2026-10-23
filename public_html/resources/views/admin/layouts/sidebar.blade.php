@@ -26,6 +26,7 @@
         <p>Master Data</p>
       </a></li>
       <li class="nav-header">OPERATIONS</li>
+      <li class="nav-item"><a href="{{route('erp.index')}}" class="nav-link"><i class="fas fa-building nav-icon"></i><p>ERP Workspace</p></a></li>
       <li class="nav-item"><a href="{{route('workhour.index')}}" class="nav-link"><i class="fas fa-clock nav-icon"></i>
         <p>Work Hours</p>
       </a></li>
@@ -59,3 +60,4 @@
     </nav>
   </div>
 </aside>
+
