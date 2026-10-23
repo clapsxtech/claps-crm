@@ -205,4 +205,16 @@ class ErpBusinessHttpTest extends TestCase
         $this->assertSame(2,DB::table('erp_audit')->where('action','membership.revoked')->count());
     }
 
+    public function test_receipt_labels_installation_timezone_without_reinterpreting_saved_time(): void {
+        config(['app.timezone'=>'Asia/Kolkata']);
+        $entry=$this->receipt('BHTTP-TIMEZONE');
+        $this->get(route('erp.receipt',[$this->unit,$entry->id]))->assertOk()->assertSee('installation time: Asia/Kolkata')->assertSee($entry->occurred_at)->assertDontSee($entry->occurred_at.' UTC');
+    }
+    public function test_sidebar_logout_uses_native_post_form_without_javascript_dependency(): void {
+        $html=view('admin.layouts.sidebar')->render();
+        $this->assertStringContainsString('type="submit" form="logout-form"',$html);
+        $this->assertStringNotContainsString("$('#logout-form')",$html);
+        $this->post(route('logout'))->assertRedirect('/');$this->assertGuest();
+        $this->get(route('erp.business',[$this->unit,'people']))->assertRedirect(route('login'));
+    }
 }

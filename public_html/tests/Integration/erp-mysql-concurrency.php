@@ -45,7 +45,22 @@ DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
 DB::statement('SET SESSION innodb_lock_wait_timeout = 10');
 check(DB::selectOne('SELECT DATABASE() AS name')->name === $database, 'Connected database does not match explicit test database.');
 
+function migrationProvenance(string $cutoff): void {
+    $source = 'SYNTHETIC-CUTOFF-'.$cutoff;
+    $batch = DB::table('erp_migration_batches')->insertGetId(['source_id'=>$source,'cutoff'=>$cutoff,'digest'=>hash('sha256',$source),'manifest'=>'{}','counts'=>'{}','totals'=>'{}','actor_id'=>1]);
+    foreach (['student'=>'erp_students','teacher'=>'erp_teachers','assignment'=>'erp_enrollments'] as $type=>$table) {
+        DB::table('erp_migration_mappings')->insert(['source_id'=>$source,'entity_type'=>$type,'external_id'=>'PROBE-'.$type,'target_type'=>$table,'target_id'=>1,'row_digest'=>hash('sha256',$type),'batch_id'=>$batch]);
+    }
+}
 function executeOperation(string $operation, string $dir, string $name): array {
+    if ($operation === 'cutoff_hold') return DB::transaction(function() use($dir,$name) {
+        DB::table('erp_teachers')->where('id',1)->lockForUpdate()->first();
+        DB::table('erp_students')->where('id',1)->lockForUpdate()->first();
+        mark($dir.'/'.$name.'.locked'); awaitFile($dir.'/release');
+        migrationProvenance('2026-01-06');
+        return ['committed_cutoff'=>'2026-01-06'];
+    });
+
     if ($operation === 'settle') return (array)(new MoneyOperations())->recordTeacherPayment(1,1,['teacher_id'=>1,'amount_paise'=>4000,'reference'=>'SETTLE-'.$name,'paid_on'=>gmdate('Y-m-d'),'reason'=>'Synthetic already-paid settlement','already_paid'=>true]);
     if ($operation === 'allocate_receipt_cap') return (array)(new MoneyOperations())->allocateReceipt(1,1,['request_id'=>$name==='b'?2:1,'payment_id'=>1,'amount_paise'=>6000]);
     if ($operation === 'allocate_request_cap') return (array)(new MoneyOperations())->allocateReceipt(1,1,['request_id'=>1,'payment_id'=>$name==='b'?2:1,'amount_paise'=>6000]);
@@ -57,6 +72,12 @@ function executeOperation(string $operation, string $dir, string $name): array {
     });
 
     if ($operation === 'approve') return (array)(new Attendance())->approve(1, 1, 1);
+    // Match teacher-controller nesting: the outermost transaction must own deadlock retries.
+    if ($operation === 'submit_distinct') return DB::transaction(function() use($name) {
+        $id=$name==='b'?2:1;
+        DB::table('erp_teachers')->where('id',$id)->lockForUpdate()->first();
+        return (array)(new Attendance())->submit(1,1,['lesson_id'=>$id,'actual_minutes'=>60]);
+    },3);
     if ($operation === 'submit') return (array)(new Attendance())->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 60]);
     if ($operation === 'import') return (array)(new Attendance())->importBatch(1, 1, ['attendance_ids' => [1], 'reference' => 'PROBE-'.$name]);
     if ($operation === 'cancel_hold' || $operation === 'correct_hold') {
@@ -75,6 +96,15 @@ if (($argv[1] ?? '') === 'worker') {
     [$script, $mode, $operation, $dir, $name] = $argv;
     try {
         // Signal after an ordinary discovery read, before the teacher lock can return.
+        if ($operation === 'submit_distinct') {
+            $shared = false;
+            DB::listen(function($query) use(&$shared,$dir,$name) {
+                if (!$shared && strpos($query->sql,'erp_migration_batches')!==false) {
+                    $shared=true; mark($dir.'/'.$name.'.shared');
+                    awaitFile($dir.'/'.($name==='a'?'b':'a').'.shared');
+                }
+            });
+        }
         $traced = false;
         DB::listen(function ($query) use (&$traced, $dir, $name, $operation) {
             $needle = strpos($operation, 'allocate_') === 0 ? 'erp_payment_requests' : ($operation === 'submit' ? 'erp_lessons' : 'erp_attendance');
@@ -93,10 +123,11 @@ if (($argv[1] ?? '') === 'worker') {
 
 require_once $base.'/database/migrations/2026_10_23_130000_create_erp_core_tables.php';
 require_once $base.'/database/migrations/2026_10_23_150000_create_erp_business_workflows.php';
+require_once $base.'/database/migrations/2026_10_23_160000_index_erp_migration_targets.php';
 function resetFixture(): void {
     $migration = new CreateErpCoreTables();
     $business = new CreateErpBusinessWorkflows();
-    $business->down(); $migration->down(); $migration->up(); $business->up();
+    $business->down(); $migration->down(); $migration->up(); $business->up(); (new IndexErpMigrationTargets())->up();
     DB::table('erp_units')->insert(['id' => 1, 'code' => 'PROBE', 'name' => 'Synthetic concurrency unit', 'timezone' => 'UTC']);
     DB::table('erp_students')->insert(['id' => 1, 'unit_id' => 1, 'code' => 'PROBE-S', 'name' => 'Synthetic student', 'registered_on' => '2026-01-01', 'timezone' => 'UTC', 'status' => 'active', 'grade' => '8', 'syllabus' => 'Synthetic']);
     DB::table('erp_teachers')->insert(['id' => 1, 'code' => 'PROBE-T', 'name' => 'Synthetic teacher', 'timezone' => 'UTC', 'status' => 'active']);
@@ -148,6 +179,7 @@ $report=['database'=>$database,'server'=>DB::selectOne('SELECT VERSION() AS vers
 try {
     resetFixture(); $r=simultaneous('submit','same_lesson'); allOk($r);
     check(DB::table('erp_attendance')->count()===1 && $r['a']['result']['id']===$r['b']['result']['id'], 'Duplicate attendance under concurrent replay.');
+    check(DB::table('erp_audit')->where('action','attendance.submitted')->count()===1, 'Duplicate submission audit after concurrent replay.');
     $report['scenarios']['simultaneous_attendance']='PASS';
 
     $r=simultaneous('import','distinct_import_refs'); allOk($r);
@@ -203,6 +235,36 @@ try {
     $r=simultaneous('correct_receipt','concurrent_receipt_correction'); allOk($r);
     check($r['a']['result']['id']===$r['b']['result']['id'] && ledgerBalance()===15000 && DB::table('erp_ledger')->count()===3, 'Concurrent correction was not atomic/idempotent.');
     $report['scenarios']['receipt_correction_rollback_and_concurrent_replay']='PASS';
+    resetFixture(); migrationProvenance('2026-01-05');
+    allOk(simultaneous('submit','mapped_simultaneous_submit'));
+    allOk(simultaneous('import','mapped_simultaneous_import'));
+    allOk(simultaneous('approve','mapped_simultaneous_approve'));
+    check(DB::table('erp_attendance')->count()===1 && DB::table('erp_ledger')->where('kind','lesson_charge')->count()===1 && DB::table('erp_ledger')->where('kind','teacher_accrual')->count()===1, 'Mapped concurrent operations duplicated financial events.');
+    $report['scenarios']['mapped_provenance_concurrent_attendance_and_both_streams']='PASS';
+
+    resetFixture(); $r=interleaved('cutoff_hold','submit','cutoff_committed_before_submit');
+    check($r['holder']['ok'] && !$r['waiter']['ok'] && $r['waiter']['class']===Illuminate\Validation\ValidationException::class, 'Waiter missed newly committed migration cutoff.');
+    check(DB::table('erp_attendance')->count()===0 && DB::table('erp_ledger')->count()===0, 'Pre-cutoff race wrote attendance or ledger.');
+    $report['scenarios']['new_committed_cutoff_visible_after_parent_lock']='PASS';
+    resetFixture(); migrationProvenance('2026-01-05');
+    foreach (['erp_students','erp_teachers','erp_enrollments','erp_lessons'] as $table) {
+        $row=(array)DB::table($table)->where('id',1)->first(); $row['id']=2;
+        if (isset($row['code'])) $row['code'].='-SECOND';
+        foreach (['student_id','teacher_id','enrollment_id'] as $field) if (isset($row[$field])) $row[$field]=2;
+        DB::table($table)->insert($row);
+    }
+    DB::table('erp_teacher_units')->insert(['teacher_id'=>2,'unit_id'=>1]);
+    foreach (DB::table('erp_migration_mappings')->get() as $mapping) {
+        $row=(array)$mapping; unset($row['id']); $row['target_id']=2; $row['external_id'].='-SECOND'; DB::table('erp_migration_mappings')->insert($row);
+    }
+    foreach ([1,2] as $owner) {
+        $opening=DB::table('erp_ledger')->insertGetId(['unit_id'=>1,'student_id'=>$owner,'kind'=>'opening_balance','amount_paise'=>0,'currency'=>'INR','reference'=>'SYN-OPENING-'.$owner,'event_key'=>'syn-opening-'.$owner,'occurred_at'=>'2026-01-05 00:00:00','created_by'=>1]);
+        DB::table('erp_migration_mappings')->insert(['source_id'=>'SYNTHETIC-CUTOFF-2026-01-05','entity_type'=>'opening_balance','external_id'=>'OPENING-'.$owner,'target_type'=>'erp_ledger','target_id'=>$opening,'row_digest'=>hash('sha256','opening-'.$owner),'batch_id'=>1]);
+    }
+    allOk(simultaneous('submit_distinct','unrelated_parties_shared_batch'));
+    check(DB::table('erp_attendance')->count()===2, 'Unrelated mapped parties did not both submit.');
+    check(DB::table('erp_audit')->where('action','attendance.submitted')->count()===2 && DB::table('erp_ledger')->count()===2, 'Retried submission duplicated audit or posted financial events.');
+    $report['scenarios']['unrelated_parties_share_immutable_batch_current_read']='PASS';
     $report['status']='PASS';
 } catch (Throwable $e) { $report['status']='FAIL'; $report['error']=$e->getMessage(); }
 file_put_contents($artifactRoot.'/last-result.json',json_encode($report,JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR));

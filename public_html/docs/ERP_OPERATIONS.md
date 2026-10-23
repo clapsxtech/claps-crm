@@ -51,7 +51,7 @@ These are test acceptance instructions, not instructions to run a production mig
 
 ## Native database validation
 
-The MariaDB 10.11.18 default-database test configuration passes 250 tests / 1798 assertions after fresh-install and DataTables compatibility fixes. Some isolated service tests intentionally remain SQLite; the HTTP/default-database tests exercise native MariaDB. Ten real two-process REPEATABLE READ concurrency probes also pass. See `ERP_MYSQL_TESTING.md` for the guarded opt-in harness. This does not certify other MySQL versions or replace acceptance on the intended host. Browser acceptance remains blocked because the supported cloud browser cannot reach the isolated test-server namespace.
+The MariaDB 10.11.18 default-database test configuration passes 264 tests / 1889 assertions after fresh-install and DataTables compatibility fixes. Some isolated service tests intentionally remain SQLite; the HTTP/default-database tests exercise native MariaDB. Thirteen real two-process REPEATABLE READ concurrency probes also pass. See `ERP_MYSQL_TESTING.md` for the guarded opt-in harness. This does not certify other MySQL versions or replace acceptance on the intended host. The earlier cloud-browser namespace blocker was resolved by starting the isolated loopback application through the supported cloud desktop Terminal. Actual browser acceptance uses synthetic data; see ERP_BROWSER_ACCEPTANCE.md for verified workflows and remaining deployment boundaries.
 
 ## Daily business operations
 
@@ -64,3 +64,5 @@ Follow-ups records WhatsApp/call outcomes without sending anything. Only the lat
 Team access manages existing verified site accounts only; it does not create credentials. Link/unlink teacher accounts explicitly, preserving class history. Access removal does not cancel classes. Migration & exports provides scoped CSV registers and app reconciliation totals; these are not proof that source Sheets match.
 
 For synthetic acceptance, add a checklist task assigned to a synthetic staff account and complete it through My assigned tasks. Create a 20000-paise request, allocate an existing receipt, correct that receipt and verify the request reopens until the replacement is allocated. Record and reverse a synthetic already-paid teacher amount within accrued payable. Confirm the ledger remains explainable and no external action occurs.
+
+Ledger receipt timestamps are recorded in the installation timezone and are labeled accordingly. Keep the installation timezone stable until a separately reviewed timestamp migration; legacy ledger timestamps do not carry a per-row zone. Lesson timestamps and approved migration cutoff boundaries are UTC and must not be reinterpreted as installation time.

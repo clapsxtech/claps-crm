@@ -3,6 +3,26 @@ namespace App\Modules\Erp\Services;
 use Illuminate\Support\Facades\DB;
 class Reporting
 {
+    /** Read-only dashboard projections. Never use these snapshots to authorize financial writes. */
+    public function teacherStatements(int $unitId,array $teacherIds): array
+    {
+        $rows=DB::table('erp_ledger as l')->leftJoin('erp_ledger as original',function($j){$j->on('original.id','=','l.reverses_id')->on('original.unit_id','=','l.unit_id')->on('original.teacher_id','=','l.teacher_id');})
+            ->where('l.unit_id',$unitId)->whereIn('l.teacher_id',$teacherIds)
+            ->select('l.teacher_id')->selectRaw("SUM(l.amount_paise) AS net, SUM(CASE WHEN (CASE WHEN l.kind = 'reversal' THEN original.kind ELSE l.kind END) = 'teacher_accrual' THEN l.amount_paise ELSE 0 END) AS earned, SUM(CASE WHEN (CASE WHEN l.kind = 'reversal' THEN original.kind ELSE l.kind END) = 'teacher_payment' THEN -l.amount_paise ELSE 0 END) AS paid")
+            ->groupBy('l.teacher_id')->get()->keyBy('teacher_id');
+        $result=[];foreach($teacherIds as $id){$r=$rows->get($id);$earned=(int)($r->earned??0);$paid=(int)($r->paid??0);$net=(int)($r->net??0);$result[$id]=['earned_paise'=>$earned,'paid_paise'=>$paid,'other_adjustments_paise'=>$net-$earned+$paid,'net_payable_paise'=>$net];}return $result;
+    }
+    public function requestSummaries(int $unitId,array $requestIds): array
+    {
+        $coverage=DB::table('erp_request_allocations as a')->join('erp_payment_requests as request',function($j){$j->on('request.id','=','a.request_id')->on('request.unit_id','=','a.unit_id');})
+            ->join('erp_ledger as payment',function($j){$j->on('payment.id','=','a.payment_id')->on('payment.unit_id','=','a.unit_id')->on('payment.student_id','=','request.student_id');})
+            ->where('a.unit_id',$unitId)->whereIn('a.request_id',$requestIds)->where('payment.kind','payment')
+            ->whereNotExists(function($q){$q->selectRaw('1')->from('erp_ledger as reversal')->whereColumn('reversal.reverses_id','payment.id');})
+            ->select('a.request_id')->selectRaw('SUM(a.amount_paise) AS covered')->groupBy('a.request_id');
+        $rows=DB::table('erp_payment_requests as r')->leftJoinSub($coverage,'coverage',function($j){$j->on('coverage.request_id','=','r.id');})
+            ->where('r.unit_id',$unitId)->whereIn('r.id',$requestIds)->select('r.id','r.amount_paise','r.status',DB::raw('COALESCE(coverage.covered,0) AS covered'))->get();
+        $result=[];foreach($rows as $r){$amount=(int)$r->amount_paise;$covered=(int)$r->covered;$result[$r->id]=['requested_paise'=>$amount,'covered_paise'=>$covered,'outstanding_paise'=>max(0,$amount-$covered),'status'=>$r->status==='cancelled'?'cancelled':($covered>=$amount?'fulfilled':'pending')];}return $result;
+    }
     public function datasets(): array
     {
         return [

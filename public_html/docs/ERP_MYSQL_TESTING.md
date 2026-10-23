@@ -47,8 +47,14 @@ Every scenario uses real independent connections in separate PHP processes. Each
 9. A receipt reversal racing allocation preserves active-coverage integrity.
 10. Receipt correction rolls back atomically on failure and retries without a second replacement.
 
+11. Mapped imported parties submit, import and approve concurrently while retaining a single financial event per stream.
+12. A cutoff committed while a submission waits is visible through current reads; pre-cutoff submission writes neither attendance nor ledger.
+13. Unrelated imported parties sharing one immutable batch pass a current-read barrier without unnecessary batch serialization. Controller-shaped outer transactions retry bounded InnoDB gap-lock deadlocks, preserving exactly one attendance/audit per lesson.
+
+Attendance submission retries the entire transaction up to three attempts only for database concurrency failures. This is normal deadlock recovery, not a weaker isolation level; validation failures are not retried, and exhaustion remains an error.
+
 The harness prints JSON and returns zero only on success. It writes `last-result.json` and per-worker results/stdout/stderr under the artifact directory, never into the repository. Barrier waits are bounded; failures identify the unsuccessful scenario. Test artifacts contain synthetic fixture data only. No runtime outputs, credentials, or database files should be committed.
 
 ## Observed evidence and limits
 
-The isolated ten-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.
+The isolated thirteen-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.

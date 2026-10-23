@@ -24,11 +24,11 @@ class BusinessController extends Controller
         }
         if(in_array($page,['people','money'])){
             $data['teachers']=DB::table('erp_teachers as t')->join('erp_teacher_units as u','u.teacher_id','=','t.id')->where('u.unit_id',$unit)->select('t.*')->orderBy('t.name')->paginate(25,['*'],'teachers_page')->withQueryString();
-            foreach($data['teachers'] as $teacher){foreach($money->teacherStatement($unit,$teacher->id) as $key=>$value)$teacher->$key=$value;}
+            $statements=(new \App\Modules\Erp\Services\Reporting())->teacherStatements($unit,$data['teachers']->pluck('id')->all());foreach($data['teachers'] as $teacher){foreach($statements[$teacher->id] as $key=>$value)$teacher->$key=$value;}
         }
         $tables=['dashboard'=>['tasks','duplicate_reviews'],'money'=>['payment_requests','ledger'],'followups'=>['tasks','task_items','followups'],'staff'=>['memberships'],'migration'=>['migration_history'],'attendance'=>['attendance','duplicate_reviews'],'timetable'=>['lessons','agreements','exceptions']];
         foreach($tables[$page]??[] as $table){$query=DB::table('erp_'.$table)->where('unit_id',$unit);if($page==='dashboard'&&$table==='tasks')$query->where('status','!=','completed');if($page==='dashboard'&&$table==='duplicate_reviews')$query->where('status','pending');$data[$table]=$query->orderByDesc('id')->paginate(25,['*'],$table.'_page')->withQueryString();}
-        if(isset($data['payment_requests']))foreach($data['payment_requests'] as $row)foreach($money->requestSummary($unit,$row->id) as $key=>$value)$row->$key=$value;
+        if(isset($data['payment_requests'])){$summaries=(new \App\Modules\Erp\Services\Reporting())->requestSummaries($unit,$data['payment_requests']->pluck('id')->all());foreach($data['payment_requests'] as $row)foreach($summaries[$row->id] as $key=>$value)$row->$key=$value;}
         if($page==='followups'){ $latest=DB::table('erp_followups')->where('unit_id',$unit)->select(DB::raw('MAX(id) AS id'))->groupBy('student_id');$data['followup_due']=DB::table('erp_followups')->where('unit_id',$unit)->whereIn('id',$latest)->whereNotNull('next_due_on')->where('next_due_on','<=',now($business->timezone)->toDateString())->orderBy('next_due_on')->paginate(25,['*'],'followup_due_page')->withQueryString(); }
         if($page==='migration')$reconciliation=(new \App\Modules\Erp\Services\Reporting())->reconciliation($unit);else $reconciliation=null;
         $metrics=['Active students'=>DB::table('erp_students')->where('unit_id',$unit)->where('status','active')->count(),'Scheduled lessons'=>DB::table('erp_lessons')->where('unit_id',$unit)->where('status','scheduled')->count(),'Pending teacher approval'=>DB::table('erp_attendance')->where('unit_id',$unit)->where('status','submitted')->count(),'Duplicate reviews'=>DB::table('erp_duplicate_reviews')->where('unit_id',$unit)->where('status','pending')->count()];
@@ -81,7 +81,7 @@ class BusinessController extends Controller
     }
     public function requestPrint(Request $request,int $unit,int $id)
     {
-        (new Access())->unit($request->user(),$unit,false);$paymentRequest=DB::table('erp_payment_requests')->where('unit_id',$unit)->where('id',$id)->first();abort_unless($paymentRequest,404);$student=DB::table('erp_students')->where('unit_id',$unit)->where('id',$paymentRequest->student_id)->first();$business=DB::table('erp_units')->find($unit);$summary=(new MoneyOperations())->requestSummary($unit,$id);return view('erp.payment-request',compact('paymentRequest','student','business','summary'));
+        (new Access())->unit($request->user(),$unit,false);$paymentRequest=DB::table('erp_payment_requests')->where('unit_id',$unit)->where('id',$id)->first();abort_unless($paymentRequest,404);$student=DB::table('erp_students')->where('unit_id',$unit)->where('id',$paymentRequest->student_id)->first();$business=DB::table('erp_units')->find($unit);$summary=(new \App\Modules\Erp\Services\Reporting())->requestSummaries($unit,[$id])[$id];return view('erp.payment-request',compact('paymentRequest','student','business','summary'));
     }
     public function export(Request $request,int $unit,string $dataset)
     {

@@ -17,6 +17,7 @@ class Attendance
             DB::table('erp_teachers')->where('id', $lesson->teacher_id)->lockForUpdate()->first();
             $student = DB::table('erp_students')->where('unit_id', $unitId)->where('id', $lesson->student_id)->lockForUpdate()->first();
             $lesson = $this->lesson($unitId, $lesson->id, true);
+            (new Finance())->assertAfterMigrationCutoff($unitId, $lesson);
             $existing = DB::table('erp_attendance')->where('unit_id', $unitId)->where('lesson_id', $lesson->id)->lockForUpdate()->first();
             if ($existing) {
                 if ((int) $existing->actual_minutes !== $minutes) $this->fail('actual_minutes', 'Attendance exists. Use an audited correction instead.');
@@ -36,7 +37,7 @@ class Attendance
             }
             Audit::record($unitId, $actorId, 'attendance.submitted', 'attendance', $id, ['lesson_id' => $lesson->id, 'actual_minutes' => $minutes]);
             return DB::table('erp_attendance')->find($id);
-        });
+        }, 3); // Retry whole atomic submission on InnoDB gap-lock deadlocks between unrelated lessons.
     }
 
     public function approve(int $unitId, int $actorId, int $attendanceId)

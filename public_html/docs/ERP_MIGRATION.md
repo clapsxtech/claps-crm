@@ -84,3 +84,23 @@ Approved student openings become ledger entries of kind `opening_balance`, dated
 ### Verification scope
 
 `ErpMigrationImporterTest` uses synthetic fixtures only: dry-run/no writes, exact canonical digest/replay, schema/target/cutoff mismatch, explicit subject/eligibility mapping, every-student zero-or-signed opening, explicit inactive/paused/ended statuses, no historical financial replay, no unmanaged stable-code overwrites, per-unit/deleted-actor denial, commit-time conflict revalidation and injected mid-import atomic rollback. The CLI test commits synthetic rows only within the isolated test database.
+
+## Live attendance boundary after migration
+
+Committed source mappings and their batch cutoff now prevent imported students, teachers or assignments from re-entering pre-cutoff attendance through live submission, student charging or teacher accrual. The boundary is UTC midnight on the approved cutoff; a lesson starting before it, including one crossing midnight, remains historical. Exact-cutoff starts can use the live workflow. Existing mistaken postings can still be corrected or reversed, but re-import/reapproval cannot recreate pre-cutoff financial effects. Invalid or ambiguous mapped provenance fails closed. This does not infer a cutoff from a report heading or export timestamp.
+
+## Read-only source-shape CSV inventory
+
+`php artisan erp:source-inventory /local/path/adapter_manifest_v1.json` reads only local CSV files beside a versioned manifest and prints diagnostics. A nonzero exit means blocking diagnostics, not a failed or partial import. The command has no execute mode and always returns `can_import=false`, `writes=0`. It does not manufacture normalized import rows from incomplete source data.
+
+Manifest version 1 requires `source_id`, timezone-qualified ISO `exported_at`, explicit `cutoff_date` (null remains blocked), `student_openings_approved` and `sources`. Each source declares a simple local filename, SHA256, workbook/sheet identity, physical spreadsheet range (for example `D12:U12`), physical row count, timezone, header row count, kind and physical-letter column map. Kinds are `master`, `registration`, `attendance`, `due`, `timetable`, or `inventory`. Source URLs may be retained privately as provenance but are never fetched. Original timezone labels are preserved; the historical `Asia/Calcutta` label is recognized as the `Asia/Kolkata` timezone alias even when a stripped runtime omits backward aliases.
+
+Required maps: attendance `attendance_id,teacher_id,student_id,date,hours,unit`; master `student_id,teacher_id,student_rate,teacher_rate`; due `prior,received,charges,current`; registration `student_id`. Optional `registered_on`, `starts_at` and `status` remain absent when source semantics are unknown. Timetable `expected_hours` is planning duration only, never substituted for actual attendance.
+
+All selected sources must share one attendance identity namespace. Identical IDs across mirrored tabs count once, with equality checked on linked identities, date, exact minutes, unit, start and status. Never combine unrelated systems with coincident IDs under one source manifest. Conflicting IDs invalidate attendance totals. Any selected file failing structure, hash, row count or width validation makes the inventory incomplete and nulls attendance minutes rather than presenting partial totals as complete.
+
+Money accepts canonical decimal strings with at most two fractional digits and converts to integer paise without floating-point rounding. Hours allow up to four fractional digits but must convert to exact whole minutes. Currency symbols, grouping commas, exponents, whitespace, excessive precision and fractional minutes are rejected. Source arithmetic is only an observation, not evidence of receipts, sign convention approval or a cutover opening. Teacher openings remain unsupported. Registration-date semantics, explicit status mappings, assignment effective dates, approved eligibility, exact attendance starts, cutoff and approved student openings must be resolved separately. No source-derived financial replay is authorized by this diagnostic.
+
+Tests contain fabricated records only. Private/sanitized source extracts, mapping manifests and reconciliation results must remain outside source control.
+
+This intentionally conservative inventory CLI currently always exits nonzero because teacher opening support is absent, even if CSV structure is complete. Inspect `inventory_complete` separately from import readiness. Limits: 100 sources, 10,000 physical rows per source, 50,000 declared rows per bundle, 5 MiB per CSV, 1 MiB mapping manifest. These are bounded diagnostic extracts, not a complete-population loader.

@@ -47,10 +47,10 @@
         <p>Users</p>
       </a></li>
       <li class="nav-item">
-        <a href="javascript:void" class="nav-link" onclick="$('#logout-form').submit();">
+        <button type="submit" form="logout-form" class="nav-link" style="border:0;background:transparent;width:100%;text-align:left;color:inherit">
           <i class="nav-icon fas fa-sign-out-alt"></i>
           <p>Sign out</p>
-        </a>
+        </button>
       </li>
 
       </ul>

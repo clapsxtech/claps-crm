@@ -33,12 +33,12 @@ class WorkspaceController extends Controller
             $attendance->student_finance_state=$demo?'Free demo':($active->where('kind','lesson_charge')->isNotEmpty()?'Imported':($attendance->status==='rejected'?'Rejected / reversed':'Pending import'));
             $attendance->teacher_finance_state=$demo?'Unpaid demo':($active->where('kind','teacher_accrual')->isNotEmpty()?'Accrued':($attendance->status==='rejected'?'Rejected / reversed':($attendance->status==='approved'?'Approved, not accrued':'Pending approval')));
         }
-        foreach($data['students'] as $student){$student->priority=(new People())->priority($student->registered_on,$business->timezone);$student->balance_paise=(new Finance())->balance($unit,$student->id);}
+        $balances=DB::table('erp_ledger')->where('unit_id',$unit)->whereIn('student_id',$data['students']->pluck('id'))->select('student_id')->selectRaw('SUM(amount_paise) AS balance')->groupBy('student_id')->pluck('balance','student_id');foreach($data['students'] as $student){$student->priority=(new People())->priority($student->registered_on,$business->timezone);$student->balance_paise=(int)($balances[$student->id]??0);}
         $teacherIds=DB::table('erp_teacher_units')->where('unit_id',$unit)->select('teacher_id');
         $teachers=DB::table('erp_teachers')->whereIn('id',$teacherIds);
         if($search!=='')$teachers->where(function($q)use($search){$q->where('name','like','%'.$search.'%')->orWhere('code','like','%'.$search.'%');});
         $data['teachers']=$teachers->orderBy('name')->paginate(50,['*'],'teachers_page')->withQueryString();
-        foreach($data['teachers'] as $teacher){$teacher->approved_accrual_paise=(new \App\Modules\Erp\Services\MoneyOperations())->teacherStatement($unit,$teacher->id)['earned_paise'];}
+        $statements=(new \App\Modules\Erp\Services\Reporting())->teacherStatements($unit,$data['teachers']->pluck('id')->all());foreach($data['teachers'] as $teacher){$teacher->approved_accrual_paise=$statements[$teacher->id]['earned_paise'];}
         $subjects=DB::table('erp_subjects')->whereIn('id',DB::table('erp_eligibilities')->whereIn('teacher_id',$teacherIds)->select('subject_id'));
         if($search!=='')$subjects->where('name','like','%'.$search.'%');
         $data['subjects']=$subjects->orderBy('name')->paginate(50,['*'],'subjects_page')->withQueryString();

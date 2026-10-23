@@ -56,7 +56,7 @@ class TeacherController extends Controller
             [$current,$currentUnit]=$this->identity($request);
             if ($current->id !== $teacher->id || $currentUnit !== $unitId || !DB::table('erp_lessons')->where('id',$payload['lesson_id'])->where('unit_id',$unitId)->where('teacher_id',$teacher->id)->exists()) throw new AuthorizationException('Only your own dated lessons in your unit can receive your attendance.');
             (new Attendance())->submit($unitId,$actorId,$payload);
-        });
+        }, 3);
         return redirect()->route('erp.teacher.index')->with('status','Attendance submitted. Financial records remain unchanged until an administrator imports the attendance batch.');
     }
 }
