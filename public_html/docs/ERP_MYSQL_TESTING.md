@@ -41,8 +41,14 @@ Every scenario uses real independent connections in separate PHP processes. Each
 4. Two simultaneous administrator approvals produce exactly one teacher accrual without changing or adding to the student charge.
 5. A correction commits while a new import waits; the ledger must retain the original charge, compensating reversal, and corrected charge. Both original student charge and approved teacher accrual must reverse; import recreates only the student charge until fresh approval.
 
+6. Concurrent recorded teacher settlements cannot exceed the available payable.
+7. Allocations across requests cannot exceed one receipt.
+8. Concurrent receipts cannot over-cover one payment request.
+9. A receipt reversal racing allocation preserves active-coverage integrity.
+10. Receipt correction rolls back atomically on failure and retries without a second replacement.
+
 The harness prints JSON and returns zero only on success. It writes `last-result.json` and per-worker results/stdout/stderr under the artifact directory, never into the repository. Barrier waits are bounded; failures identify the unsuccessful scenario. Test artifacts contain synthetic fixture data only. No runtime outputs, credentials, or database files should be committed.
 
 ## Observed evidence and limits
 
-The isolated five-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.
+The isolated ten-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.

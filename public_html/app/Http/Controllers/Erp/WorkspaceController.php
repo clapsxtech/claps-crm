@@ -38,7 +38,7 @@ class WorkspaceController extends Controller
         $teachers=DB::table('erp_teachers')->whereIn('id',$teacherIds);
         if($search!=='')$teachers->where(function($q)use($search){$q->where('name','like','%'.$search.'%')->orWhere('code','like','%'.$search.'%');});
         $data['teachers']=$teachers->orderBy('name')->paginate(50,['*'],'teachers_page')->withQueryString();
-        foreach($data['teachers'] as $teacher){$teacher->approved_accrual_paise=(int)DB::table('erp_ledger')->where('unit_id',$unit)->where('teacher_id',$teacher->id)->sum('amount_paise');}
+        foreach($data['teachers'] as $teacher){$teacher->approved_accrual_paise=(new \App\Modules\Erp\Services\MoneyOperations())->teacherStatement($unit,$teacher->id)['earned_paise'];}
         $subjects=DB::table('erp_subjects')->whereIn('id',DB::table('erp_eligibilities')->whereIn('teacher_id',$teacherIds)->select('subject_id'));
         if($search!=='')$subjects->where('name','like','%'.$search.'%');
         $data['subjects']=$subjects->orderBy('name')->paginate(50,['*'],'subjects_page')->withQueryString();
@@ -56,6 +56,7 @@ class WorkspaceController extends Controller
         if($request->expectsJson())return response()->json(['result'=>$result]);
         $message='Saved and audited.';
         if($action==='approve')$message='Attendance approved. Teacher accrual: '.(!empty($result->teacher_financial_posted)?'posted':'none (demo or disabled policy)').'. Student charge: '.(!empty($result->student_financial_posted)?'already imported':'not imported').'. No money was transferred.';
+        if(in_array($request->input('return_page'),['people','money','followups']))return redirect()->route('erp.business',[$unit,$request->input('return_page')])->with('status',$message);
         return redirect()->route('erp.workspace',$unit)->with('status',$message);
     }
     public function receipt(Request $request,int $unit,int $entry)
@@ -63,6 +64,8 @@ class WorkspaceController extends Controller
         (new Access())->unit($request->user(),$unit,false);
         $receipt=DB::table('erp_ledger')->where('unit_id',$unit)->where('id',$entry)->where('kind','payment')->first();abort_unless($receipt,404);
         $student=DB::table('erp_students')->where('unit_id',$unit)->where('id',$receipt->student_id)->first();$business=DB::table('erp_units')->find($unit);
-        return view('erp.receipt',compact('receipt','student','business'));
+        $reversal=DB::table('erp_ledger')->where('unit_id',$unit)->where('reverses_id',$receipt->id)->first();
+        $correction=DB::table('erp_audit')->where('unit_id',$unit)->where('entity_type','ledger')->where('entity_id',$receipt->id)->where('action','receipt.corrected')->orderByDesc('id')->first();$replacement=$correction?json_decode($correction->payload,true):null;
+        return view('erp.receipt',compact('receipt','student','business','reversal','replacement')); 
     }
 }

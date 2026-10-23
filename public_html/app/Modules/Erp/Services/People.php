@@ -41,7 +41,9 @@ class People
     }
     public function completeTask(int $unitId,int $actorId,array $data)
     {
-        return DB::transaction(function()use($unitId,$actorId,$data){$task=DB::table('erp_tasks')->where('unit_id',$unitId)->where('id',$data['task_id']??0)->lockForUpdate()->first();abort_unless($task,404);if($task->status!=='completed'){DB::table('erp_tasks')->where('id',$task->id)->update(['status'=>'completed','updated_at'=>now()]);Audit::record($unitId,$actorId,'task.completed','task',$task->id,[]);}return ['id'=>$task->id];});
+        abort_unless(DB::table('erp_tasks')->where('unit_id',$unitId)->where('id',$data['task_id'] ?? 0)->exists(),404);
+        $task=(new Operations())->updateTask($unitId,$actorId,['task_id'=>$data['task_id'] ?? null,'status'=>'completed']);
+        return ['id'=>$task->id];
     }
     public function mark(int $unitId,int $actorId,array $data)
     {

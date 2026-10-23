@@ -234,6 +234,19 @@ class ErpSchedulingTest extends TestCase
         $this->rejects(fn()=> $this->service->scheduleExtra(1,1,array_merge($valid,['reference'=>'SYN-OVERLAP-OTHER'])));
         $this->assertSame(1,DB::table('erp_lessons')->count());
     }
+    public function test_inactive_people_block_new_scheduling_but_allow_cancellation_and_closure(): void {
+        $e=$this->assignment(); $this->windows(); $proposed=$this->agreement($e); DB::table('erp_students')->where('id',1)->update(['status'=>'paused']);
+        $this->rejects(fn()=> $this->confirm($proposed));
+        $this->rejects(fn()=> $this->agreement($e));
+        DB::table('erp_students')->where('id',1)->update(['status'=>'active']); $a=$this->confirm($proposed);
+        $lessons=$this->service->materialize(1,1,['agreement_id'=>$a->id,'from'=>'2027-01-01','through'=>'2027-01-05']);
+        DB::table('erp_teachers')->where('id',1)->update(['status'=>'paused']);
+        $this->rejects(fn()=> $this->service->materialize(1,1,['agreement_id'=>$a->id,'from'=>'2027-01-06','through'=>'2027-01-31']));
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$this->extraPayload($e)));
+        $this->rejects(fn()=> $this->service->reschedule(1,1,['lesson_id'=>$lessons[0]->id,'date'=>'2027-01-05','start_time'=>'11:00','timezone'=>'Asia/Kolkata','reason'=>'Move','teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>'call','confirmation_note'=>'Both confirmed']));
+        $this->assertSame('cancelled',$this->service->cancel(1,1,['lesson_id'=>$lessons[0]->id,'reason'=>'Stop teaching'])->status);
+        $this->assertSame('2027-01-15',$this->service->endAgreement(1,1,['agreement_id'=>$a->id,'ends_on'=>'2027-01-15'])->ends_on);
+    }
     public function test_dst_nonexistent_and_ambiguous_times_are_rejected(): void {
         $this->rejects(fn()=> $this->service->localToUtc('2027-03-14','02:30','America/New_York'));
         $this->rejects(fn()=> $this->service->localToUtc('2027-11-07','01:30','America/New_York'));

@@ -1,6 +1,6 @@
 # ERP migration preview contract
 
-This release supplies a dry-run validator only. There is no upload route, importer, database write, Sheets access, attendance approval, ledger posting, or external communication. Even a valid result has `can_import: false` and `writes: 0`. Do not use successful validation as authorization to import production data.
+The original preview service and command remain read-only inventory validators. This release also supplies a separate, disabled-by-default guarded import service and local CLI described below. There is no upload route, Sheets access or external communication. A valid dry-run is not authorization to import production data. Only synthetic fixture imports have been exercised.
 
 ## Calling the service
 
@@ -22,9 +22,9 @@ Money values must already be integer paise: `12000` represents INR 120. Floats, 
 
 The result includes `valid`, `dry_run`, `can_import`, `writes`, per-type `counts`, `issues` and `totals`. Every issue is blocking, identifies a one-based input row, field and machine-readable code. Counts describe received recognized row types, including invalid rows. If any issue exists, totals are null so a partially valid batch cannot be mistaken for reconciled totals. A valid batch reports student opening balance and teacher opening payable sums; historical financial effect is always zero. Preview does not echo names, contacts or original records into reports.
 
-Historical lessons must never be replayed through the live attendance approval/charging pipeline. Opening balances represent the agreed cutover snapshot; historical attendance is archival context only. This implementation does not persist either.
+Historical lessons must never be replayed through the live attendance approval/charging pipeline. Opening balances represent the agreed cutover snapshot; historical attendance is archival context only. The pure preview does not persist either. The guarded importer below stores historical rows only in its separate archive and requires explicit opening-balance approval.
 
-Before any future importer is implemented, explicitly agree the cutover date and balance sign policy, reconcile each source opening balance against finance records, resolve destination duplicates and assignment overlaps with existing records, check teacher eligibility, detect conflicts with existing destination IDs, confirm access permissions and backups, and approve a separate transactional import plan with stable source-to-destination mappings. The current validator does not establish those operational approvals, reconcile history to balances, or validate against existing production rows.
+Before any real import is attempted, explicitly agree the cutover date and balance sign policy, reconcile each source opening balance against finance records, resolve destination duplicates and assignment overlaps with existing records, check teacher eligibility, detect conflicts with existing destination IDs, confirm access permissions and backups, and approve a separate transactional import plan with stable source-to-destination mappings. The current validator does not establish those operational approvals, reconcile history to balances, or validate against existing production rows.
 
 ## Synthetic verification
 
@@ -47,3 +47,40 @@ Only readable local regular files are accepted. URL/stream wrappers are rejected
 CLI tests use temporary synthetic files and an isolated console command harness, without application/database bootstrap:
 
 `php vendor/bin/phpunit --no-configuration --bootstrap vendor/autoload.php tests/Feature/ErpMigrationCommandTest.php`
+
+## Guarded importer: code ready, real import not authorized
+
+`MigrationImporter::preview(rows, references)` adds destination validation and a canonical SHA256 `digest` to the summary. It writes nothing. `execute(rows, references, expectedDigest, approvedCutoff, actorId, allowProduction=false)` is the separate transactional operation. Building this operation is not permission to execute it against business records.
+
+Importer envelopes add mandatory fields beyond the inventory-only preview:
+
+- `references.schema_version`: integer 1.
+- `references.target_database`: exact configured destination database name, not a connection string or password. The service verifies the current database. SQLite fixture tests use their configured in-memory name.
+- `references.subject_ids`: object mapping each subject code to an existing integer ERP subject ID. `references.subject_names` maps those same codes to the exact current subject names. Unknown or mismatched mappings block; subjects are not guessed or created.
+- `references.teacher_eligibilities`: explicit approved rows with `external_id`, `teacher_id` (teacher external ID), `subject_code`, `grade`, `syllabus`. Every assignment must match an explicitly supplied eligibility for its student's grade/syllabus. Eligibility is not inferred from the assignment.
+- Student `status`: explicitly `active`, `paused` or `stopped`. Teacher `status`: explicitly `active` or `inactive`. Assignment `status`: explicitly `active` or `ended`; ended assignments require `ends_on`. Values are preserved, not silently reactivated.
+- Every student requires exactly one `opening_balance` row, including an explicit integer zero when the approved opening is zero. Missing balances never become guessed zeros. Only student openings are supported. Teacher salary dues, historical payroll opening balances, and proof of prior salary payments are not migrated by this importer.
+
+All rows, reference catalogs, statuses, source-manifest metadata, eligibility declarations, target database and cutoff contribute to the digest. Object keys are canonically sorted; list order is retained. Changes require a new preview and approval of its new digest. Importer row fields are allowlisted, preventing unsupported fields from being silently dropped. Explicit rates remain mandatory. Imported student and teacher hourly rates must be native integer paise from 0 through 100000000, inclusive, matching the operational Scheduling/Finance maximum rather than merely fitting a database integer.
+
+Default read-only usage:
+
+`php artisan erp:migration-import /absolute/path/to/approved-normalized-envelope.json`
+
+The following describes a manual administrative commit interface, not a command already run against real data:
+
+`php artisan erp:migration-import /absolute/path/to/approved-normalized-envelope.json --execute --confirm-digest=EXACT_PREVIEW_SHA256 --cutoff=YYYY-MM-DD --target-database=EXACT_DATABASE --actor=EXISTING_ADMIN_ID`
+
+Execution also requires configuration `erp.migration_import_enabled` to be boolean true (absent/false blocks). Production additionally requires `--allow-production`. That opt-in never bypasses digest, cutoff, destination, actor or unit checks. The actor must be an active member of the organization and an explicit administrator of every target unit. Merely running the CLI or supplying an administrator ID does not create an authorization grant. Operators must obtain the appropriate real-data approval before enabling or running it. Preview and commit accept only local regular files up to 5 MiB / 5,000 rows; remote URLs and stream wrappers are refused.
+
+### Atomicity and provenance
+
+The importer locks affected units in stable order, revalidates current destination conflicts inside a database transaction, and inserts the batch, source mappings, people, eligibility declarations, assignments, approved student openings and archived history atomically. Any failure rolls back all changes. It never overwrites unmanaged rows sharing a stable code. Changed mapped source rows, missing/moved mapped targets, overlapping destination assignments, and attempts to add another opening onto an existing student ledger block rather than merge silently.
+
+`erp_migration_batches` records the source, cutoff, canonical digest, manifest, counts, totals and actor. `(source_id, cutoff)` is unique. An exact batch replay returns the original batch summary with zero new writes; changed payloads at the same source/cutoff are rejected. `erp_migration_mappings` records stable source/type/external-ID provenance and each canonical row digest. `erp_migration_history` is the separate append-only archival path exposed by this code: it has no mutation route and is never inserted into live lessons or attendance. Historical rows always have `financial_effect=none`; no live approval/import/payroll service is called.
+
+Approved student openings become ledger entries of kind `opening_balance`, dated at UTC midnight on the explicitly approved cutoff. Positive means available credit, negative means debt. They are not receipts and do not claim payment occurred. No teacher opening, teacher accrual, historical lesson charge, payment, outbound message or transfer is generated.
+
+### Verification scope
+
+`ErpMigrationImporterTest` uses synthetic fixtures only: dry-run/no writes, exact canonical digest/replay, schema/target/cutoff mismatch, explicit subject/eligibility mapping, every-student zero-or-signed opening, explicit inactive/paused/ended statuses, no historical financial replay, no unmanaged stable-code overwrites, per-unit/deleted-actor denial, commit-time conflict revalidation and injected mid-import atomic rollback. The CLI test commits synthetic rows only within the isolated test database.

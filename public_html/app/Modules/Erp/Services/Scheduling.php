@@ -52,13 +52,14 @@ class Scheduling
         if (!$row) $this->fail('Record not found in this unit.');
         return $row;
     }
-    private function parents($unitId, $teacherId, $studentId) {
+    private function parents($unitId, $teacherId, $studentId, bool $requireActive = false) {
         // Same lock order in every scheduling mutation; teachers are global, not unit-scoped.
         $teacher = DB::table('erp_teachers')->where('id', $teacherId)->lockForUpdate()->first();
         $student = DB::table('erp_students')->where('id', $studentId)->lockForUpdate()->first();
         if (!$teacher || !$student || (int)$student->unit_id !== (int)$unitId) $this->fail('Student or teacher does not belong to this unit.');
         if (DB::table('erp_teacher_units')->where('teacher_id', $teacherId)->lockForUpdate()->get()->count() !== 1) $this->fail('Teacher must belong to exactly one unit pool. Correct the teacher membership before scheduling.');
         if (!DB::table('erp_teacher_units')->where('teacher_id', $teacherId)->where('unit_id', $unitId)->lockForUpdate()->first()) $this->fail('Teacher does not belong to this unit.');
+        if ($requireActive && ($teacher->status !== 'active' || $student->status !== 'active')) $this->fail('Student and teacher must be active before creating or changing scheduled teaching.');
         return [$teacher, $student];
     }
     private function insert($table, array $values) {
@@ -70,7 +71,7 @@ class Scheduling
     public function assign(int $unitId, int $actorId, array $p) {
         $this->required($p, ['student_id','teacher_id','subject_id','starts_on','student_rate_paise','teacher_rate_paise']);
         return DB::transaction(function () use ($unitId, $actorId, $p) {
-            [$teacher, $student] = $this->parents($unitId, $p['teacher_id'], $p['student_id']);
+            [$teacher, $student] = $this->parents($unitId, $p['teacher_id'], $p['student_id'],true);
             if ($teacher->status !== 'active' || $student->status !== 'active') $this->fail('Student and teacher must be active.');
             $start = $this->date($p['starts_on']); $end = isset($p['ends_on']) && $p['ends_on'] !== '' ? $this->date($p['ends_on']) : null;
             if ($end && $end < $start) $this->fail('End date precedes start date.');
@@ -153,7 +154,7 @@ class Scheduling
     public function proposeAgreement(int $unitId, int $actorId, array $p) {
         $this->required($p,['enrollment_id','weekday','start_time','duration_minutes','timezone','starts_on']);
         return DB::transaction(function () use ($unitId,$actorId,$p) {
-            $e = $this->row('erp_enrollments',$p['enrollment_id'],$unitId); $this->parents($unitId,$e->teacher_id,$e->student_id);
+            $e = $this->row('erp_enrollments',$p['enrollment_id'],$unitId); $this->parents($unitId,$e->teacher_id,$e->student_id,true);
             $e = $this->row('erp_enrollments',$e->id,$unitId,true);
             $start = $this->date($p['starts_on']); $end = !empty($p['ends_on']) ? $this->date($p['ends_on']) : $e->ends_on;
             if ($start < $e->starts_on || ($end && $end < $start) || ($e->ends_on && (!$end || $end > $e->ends_on))) $this->fail('Agreement must fit assignment dates.');
@@ -171,7 +172,7 @@ class Scheduling
     public function confirmAgreement(int $unitId, int $actorId, array $p) {
         $this->required($p,['agreement_id','confirmation_channel','teacher_confirmed','student_confirmed','confirmation_note']);
         return DB::transaction(function () use ($unitId,$actorId,$p) {
-            $a = $this->row('erp_agreements',$p['agreement_id'],$unitId); $e = $this->row('erp_enrollments',$a->enrollment_id,$unitId); $this->parents($unitId,$e->teacher_id,$e->student_id);
+            $a = $this->row('erp_agreements',$p['agreement_id'],$unitId); $e = $this->row('erp_enrollments',$a->enrollment_id,$unitId); $this->parents($unitId,$e->teacher_id,$e->student_id,true);
             $e = $this->row('erp_enrollments',$e->id,$unitId,true);
             $a = $this->row('erp_agreements',$a->id,$unitId,true);
             if ($a->starts_on < $e->starts_on || ($e->ends_on && $a->starts_on > $e->ends_on)) $this->fail('Agreement no longer fits the current assignment dates.');
@@ -229,7 +230,7 @@ class Scheduling
     public function materialize(int $unitId, int $actorId, array $p) {
         $this->required($p,['agreement_id','from','through']);
         return DB::transaction(function () use ($unitId,$actorId,$p) {
-            $a=$this->row('erp_agreements',$p['agreement_id'],$unitId); $e=$this->row('erp_enrollments',$a->enrollment_id,$unitId); $this->parents($unitId,$e->teacher_id,$e->student_id);
+            $a=$this->row('erp_agreements',$p['agreement_id'],$unitId); $e=$this->row('erp_enrollments',$a->enrollment_id,$unitId); $this->parents($unitId,$e->teacher_id,$e->student_id,true);
             $e=$this->row('erp_enrollments',$e->id,$unitId,true);
             $a=$this->row('erp_agreements',$a->id,$unitId,true);
             if ($a->status !== 'confirmed') $this->fail('Only bilaterally confirmed agreements generate lessons.');
@@ -285,7 +286,7 @@ class Scheduling
     public function reschedule(int $unitId, int $actorId, array $p) {
         $this->required($p,['lesson_id','date','start_time','timezone','reason','teacher_confirmed','student_confirmed','confirmation_channel','confirmation_note']);
         return DB::transaction(function () use ($unitId,$actorId,$p) {
-            $l=$this->row('erp_lessons',$p['lesson_id'],$unitId); $e=$this->row('erp_enrollments',$l->enrollment_id,$unitId); $this->parents($unitId,$l->teacher_id,$l->student_id); $l=$this->row('erp_lessons',$l->id,$unitId,true);
+            $l=$this->row('erp_lessons',$p['lesson_id'],$unitId); $e=$this->row('erp_enrollments',$l->enrollment_id,$unitId); $this->parents($unitId,$l->teacher_id,$l->student_id,true); $l=$this->row('erp_lessons',$l->id,$unitId,true);
             $e=$this->row('erp_enrollments',$l->enrollment_id,$unitId,true);
             if ($l->status !== 'scheduled' || DB::table('erp_attendance')->where('lesson_id',$l->id)->lockForUpdate()->first()) $this->fail('Only scheduled lessons without attendance can be rescheduled.');
             if (!trim($p['reason'])) $this->fail('A rescheduling reason is required.');

@@ -39,11 +39,23 @@ $app->boot();
 use Illuminate\Support\Facades\DB;
 use App\Modules\Erp\Services\Attendance;
 use App\Modules\Erp\Services\Scheduling;
+use App\Modules\Erp\Services\MoneyOperations;
+use App\Modules\Erp\Services\Finance;
 DB::statement('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
 DB::statement('SET SESSION innodb_lock_wait_timeout = 10');
 check(DB::selectOne('SELECT DATABASE() AS name')->name === $database, 'Connected database does not match explicit test database.');
 
 function executeOperation(string $operation, string $dir, string $name): array {
+    if ($operation === 'settle') return (array)(new MoneyOperations())->recordTeacherPayment(1,1,['teacher_id'=>1,'amount_paise'=>4000,'reference'=>'SETTLE-'.$name,'paid_on'=>gmdate('Y-m-d'),'reason'=>'Synthetic already-paid settlement','already_paid'=>true]);
+    if ($operation === 'allocate_receipt_cap') return (array)(new MoneyOperations())->allocateReceipt(1,1,['request_id'=>$name==='b'?2:1,'payment_id'=>1,'amount_paise'=>6000]);
+    if ($operation === 'allocate_request_cap') return (array)(new MoneyOperations())->allocateReceipt(1,1,['request_id'=>1,'payment_id'=>$name==='b'?2:1,'amount_paise'=>6000]);
+    if ($operation === 'correct_receipt') return (array)(new MoneyOperations())->correctReceipt(1,1,['entry_id'=>1,'amount_paise'=>15000,'new_reference'=>'CORRECTED-RECEIPT','reason'=>'Synthetic correction']);
+    if ($operation === 'reverse_receipt_hold') return DB::transaction(function() use($dir,$name) {
+        DB::table('erp_students')->where('id',1)->lockForUpdate()->first();
+        mark($dir.'/'.$name.'.locked'); awaitFile($dir.'/release');
+        return (array)(new MoneyOperations())->reverseReceipt(1,1,['entry_id'=>1,'reason'=>'Synthetic erroneous receipt']);
+    });
+
     if ($operation === 'approve') return (array)(new Attendance())->approve(1, 1, 1);
     if ($operation === 'submit') return (array)(new Attendance())->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 60]);
     if ($operation === 'import') return (array)(new Attendance())->importBatch(1, 1, ['attendance_ids' => [1], 'reference' => 'PROBE-'.$name]);
@@ -65,7 +77,7 @@ if (($argv[1] ?? '') === 'worker') {
         // Signal after an ordinary discovery read, before the teacher lock can return.
         $traced = false;
         DB::listen(function ($query) use (&$traced, $dir, $name, $operation) {
-            $needle = $operation === 'submit' ? 'erp_lessons' : 'erp_attendance';
+            $needle = strpos($operation, 'allocate_') === 0 ? 'erp_payment_requests' : ($operation === 'submit' ? 'erp_lessons' : 'erp_attendance');
             if (!$traced && stripos($query->sql, 'select') === 0 && strpos($query->sql, $needle) !== false && stripos($query->sql, 'for update') === false) {
                 $traced = true; mark($dir.'/'.$name.'.discovered');
             }
@@ -80,9 +92,11 @@ if (($argv[1] ?? '') === 'worker') {
 }
 
 require_once $base.'/database/migrations/2026_10_23_130000_create_erp_core_tables.php';
+require_once $base.'/database/migrations/2026_10_23_150000_create_erp_business_workflows.php';
 function resetFixture(): void {
     $migration = new CreateErpCoreTables();
-    $migration->down(); $migration->up();
+    $business = new CreateErpBusinessWorkflows();
+    $business->down(); $migration->down(); $migration->up(); $business->up();
     DB::table('erp_units')->insert(['id' => 1, 'code' => 'PROBE', 'name' => 'Synthetic concurrency unit', 'timezone' => 'UTC']);
     DB::table('erp_students')->insert(['id' => 1, 'unit_id' => 1, 'code' => 'PROBE-S', 'name' => 'Synthetic student', 'registered_on' => '2026-01-01', 'timezone' => 'UTC', 'status' => 'active', 'grade' => '8', 'syllabus' => 'Synthetic']);
     DB::table('erp_teachers')->insert(['id' => 1, 'code' => 'PROBE-T', 'name' => 'Synthetic teacher', 'timezone' => 'UTC', 'status' => 'active']);
@@ -119,6 +133,17 @@ function interleaved(string $holder, string $waiter, string $name): array {
 function allOk(array $results): void { foreach ($results as $name=>$result) check($result['ok'], $name.' failed: '.json_encode($result)); }
 function ledgerBalance(): int { return (int)DB::table('erp_ledger')->where('student_id',1)->sum('amount_paise'); }
 
+function exactlyOneAccepted(array $results): void {
+    check(count(array_filter($results, function($r){return $r['ok'];}))===1, 'Expected exactly one accepted concurrent operation: '.json_encode($results));
+    foreach ($results as $result) if (!$result['ok']) check($result['class']===Illuminate\Validation\ValidationException::class, 'Expected domain rejection, not database failure: '.json_encode($result));
+}
+function requestFixture(string $reference): void {
+    (new MoneyOperations())->createPaymentRequest(1,1,['student_id'=>1,'amount_paise'=>10000,'reference'=>$reference,'requested_on'=>gmdate('Y-m-d')]);
+}
+function receiptFixture(string $reference): void {
+    (new Finance())->payment(1,1,['student_id'=>1,'amount_paise'=>10000,'reference'=>$reference]);
+}
+
 $report=['database'=>$database,'server'=>DB::selectOne('SELECT VERSION() AS version')->version,'isolation'=>'REPEATABLE READ','scenarios'=>[]];
 try {
     resetFixture(); $r=simultaneous('submit','same_lesson'); allOk($r);
@@ -147,6 +172,37 @@ try {
     (new Attendance())->approve(1,1,1);
     check((int)DB::table('erp_ledger')->where('teacher_id',1)->sum('amount_paise')===3000 && DB::table('erp_ledger')->count()===6, 'Fresh approval did not independently accrue corrected teacher pay.');
     $report['scenarios']['correction_reimport_compensating_ledger']='PASS';
+    resetFixture(); (new Attendance())->submit(1,1,['lesson_id'=>1,'actual_minutes'=>60]); (new Attendance())->approve(1,1,1);
+    $r=simultaneous('settle','competing_settlements'); exactlyOneAccepted($r);
+    check(DB::table('erp_ledger')->where('kind','teacher_payment')->count()===1 && (new MoneyOperations())->teacherStatement(1,1)['net_payable_paise']===2000, 'Competing settlements overspent payable.');
+    $report['scenarios']['competing_settlements_capped_to_payable']='PASS';
+
+    resetFixture(); receiptFixture('CAP-RECEIPT'); requestFixture('CAP-REQUEST-A'); requestFixture('CAP-REQUEST-B');
+    $r=simultaneous('allocate_receipt_cap','receipt_allocation_cap'); exactlyOneAccepted($r);
+    check((int)DB::table('erp_request_allocations')->sum('amount_paise')===6000, 'Competing requests overallocated one receipt.');
+    $report['scenarios']['competing_allocations_receipt_cap']='PASS';
+
+    resetFixture(); receiptFixture('CAP-RECEIPT-A'); receiptFixture('CAP-RECEIPT-B'); requestFixture('CAP-REQUEST');
+    $r=simultaneous('allocate_request_cap','request_allocation_cap'); exactlyOneAccepted($r);
+    check((new MoneyOperations())->requestSummary(1,1)['covered_paise']===6000, 'Competing receipts overallocated one request.');
+    $report['scenarios']['competing_allocations_request_cap']='PASS';
+
+    resetFixture(); receiptFixture('RACE-RECEIPT'); requestFixture('RACE-REQUEST');
+    $r=interleaved('reverse_receipt_hold','allocate_receipt_cap','reversal_before_allocation');
+    check($r['holder']['ok'] && !$r['waiter']['ok'] && $r['waiter']['class']===Illuminate\Validation\ValidationException::class, 'Allocation did not observe committed receipt reversal.');
+    check((new MoneyOperations())->requestSummary(1,1)['covered_paise']===0 && DB::table('erp_request_allocations')->count()===0, 'Reversed receipt incorrectly covers a request.');
+    $report['scenarios']['receipt_reversal_allocation_current_read']='PASS';
+
+    resetFixture(); receiptFixture('ORIGINAL-CORRECTION');
+    DB::unprepared("CREATE TRIGGER probe_fail_replacement BEFORE INSERT ON erp_ledger FOR EACH ROW BEGIN IF NEW.reference = 'FAIL-REPLACEMENT' THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'synthetic replacement failure'; END IF; END");
+    $rolledBack=false;
+    try { (new MoneyOperations())->correctReceipt(1,1,['entry_id'=>1,'amount_paise'=>15000,'new_reference'=>'FAIL-REPLACEMENT','reason'=>'Synthetic rollback']); }
+    catch (Illuminate\Database\QueryException $expected) { $rolledBack=true; }
+    finally { DB::unprepared('DROP TRIGGER probe_fail_replacement'); }
+    check($rolledBack && ledgerBalance()===10000 && DB::table('erp_ledger')->whereNotNull('reverses_id')->count()===0, 'Correction failure left partial reversal.');
+    $r=simultaneous('correct_receipt','concurrent_receipt_correction'); allOk($r);
+    check($r['a']['result']['id']===$r['b']['result']['id'] && ledgerBalance()===15000 && DB::table('erp_ledger')->count()===3, 'Concurrent correction was not atomic/idempotent.');
+    $report['scenarios']['receipt_correction_rollback_and_concurrent_replay']='PASS';
     $report['status']='PASS';
 } catch (Throwable $e) { $report['status']='FAIL'; $report['error']=$e->getMessage(); }
 file_put_contents($artifactRoot.'/last-result.json',json_encode($report,JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR));
