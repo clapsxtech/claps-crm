@@ -27,6 +27,8 @@ class ErpSchedulingTest extends TestCase
         $container->instance('db.schema',$capsule->schema());
         require_once __DIR__.'/../../database/migrations/2026_10_23_130000_create_erp_core_tables.php';
         (new \CreateErpCoreTables())->up();
+        require_once __DIR__.'/../../database/migrations/2026_10_23_140000_add_request_reference_to_erp_lessons.php';
+        (new \AddRequestReferenceToErpLessons())->up();
         DB::table('erp_units')->insert(['id'=>1,'code'=>'TEST','name'=>'Synthetic unit','timezone'=>'Asia/Kolkata']);
         DB::table('erp_students')->insert(['id'=>1,'unit_id'=>1,'registered_on'=>'2027-01-01','code'=>'SYN-S1','name'=>'Synthetic Student','timezone'=>'Asia/Kolkata','status'=>'active','grade'=>'8','syllabus'=>'CBSE']);
         DB::table('erp_teachers')->insert(['id'=>1,'code'=>'SYN-T1','name'=>'Synthetic Teacher','timezone'=>'Asia/Kolkata','status'=>'active']);
@@ -194,6 +196,43 @@ class ErpSchedulingTest extends TestCase
         $lessons=$this->service->materialize(1,1,['agreement_id'=>$a->id,'from'=>'2027-01-01','through'=>'2027-01-31']);
         $this->assertCount(2,$lessons);
         $this->rejects(fn()=> $this->service->reschedule(1,1,['lesson_id'=>$lessons[0]->id,'date'=>'2027-01-20','start_time'=>'11:00','timezone'=>'Asia/Kolkata','teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>'call','confirmation_note'=>'Both agreed','reason'=>'Outside effective dates']));
+    }
+    private function extraPayload($enrollment, array $overrides=[]): array {
+        return array_merge(['enrollment_id'=>$enrollment->id,'date'=>'2027-01-05','start_time'=>'11:00','timezone'=>'Asia/Kolkata','duration_minutes'=>45,'kind'=>'extra','teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>'call','confirmation_note'=>'Synthetic bilateral consent for this one-off time','reference'=>'SYN-ONE-OFF-1'],$overrides);
+    }
+    public function test_one_off_extra_freezes_rates_and_replay_is_payload_bound(): void {
+        $e=$this->assignment(); $this->windows(); $p=$this->extraPayload($e);
+        $l=$this->service->scheduleExtra(1,1,$p);
+        $this->assertSame('extra',$l->kind); $this->assertSame('2027-01-05 05:30:00',$l->starts_at); $this->assertSame('2027-01-05 06:15:00',$l->ends_at);
+        $this->assertSame(70000,(int)$l->student_rate_paise); $this->assertSame(40000,(int)$l->teacher_rate_paise);
+        DB::table('erp_enrollments')->where('id',$e->id)->update(['student_rate_paise'=>99999]);
+        $this->assertSame($l->id,$this->service->scheduleExtra(1,1,$p)->id);
+        foreach (['duration_minutes'=>60,'kind'=>'demo','confirmation_note'=>'Different evidence','timezone'=>'UTC'] as $key=>$value) $this->rejects(fn()=> $this->service->scheduleExtra(1,1,array_merge($p,[$key=>$value])));
+        $this->service->cancel(1,1,['lesson_id'=>$l->id,'reason'=>'Synthetic cancellation']);
+        $this->assertSame('cancelled',$this->service->scheduleExtra(1,1,$p)->status);
+        $this->assertSame(1,DB::table('erp_lessons')->count()); $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_one_off_demo_is_explicit_audited_and_requires_bilateral_consent(): void {
+        $e=$this->assignment(); $this->windows(); $p=$this->extraPayload($e,['kind'=>'demo']);
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,array_merge($p,['student_confirmed'=>false])));
+        $demo=$this->service->scheduleExtra(1,1,$p); $this->assertSame('demo',$demo->kind);
+        $audit=json_decode(DB::table('erp_audit')->where('action','lesson.one_off_scheduled')->value('payload'),true);
+        $this->assertTrue($audit['demo_free_and_unpaid']); $this->assertTrue($audit['request']['student_confirmed']);
+        $this->assertSame(0,DB::table('erp_attendance')->count()); $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_one_off_rejects_scope_dates_missing_availability_holidays_and_overlaps(): void {
+        $e=$this->assignment(['ends_on'=>'2027-01-31']); $p=$this->extraPayload($e);
+        $this->rejects(fn()=> $this->service->scheduleExtra(2,1,$p));
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$p));
+        $this->windows();
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,array_merge($p,['date'=>'2027-02-01'])));
+        $this->service->exception(1,1,['teacher_id'=>1,'date'=>'2027-01-05','reason'=>'Synthetic holiday']);
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$p));
+        $a=$this->confirm($this->agreement($e,['ends_on'=>'2027-01-31']));
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,array_merge($p,['date'=>'2027-01-04','start_time'=>'10:30'])));
+        $valid=array_merge($p,['date'=>'2027-01-06']); $this->service->scheduleExtra(1,1,$valid);
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,array_merge($valid,['reference'=>'SYN-OVERLAP-OTHER'])));
+        $this->assertSame(1,DB::table('erp_lessons')->count());
     }
     public function test_dst_nonexistent_and_ambiguous_times_are_rejected(): void {
         $this->rejects(fn()=> $this->service->localToUtc('2027-03-14','02:30','America/New_York'));

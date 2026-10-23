@@ -30,7 +30,7 @@ require $base.'/vendor/autoload.php';
 $app = new Illuminate\Foundation\Application($base);
 $app->instance('config', new Illuminate\Config\Repository([
     'app' => ['locale' => 'en'],
-    'erp' => ['finance_policy' => 'admin_import_delivered_only', 'payroll_policy' => 'unconfigured'],
+    'erp' => ['finance_policy' => 'admin_import_delivered_only', 'payroll_policy' => 'approved_attended_only'],
     'database' => ['default' => 'mysql', 'connections' => ['mysql' => ['driver' => 'mysql', 'host' => $host, 'port' => (int)$port, 'database' => $database, 'username' => $user, 'password' => $password, 'unix_socket' => '', 'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci', 'prefix' => '', 'strict' => true, 'engine' => 'InnoDB']]],
 ]));
 Illuminate\Support\Facades\Facade::setFacadeApplication($app);
@@ -44,6 +44,7 @@ DB::statement('SET SESSION innodb_lock_wait_timeout = 10');
 check(DB::selectOne('SELECT DATABASE() AS name')->name === $database, 'Connected database does not match explicit test database.');
 
 function executeOperation(string $operation, string $dir, string $name): array {
+    if ($operation === 'approve') return (array)(new Attendance())->approve(1, 1, 1);
     if ($operation === 'submit') return (array)(new Attendance())->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 60]);
     if ($operation === 'import') return (array)(new Attendance())->importBatch(1, 1, ['attendance_ids' => [1], 'reference' => 'PROBE-'.$name]);
     if ($operation === 'cancel_hold' || $operation === 'correct_hold') {
@@ -128,6 +129,10 @@ try {
     check(DB::table('erp_attendance_batches')->count()===2 && DB::table('erp_ledger')->where('kind','lesson_charge')->count()===1 && ledgerBalance()===-12000, 'Concurrent distinct imports duplicated or lost the charge.');
     $report['scenarios']['distinct_import_refs_exactly_one_charge']='PASS';
 
+    $r=simultaneous('approve','concurrent_approval'); allOk($r);
+    check(DB::table('erp_ledger')->where('kind','teacher_accrual')->count()===1 && (int)DB::table('erp_ledger')->where('teacher_id',1)->sum('amount_paise')===6000 && ledgerBalance()===-12000, 'Concurrent approval duplicated teacher accrual or changed student charge.');
+    $report['scenarios']['simultaneous_approval_exactly_one_teacher_accrual']='PASS';
+
     resetFixture(); $r=interleaved('cancel_hold','submit','cancel_before_attendance');
     check($r['holder']['ok'] && !$r['waiter']['ok'] && $r['waiter']['class']===Illuminate\Validation\ValidationException::class, 'Attendance did not reject committed concurrent cancellation.');
     check(DB::table('erp_lessons')->where('id',1)->value('status')==='cancelled' && DB::table('erp_attendance')->count()===0 && DB::table('erp_ledger')->count()===0, 'Cancelled lesson gained attendance or charge.');
@@ -135,9 +140,12 @@ try {
 
     resetFixture(); (new Attendance())->submit(1,1,['lesson_id'=>1,'actual_minutes'=>60]);
     (new Attendance())->importBatch(1,1,['attendance_ids'=>[1],'reference'=>'PROBE-INITIAL']);
+    (new Attendance())->approve(1,1,1);
     $r=interleaved('correct_hold','import','correction_before_reimport'); allOk($r);
-    check(ledgerBalance()===-6000 && DB::table('erp_ledger')->count()===3 && DB::table('erp_ledger')->where('kind','reversal')->count()===1, 'Correction/reimport ledger invariants failed.');
-    check(DB::table('erp_ledger')->where('kind','teacher_accrual')->count()===0, 'Unapproved payroll accrual occurred.');
+    check(ledgerBalance()===-6000 && DB::table('erp_ledger')->count()===5 && DB::table('erp_ledger')->where('kind','reversal')->count()===2, 'Correction/reimport ledger invariants failed.');
+    check((int)DB::table('erp_ledger')->where('teacher_id',1)->sum('amount_paise')===0, 'Corrected teacher pay accrued before fresh approval.');
+    (new Attendance())->approve(1,1,1);
+    check((int)DB::table('erp_ledger')->where('teacher_id',1)->sum('amount_paise')===3000 && DB::table('erp_ledger')->count()===6, 'Fresh approval did not independently accrue corrected teacher pay.');
     $report['scenarios']['correction_reimport_compensating_ledger']='PASS';
     $report['status']='PASS';
 } catch (Throwable $e) { $report['status']='FAIL'; $report['error']=$e->getMessage(); }

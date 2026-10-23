@@ -38,10 +38,11 @@ Every scenario uses real independent connections in separate PHP processes. Each
 1. Two simultaneous submissions of the same lesson return the same attendance ID and create one row.
 2. Two import batches with distinct references for the same attendance create two snapshots but exactly one student charge.
 3. A cancellation holding the teacher lock commits while attendance waits; the waiting submission must reject the now-cancelled lesson and create no charge.
-4. A correction commits while a new import waits; the ledger must retain the original charge, compensating reversal, and corrected charge. No teacher payroll accrual may appear.
+4. Two simultaneous administrator approvals produce exactly one teacher accrual without changing or adding to the student charge.
+5. A correction commits while a new import waits; the ledger must retain the original charge, compensating reversal, and corrected charge. Both original student charge and approved teacher accrual must reverse; import recreates only the student charge until fresh approval.
 
 The harness prints JSON and returns zero only on success. It writes `last-result.json` and per-worker results/stdout/stderr under the artifact directory, never into the repository. Barrier waits are bounded; failures identify the unsuccessful scenario. Test artifacts contain synthetic fixture data only. No runtime outputs, credentials, or database files should be committed.
 
 ## Observed evidence and limits
 
-The isolated four-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.
+The isolated five-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.

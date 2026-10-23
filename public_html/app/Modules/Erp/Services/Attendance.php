@@ -50,10 +50,13 @@ class Attendance
                 DB::table('erp_attendance')->where('id', $attendanceId)->where('unit_id', $unitId)->update(['status' => 'approved', 'reviewed_by' => $actorId, 'reviewed_at' => $now, 'updated_at' => $now]);
                 Audit::record($unitId, $actorId, 'attendance.approved', 'attendance', $attendanceId, ['policy' => config('erp.finance_policy', 'unconfigured')]);
             }
-            // Review approval alone never creates a financial posting.
-            $posted = false;
+            $finance = new Finance();
+            $finance->postTeacherAttendance($unitId, $actorId, $attendanceId);
+            $status = $finance->attendancePostingStatus($unitId, $attendanceId);
             $result = DB::table('erp_attendance')->find($attendanceId);
-            $result->financial_posted = $posted;
+            $result->student_financial_posted = $status['student_financial_posted'];
+            $result->teacher_financial_posted = $status['teacher_financial_posted'];
+            $result->financial_posted = $status['student_financial_posted'];
             return $result;
         });
     }
@@ -87,7 +90,7 @@ class Attendance
                 $attendance = $this->locked($unitId, $id);
                 if (!in_array($attendance->status, ['submitted', 'approved'], true)) $this->fail('attendance_ids', 'Only submitted or approved attendance can be imported.');
                 $lesson = $this->lesson($unitId, $attendance->lesson_id, true);
-                if ($lesson->status !== 'completed' || $lesson->kind === 'demo') $this->fail('attendance_ids', 'Only delivered non-demo lessons can be imported for charging.');
+                if ($lesson->status !== 'completed') $this->fail('attendance_ids', 'Only delivered lessons can be imported.');
                 $snapshot[] = ['attendance_id' => (int) $id, 'lesson_id' => (int) $lesson->id, 'actual_minutes' => (int) $attendance->actual_minutes, 'student_rate_paise' => (int) $lesson->student_rate_paise, 'currency' => $lesson->currency, 'posting_generation' => DB::table('erp_ledger')->where('attendance_id', $id)->where('kind', 'lesson_charge')->lockForUpdate()->get()->count() + 1];
             }
             $now = now()->format('Y-m-d H:i:s');

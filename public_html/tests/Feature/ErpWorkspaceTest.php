@@ -14,7 +14,7 @@ class ErpWorkspaceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['erp.finance_policy' => 'admin_import_delivered_only', 'erp.payroll_policy' => 'unconfigured']);
+        config(['erp.finance_policy' => 'admin_import_delivered_only', 'erp.payroll_policy' => 'approved_attended_only']);
         $this->unit = DB::table('erp_units')->insertGetId(['code' => 'HTTP-AA', 'name' => 'Synthetic AA', 'timezone' => 'UTC']);
         $this->otherUnit = DB::table('erp_units')->insertGetId(['code' => 'HTTP-BB', 'name' => 'Synthetic BB', 'timezone' => 'UTC']);
         $this->admin = $this->createAdmin();
@@ -54,8 +54,11 @@ class ErpWorkspaceTest extends TestCase
         $attendance = $this->action('attendance', ['lesson_id' => $lesson['id'], 'actual_minutes' => 45]);
         $this->assertSame(0, DB::table('erp_ledger')->count());
         $reviewed = $this->action('approve', ['attendance_id' => $attendance['id']]);
-        $this->assertFalse($reviewed['financial_posted']);
-        $this->assertSame(0, DB::table('erp_ledger')->count());
+        $this->assertFalse($reviewed['student_financial_posted']);
+        $this->assertTrue($reviewed['teacher_financial_posted']);
+        $this->assertSame(1, DB::table('erp_ledger')->count());
+        $this->assertSame(4500, (int) DB::table('erp_ledger')->where('teacher_id', $teacher['id'])->sum('amount_paise'));
+        $this->assertSame(0, (int) DB::table('erp_ledger')->where('student_id', $student['id'])->sum('amount_paise'));
         // The browser form submits comma-separated IDs; JSON callers may use arrays.
         $batch = $this->action('import-batch', ['attendance_ids' => (string) $attendance['id'], 'reference' => 'HTTP-IMPORT-1']);
         $this->assertSame($batch['id'], $this->action('import-batch', ['attendance_ids' => [$attendance['id']], 'reference' => 'HTTP-IMPORT-1'])['id']);
@@ -68,8 +71,17 @@ class ErpWorkspaceTest extends TestCase
         // Corrected submitted attendance can be imported without a separate approval.
         $this->action('import-batch', ['attendance_ids' => [$attendance['id']], 'reference' => 'HTTP-IMPORT-2']);
         $this->assertSame(14000, (int) DB::table('erp_ledger')->where('student_id', $student['id'])->sum('amount_paise'));
-        $this->assertSame(0, DB::table('erp_ledger')->where('kind', 'teacher_accrual')->count());
-        $this->assertSame(1, DB::table('erp_ledger')->where('kind', 'reversal')->count());
+        $this->assertSame(1, DB::table('erp_ledger')->where('kind', 'teacher_accrual')->count());
+        $this->assertSame(0, (int) DB::table('erp_ledger')->where('teacher_id', $teacher['id'])->sum('amount_paise'));
+        $this->assertDatabaseHas('erp_attendance', ['id' => $attendance['id'], 'status' => 'submitted', 'reviewed_by' => null, 'reviewed_at' => null]);
+        $this->assertSame(2, DB::table('erp_ledger')->where('kind', 'reversal')->count());
+        $reapproved = $this->action('approve', ['attendance_id' => $attendance['id']]);
+        $this->assertTrue($reapproved['teacher_financial_posted']);
+        $this->assertTrue($reapproved['student_financial_posted']);
+        $this->assertSame(3000, (int) DB::table('erp_ledger')->where('teacher_id', $teacher['id'])->sum('amount_paise'));
+        $this->assertSame(14000, (int) DB::table('erp_ledger')->where('student_id', $student['id'])->sum('amount_paise'));
+        $workspace = $this->get('/erp/units/'.$this->unit)->assertOk()->assertSee('approved accrual paise')->assertSee('not proof of payment');
+        $this->assertSame(3000, $workspace->viewData('data')['teachers']->first()->approved_accrual_paise);
         $this->assertSame(2, DB::table('erp_attendance_batches')->count());
         $this->assertDatabaseHas('erp_audit', ['action' => 'attendance.corrected', 'actor_id' => $this->admin->id]);
     }
@@ -179,6 +191,49 @@ class ErpWorkspaceTest extends TestCase
         $this->assertSame(2, DB::table('erp_exceptions')->count());
         $this->assertSame(1, DB::table('erp_agreements')->where('replaces_agreement_id', $original['id'])->count());
         $this->assertSame(0, DB::table('erp_ledger')->count());
+    }
+
+    public function test_student_import_before_payroll_approval_preserves_frozen_rates_and_separate_status(): void
+    {
+        $this->actingAs($this->admin);
+        [$student, $teacher, $lesson] = $this->scheduledLesson();
+        DB::table('erp_enrollments')->where('id', $lesson['enrollment_id'])->update(['student_rate_paise' => 24000, 'teacher_rate_paise' => 18000]);
+        $attendance = $this->action('attendance', ['lesson_id' => $lesson['id'], 'actual_minutes' => 45]);
+        $this->action('import-batch', ['attendance_ids' => [$attendance['id']], 'reference' => 'HTTP-STUDENT-FIRST']);
+        $this->assertSame(-9000, (int) DB::table('erp_ledger')->where('student_id', $student['id'])->sum('amount_paise'));
+        $this->assertSame(0, DB::table('erp_ledger')->where('kind', 'teacher_accrual')->count());
+        $this->assertDatabaseHas('erp_attendance', ['id' => $attendance['id'], 'status' => 'submitted']);
+        $this->post('/erp/units/'.$this->unit.'/approve', ['attendance_id' => $attendance['id']])
+            ->assertRedirect('/erp/units/'.$this->unit)
+            ->assertSessionHas('status', 'Attendance approved. Teacher accrual: posted. Student charge: already imported. No money was transferred.');
+        $approved = $this->action('approve', ['attendance_id' => $attendance['id']]);
+        $this->assertTrue($approved['teacher_financial_posted']);
+        $this->assertTrue($approved['student_financial_posted']);
+        $this->assertSame(4500, (int) DB::table('erp_ledger')->where('teacher_id', $teacher['id'])->sum('amount_paise'));
+        $this->assertSame(1, DB::table('erp_ledger')->where('kind', 'teacher_accrual')->count());
+        $this->assertSame(-9000, (int) DB::table('erp_ledger')->where('student_id', $student['id'])->sum('amount_paise'));
+        $workspace = $this->get('/erp/units/'.$this->unit)->assertOk();
+        $this->assertSame(4500, $workspace->viewData('data')['teachers']->first()->approved_accrual_paise);
+    }
+
+    public function test_one_off_demo_http_is_free_unpaid_and_reference_idempotent(): void
+    {
+        $this->actingAs($this->admin);
+        [$student, $teacher, $lesson] = $this->scheduledLesson();
+        $payload = ['enrollment_id' => $lesson['enrollment_id'], 'date' => substr($lesson['starts_at'], 0, 10), 'start_time' => '11:00', 'timezone' => 'UTC', 'duration_minutes' => 45, 'kind' => 'demo', 'teacher_confirmed' => true, 'student_confirmed' => true, 'confirmation_channel' => 'call', 'confirmation_note' => 'Synthetic free demo agreement', 'reference' => 'HTTP-DEMO-1'];
+        $demo = $this->action('extra', $payload);
+        $this->assertSame($demo['id'], $this->action('extra', $payload)['id']);
+        $this->assertSame('demo', $demo['kind']);
+        $this->postJson('/erp/units/'.$this->unit.'/extra', array_merge($payload, ['duration_minutes' => 30]))->assertUnprocessable();
+        $attendance = $this->action('attendance', ['lesson_id' => $demo['id'], 'actual_minutes' => 45]);
+        $approved = $this->action('approve', ['attendance_id' => $attendance['id']]);
+        $this->assertFalse($approved['teacher_financial_posted']);
+        $this->assertFalse($approved['student_financial_posted']);
+        $this->action('import-batch', ['attendance_ids' => [$attendance['id']], 'reference' => 'HTTP-DEMO-IMPORT']);
+        $this->assertSame(0, DB::table('erp_ledger')->count());
+        $workspace = $this->get('/erp/units/'.$this->unit)->assertOk()->assertSee('Demo classes are free and unpaid');
+        $this->assertSame(0, $workspace->viewData('data')['teachers']->first()->approved_accrual_paise);
+        $this->assertSame(0, $workspace->viewData('data')['students']->first()->balance_paise);
     }
 
 }

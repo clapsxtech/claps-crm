@@ -15,7 +15,7 @@ class ErpFinanceAttendanceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:', 'erp.finance_policy' => 'admin_import_delivered_only']);
+        config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:', 'erp.finance_policy' => 'admin_import_delivered_only', 'erp.payroll_policy' => 'unconfigured']);
         DB::purge('sqlite');
         Schema::create('users', function (Blueprint $table) { $table->increments('id'); });
         DB::table('users')->insert(['id' => 1]);
@@ -240,4 +240,110 @@ class ErpFinanceAttendanceTest extends TestCase
         $service->importBatch(1, 1, ['attendance_ids' => [$first->id], 'reference' => 'BATCH-GENUINE']);
         $this->assertSame(-12000, (new Finance())->balance(1, 1));
     }
+    public function test_teacher_approval_before_import_is_independent_and_idempotent(): void
+    {
+        config(['erp.payroll_policy' => 'approved_attended_only']);
+        $service = new Attendance();
+        $row = $service->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 45]);
+        DB::table('erp_enrollments')->where('id', 1)->update(['teacher_rate_paise' => 99999]);
+        $result = $service->approve(1, 1, $row->id);
+        $this->assertTrue($result->teacher_financial_posted);
+        $this->assertFalse($result->student_financial_posted);
+        $this->assertSame(4500, (int) DB::table('erp_ledger')->where('teacher_id', 1)->sum('amount_paise'));
+        $service->approve(1, 1, $row->id);
+        $service->importBatch(1, 1, ['attendance_ids' => [$row->id], 'reference' => 'PAY-APPROVE-FIRST']);
+        $result = $service->approve(1, 1, $row->id);
+        $this->assertTrue($result->teacher_financial_posted);
+        $this->assertTrue($result->student_financial_posted);
+        $this->assertSame(2, DB::table('erp_ledger')->count());
+        $this->assertSame(-9000, (new Finance())->balance(1, 1));
+    }
+
+    public function test_import_before_approval_never_accrues_teacher_early_and_rounds_frozen_rate(): void
+    {
+        config(['erp.payroll_policy' => 'approved_attended_only']);
+        DB::table('erp_lessons')->where('id', 1)->update(['teacher_rate_paise' => 101, 'student_rate_paise' => 103]);
+        $service = new Attendance();
+        $row = $service->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 30]);
+        $this->invalid(function () use ($row) { (new Finance())->postTeacherAttendance(1, 1, $row->id); });
+        $service->importBatch(1, 1, ['attendance_ids' => [$row->id], 'reference' => 'PAY-IMPORT-FIRST']);
+        $this->assertSame(0, DB::table('erp_ledger')->where('kind', 'teacher_accrual')->count());
+        $result = $service->approve(1, 1, $row->id);
+        $this->assertTrue($result->student_financial_posted);
+        $this->assertTrue($result->teacher_financial_posted);
+        $this->assertSame(51, (int) DB::table('erp_ledger')->where('teacher_id', 1)->sum('amount_paise'));
+        $this->assertSame(-52, (new Finance())->balance(1, 1));
+        $this->invalid(function () use ($row) { (new Finance())->postTeacherAttendance(2, 1, $row->id); });
+    }
+
+    public function test_demo_records_import_and_approval_but_has_no_student_or_teacher_entries(): void
+    {
+        config(['erp.payroll_policy' => 'approved_attended_only']);
+        DB::table('erp_lessons')->where('id', 1)->update(['kind' => 'demo']);
+        $service = new Attendance();
+        $row = $service->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 60]);
+        $service->importBatch(1, 1, ['attendance_ids' => [$row->id], 'reference' => 'FREE-DEMO']);
+        $result = $service->approve(1, 1, $row->id);
+        $this->assertFalse($result->student_financial_posted);
+        $this->assertFalse($result->teacher_financial_posted);
+        $this->assertSame(0, DB::table('erp_ledger')->count());
+        $this->assertSame(1, DB::table('erp_attendance_batches')->count());
+        $this->assertSame('approved', $result->status);
+    }
+
+    public function test_correction_reverses_both_streams_then_requires_independent_actions(): void
+    {
+        config(['erp.payroll_policy' => 'approved_attended_only']);
+        $service = new Attendance();
+        $row = $service->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 60]);
+        $service->approve(1, 1, $row->id);
+        $service->importBatch(1, 1, ['attendance_ids' => [$row->id], 'reference' => 'BOTH-ORIGINAL']);
+        $service->correct(1, 1, $row->id, ['actual_minutes' => 30, 'reason' => 'Correct both amounts']);
+        $this->assertSame(2, DB::table('erp_ledger')->where('kind', 'reversal')->count());
+        $this->assertSame(0, (int) DB::table('erp_ledger')->where('teacher_id', 1)->sum('amount_paise'));
+        $this->assertSame(0, (new Finance())->balance(1, 1));
+        $this->invalid(function () use ($row) { (new Finance())->postTeacherAttendance(1, 1, $row->id); });
+        $service->importBatch(1, 1, ['attendance_ids' => [$row->id], 'reference' => 'BOTH-CORRECTED']);
+        $this->assertSame(0, (int) DB::table('erp_ledger')->where('teacher_id', 1)->sum('amount_paise'));
+        $this->assertSame(-6000, (new Finance())->balance(1, 1));
+        $service->approve(1, 1, $row->id);
+        $service->approve(1, 1, $row->id);
+        $this->assertSame(3000, (int) DB::table('erp_ledger')->where('teacher_id', 1)->sum('amount_paise'));
+        $this->assertSame(6, DB::table('erp_ledger')->count());
+    }
+
+    public function test_rejecting_previously_approved_duplicate_reverses_teacher_and_student(): void
+    {
+        config(['erp.payroll_policy' => 'approved_attended_only']);
+        $service = new Attendance();
+        $first = $service->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 60]);
+        $service->approve(1, 1, $first->id);
+        $service->importBatch(1, 1, ['attendance_ids' => [$first->id], 'reference' => 'DUP-PAID']);
+        $this->lesson(2, '2026-10-20 14:00:00');
+        $service->submit(1, 1, ['lesson_id' => 2, 'actual_minutes' => 60]);
+        $review = DB::table('erp_duplicate_reviews')->first();
+        $service->resolveDuplicate(1, 1, $review->id, ['decision' => 'duplicate', 'duplicate_attendance_id' => $first->id, 'teacher_reply' => 'First report was duplicated.', 'reason' => 'Reject earlier imported record']);
+        $this->assertSame(0, (int) DB::table('erp_ledger')->where('teacher_id', 1)->sum('amount_paise'));
+        $this->assertSame(0, (new Finance())->balance(1, 1));
+        $this->assertSame(2, DB::table('erp_ledger')->where('kind', 'reversal')->count());
+        $this->invalid(function () use ($first, $service) { $service->approve(1, 1, $first->id); });
+    }
+
+    public function test_teacher_accrual_failure_rolls_back_approval_and_cancelled_lesson_never_accrues(): void
+    {
+        config(['erp.payroll_policy' => 'approved_attended_only']);
+        $service = new Attendance();
+        $row = $service->submit(1, 1, ['lesson_id' => 1, 'actual_minutes' => 60]);
+        DB::unprepared("CREATE TRIGGER synthetic_fail_pay BEFORE INSERT ON erp_ledger WHEN NEW.kind = 'teacher_accrual' BEGIN SELECT RAISE(ABORT, 'synthetic payroll failure'); END");
+        try { $service->approve(1, 1, $row->id); $this->fail('Expected synthetic failure.'); }
+        catch (\Illuminate\Database\QueryException $expected) {
+            $this->assertSame('submitted', DB::table('erp_attendance')->where('id', $row->id)->value('status'));
+            $this->assertSame(0, DB::table('erp_ledger')->count());
+        }
+        DB::unprepared('DROP TRIGGER synthetic_fail_pay');
+        DB::table('erp_lessons')->where('id', 1)->update(['status' => 'cancelled']);
+        $this->invalid(function () use ($service, $row) { $service->approve(1, 1, $row->id); });
+        $this->assertSame(0, DB::table('erp_ledger')->count());
+    }
+
 }

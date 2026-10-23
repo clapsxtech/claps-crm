@@ -246,6 +246,42 @@ class Scheduling
             $this->audit($unitId,$actorId,'lessons.materialized','agreement',$a->id,['count'=>count($created),'from'=>$from,'through'=>$through]); return $created;
         });
     }
+    /** Explicit, bilaterally agreed one-off lesson. Demo rates are snapshots, never authorization to bill. */
+    public function scheduleExtra(int $unitId, int $actorId, array $p) {
+        $this->required($p,['enrollment_id','date','start_time','timezone','duration_minutes','kind','teacher_confirmed','student_confirmed','confirmation_channel','confirmation_note','reference']);
+        return DB::transaction(function () use ($unitId,$actorId,$p) {
+            $e=$this->row('erp_enrollments',$p['enrollment_id'],$unitId);
+            [$teacher,$student]=$this->parents($unitId,$e->teacher_id,$e->student_id);
+            $e=$this->row('erp_enrollments',$e->id,$unitId,true);
+            $reference=trim((string)$p['reference']);
+            if ($reference === '' || strlen($reference)>120) $this->fail('Provide a stable request reference of at most 120 characters.');
+            if (!in_array($p['kind'],['demo','extra'],true)) $this->fail('One-off lesson kind must be demo or extra.');
+            if (!in_array($p['teacher_confirmed'],[true,1,'1'],true) || !in_array($p['student_confirmed'],[true,1,'1'],true) || !in_array($p['confirmation_channel'],['whatsapp','call'],true) || !trim($p['confirmation_note'])) $this->fail('Record bilateral WhatsApp/call confirmation for this one-off lesson.');
+            $minutes=$this->integer($p['duration_minutes'],1,480,'duration');
+            $start=$this->localToUtc($p['date'],$p['start_time'],$p['timezone']);
+            $end=gmdate('Y-m-d H:i:s',strtotime($start.' UTC')+$minutes*60);
+            $request=['unit_id'=>$unitId,'enrollment_id'=>(int)$e->id,'date'=>$p['date'],'start_time'=>$p['start_time'],'timezone'=>$p['timezone'],'duration_minutes'=>$minutes,'kind'=>$p['kind'],'teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>$p['confirmation_channel'],'confirmation_note'=>trim($p['confirmation_note']),'reference'=>$reference];
+            $fingerprint=hash('sha256',json_encode($request,JSON_THROW_ON_ERROR));
+            $existing=DB::table('erp_lessons')->where('request_reference',$reference)->lockForUpdate()->first();
+            if ($existing) {
+                if ((int)$existing->unit_id !== $unitId || (int)$existing->enrollment_id !== (int)$e->id) $this->fail('This request reference belongs to a different lesson request.');
+                $audit=DB::table('erp_audit')->where('unit_id',$unitId)->where('action','lesson.one_off_scheduled')->where('entity_type','lesson')->where('entity_id',$existing->id)->lockForUpdate()->first();
+                $saved=$audit ? json_decode($audit->payload,true) : [];
+                if (!isset($saved['request_fingerprint']) || !hash_equals($saved['request_fingerprint'],$fingerprint)) $this->fail('This request reference was already used with different details.');
+                // Return the preserved original even after cancellation/rescheduling; never recreate it.
+                return $existing;
+            }
+            if ($teacher->status !== 'active' || $student->status !== 'active' || $e->status !== 'active') $this->fail('An active student, teacher and assignment are required.');
+            $zone=$this->zone($student->timezone);
+            $effectiveStart=(new DateTimeImmutable($start,new DateTimeZone('UTC')))->setTimezone($zone)->format('Y-m-d');
+            $effectiveEnd=(new DateTimeImmutable($end,new DateTimeZone('UTC')))->modify('-1 second')->setTimezone($zone)->format('Y-m-d');
+            if ($effectiveStart < $e->starts_on || ($e->ends_on && $effectiveEnd > $e->ends_on)) $this->fail('The whole lesson must fit the assignment effective dates.');
+            $this->coverage($unitId,$e,$start,$end); $this->conflicts($e,$start,$end);
+            $lesson=$this->insert('erp_lessons',['unit_id'=>$unitId,'enrollment_id'=>$e->id,'agreement_id'=>null,'student_id'=>$e->student_id,'teacher_id'=>$e->teacher_id,'subject_id'=>$e->subject_id,'starts_at'=>$start,'ends_at'=>$end,'status'=>'scheduled','kind'=>$p['kind'],'request_reference'=>$reference,'student_rate_paise'=>$e->student_rate_paise,'teacher_rate_paise'=>$e->teacher_rate_paise,'currency'=>$e->currency]);
+            $this->audit($unitId,$actorId,'lesson.one_off_scheduled','lesson',$lesson->id,['request_fingerprint'=>$fingerprint,'request'=>$request,'starts_at'=>$start,'ends_at'=>$end,'confirmed_at'=>$this->now(),'demo_free_and_unpaid'=>$p['kind']==='demo']);
+            return $lesson;
+        });
+    }
     public function reschedule(int $unitId, int $actorId, array $p) {
         $this->required($p,['lesson_id','date','start_time','timezone','reason','teacher_confirmed','student_confirmed','confirmation_channel','confirmation_note']);
         return DB::transaction(function () use ($unitId,$actorId,$p) {

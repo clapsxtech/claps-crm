@@ -56,12 +56,13 @@ class Finance
             if (!DB::table('erp_students')->where('unit_id', $unitId)->where('id', $lesson->student_id)->lockForUpdate()->first() || !DB::table('erp_teacher_units')->where('unit_id', $unitId)->where('teacher_id', $lesson->teacher_id)->lockForUpdate()->first()) $this->fail('lesson', 'Lesson parties must belong to this unit.');
             if (!DB::table('erp_enrollments')->where('unit_id', $unitId)->where('id', $lesson->enrollment_id)->where('student_id', $lesson->student_id)->where('teacher_id', $lesson->teacher_id)->where('subject_id', $lesson->subject_id)->lockForUpdate()->first()) $this->fail('lesson', 'Lesson enrollment and parties do not match this unit.');
             if (config('erp.finance_policy', 'unconfigured') !== 'admin_import_delivered_only') $this->fail('policy', 'Administrator-import billing policy must be explicitly configured.');
-            if ($lesson->status !== 'completed' || $lesson->kind === 'demo') $this->fail('lesson', 'Only delivered non-demo lessons can be charged.');
+            if ($lesson->status !== 'completed') $this->fail('lesson', 'Only delivered lessons can be charged.');
+            if ($lesson->kind === 'demo') return false;
             if ((int) $snapshot['actual_minutes'] !== (int) $attendance->actual_minutes || (int) $snapshot['lesson_id'] !== (int) $lesson->id || (int) $snapshot['student_rate_paise'] !== (int) $lesson->student_rate_paise || $snapshot['currency'] !== $lesson->currency) $this->fail('batch', 'Attendance changed after this import snapshot.');
             $minutes = $this->positiveInteger($attendance->actual_minutes, 'actual_minutes');
             if ($lesson->currency !== 'INR' || $lesson->student_rate_paise < 0 || $lesson->teacher_rate_paise < 0) $this->fail('rates', 'Valid frozen INR lesson rates are required.');
             $ledger = DB::table('erp_ledger')->where('unit_id', $unitId)->where('attendance_id', $attendanceId)->orderBy('id')->lockForUpdate()->get();
-            $active = $this->activeEntries($ledger)->count();
+            $active = $this->activeEntries($ledger)->where('kind', 'lesson_charge')->count();
             if ($active) {
                 if ($active !== 1) $this->fail('ledger', 'Incomplete attendance posting requires investigation.');
                 return true;
@@ -76,6 +77,40 @@ class Finance
             }
             Audit::record($unitId, $actorId, 'attendance.posted', 'attendance', $attendanceId, ['generation' => $generation, 'actual_minutes' => $minutes, 'policy' => 'admin_import_delivered_only', 'batch_id' => $batchId]);
             return true;
+        });
+    }
+
+    /** Approval accrues an amount owed; this never disburses salary or moves money. */
+    public function postTeacherAttendance(int $unitId, int $actorId, int $attendanceId): bool
+    {
+        return DB::transaction(function () use ($unitId, $actorId, $attendanceId) {
+            $attendance = $this->lockedAttendance($unitId, $attendanceId);
+            if ($attendance->status !== 'approved') $this->fail('attendance', 'Administrator-approved attendance is required for teacher accrual.');
+            $lesson = DB::table('erp_lessons')->where('unit_id', $unitId)->where('id', $attendance->lesson_id)->lockForUpdate()->first();
+            if (!$lesson || $lesson->status !== 'completed') $this->fail('lesson', 'Only attended lessons accrue teacher pay; cancellations do not.');
+            if (!DB::table('erp_teacher_units')->where('unit_id', $unitId)->where('teacher_id', $lesson->teacher_id)->lockForUpdate()->first() || !DB::table('erp_enrollments')->where('unit_id', $unitId)->where('id', $lesson->enrollment_id)->where('student_id', $lesson->student_id)->where('teacher_id', $lesson->teacher_id)->where('subject_id', $lesson->subject_id)->lockForUpdate()->first()) $this->fail('lesson', 'Lesson parties and enrollment must belong to this unit.');
+            if ($lesson->kind === 'demo' || config('erp.payroll_policy', 'unconfigured') !== 'approved_attended_only') return false;
+            if ($lesson->currency !== 'INR' || filter_var($lesson->teacher_rate_paise, FILTER_VALIDATE_INT) === false || $lesson->teacher_rate_paise < 0 || $lesson->teacher_rate_paise > 100000000) $this->fail('rates', 'A valid frozen INR hourly teacher rate is required.');
+            $minutes = $this->positiveInteger($attendance->actual_minutes, 'actual_minutes');
+            $ledger = DB::table('erp_ledger')->where('unit_id', $unitId)->where('attendance_id', $attendanceId)->orderBy('id')->lockForUpdate()->get();
+            $active = $this->activeEntries($ledger)->where('kind', 'teacher_accrual')->count();
+            if ($active > 1) $this->fail('ledger', 'Multiple active teacher accruals require investigation.');
+            if ($active === 1) return true;
+            $generation = $ledger->where('kind', 'teacher_accrual')->count() + 1;
+            $key = 'attendance:'.$attendanceId.':'.$generation.':teacher_accrual';
+            $amount = intdiv(((int) $lesson->teacher_rate_paise) * $minutes + 30, 60);
+            $this->entry($unitId, $actorId, ['teacher_id' => $lesson->teacher_id, 'attendance_id' => $attendanceId, 'kind' => 'teacher_accrual', 'amount_paise' => $amount, 'reference' => 'ERP:'.$key, 'event_key' => $key]);
+            Audit::record($unitId, $actorId, 'attendance.teacher_accrued', 'attendance', $attendanceId, ['generation' => $generation, 'actual_minutes' => $minutes, 'rate_paise' => (int) $lesson->teacher_rate_paise, 'amount_paise' => $amount, 'policy' => 'approved_attended_only']);
+            return true;
+        });
+    }
+
+    public function attendancePostingStatus(int $unitId, int $attendanceId): array
+    {
+        return DB::transaction(function () use ($unitId, $attendanceId) {
+            $this->lockedAttendance($unitId, $attendanceId);
+            $active = $this->activeEntries(DB::table('erp_ledger')->where('unit_id', $unitId)->where('attendance_id', $attendanceId)->orderBy('id')->lockForUpdate()->get());
+            return ['student_financial_posted' => $active->where('kind', 'lesson_charge')->isNotEmpty(), 'teacher_financial_posted' => $active->where('kind', 'teacher_accrual')->isNotEmpty()];
         });
     }
 
