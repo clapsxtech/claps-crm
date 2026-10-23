@@ -10,5 +10,4 @@ class Students extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
-    //protected $fillable = ['id', 'student_name','status','student_code','hour_rate','category','source','hours'];
 }

@@ -4,12 +4,8 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\GetStudent;
-use App\Models\Subject;
-use App\Models\WorkHour;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class WorkHourReportController extends Controller
@@ -33,9 +29,6 @@ class WorkHourReportController extends Controller
           
                 return DataTables::of($data)
                 ->addIndexColumn()
-                // ->addColumn('balance', function ($row) {
-                //     return $row->total - $row->total_amount;
-                // })
                 ->addColumn('action', function ($row) {
                     $button = '<button type="button" data-href="' . route('subjects.edit', $row->id) . '" class="btn btn-xs btn-primary edit_button" data-container=".modal_class"><i class="fa fa-edit"></i></button>&nbsp';
                     $button .= '<button data-href="' . route('delete', ['subjects', $row->id]) . '" class="btn btn-xs btn-primary btn-modal"><i class="fa fa-trash"></i></button>';

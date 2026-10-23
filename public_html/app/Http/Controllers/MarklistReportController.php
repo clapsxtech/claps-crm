@@ -17,8 +17,6 @@ class MarklistReportController extends Controller
      */
     public function index(Request $request)
     { 
-        // ::all();
-            //   $this->syncMarklistReportData();
         if ($request->ajax()) {
             $data = MarklistReport::select('id','student_name','student_code','teacher_name','teacher_code','subject','chapter','mark_scored','total_mark','mode_of_exam',
             'examination_date','remark','date_submitted')->orderBy('date_submitted', 'desc'); 
@@ -96,7 +94,8 @@ class MarklistReportController extends Controller
                 return response()->json(['message' => 'Data not found']);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            report($e);
+            return response()->json(['error' => 'Unable to synchronize mark-list data.'], 500);
         }
     }
 
@@ -120,14 +119,9 @@ class MarklistReportController extends Controller
                 $data->where('date', '>=', $request->input('fromdate'));
             }
             
-            // Check for filter_date_to and add similar logic
             if ($request->has('filter_date_to')) {
                 $data->where('date', '<=', $request->input('filter_date_to'));
             }
-            
-            // if ($request->has('filter_date_to')) {
-            //     $data->where('date', '<=', $request->input('filter_date_to'));
-            // }
     
             return DataTables::of($data)
                 ->addIndexColumn()

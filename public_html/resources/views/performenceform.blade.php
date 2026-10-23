@@ -7,6 +7,7 @@
     <title>Teacher Performance</title>
     <link rel="stylesheet" href="{{ asset('frontent_form/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 
     <style>
         /* Add your custom styles here */
@@ -60,7 +61,7 @@
     </style>
 </head>
 
-<body>
+<body class="public-page">
     <section class="h-100 gradient-custom">
         <div class="container py-5 h-100">
             <div class="row justify-content-center align-items-center h-100">
@@ -158,9 +159,9 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name" class="control-label">Password:*</label>
+                                            <label for="password" class="control-label">Teacher verification code:*</label>
                                             <input class="form-control" required autocomplete="off" name="password"
-                                                id="password" type="text">
+                                                id="password" type="password">
                                         </div>
                                     </div>
                                     <div id="error-alert" class="alert alert-danger alert-dismissible fade show"

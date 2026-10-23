@@ -8,6 +8,7 @@ use Google\Client;
 use Google\Service\Sheets;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class DueController extends Controller
@@ -83,13 +84,19 @@ class DueController extends Controller
         $values = $response->getValues();
 
         if ($values) {
-            DueReport::truncate();
-    
             $dataRows = array_slice($values, 1);
+            $records = [];
        
             foreach ($dataRows as $row) {
-                if (!empty($row[0]) && count($row) >= 9) {
-                    $insertDueReport = [
+                if (empty($row[0])) {
+                    continue;
+                }
+
+                if (count($row) < 20) {
+                    throw new \UnexpectedValueException('A due-report spreadsheet row has fewer than 20 columns.');
+                }
+
+                    $records[] = [
                         'student_name' => $row[0],
                         'student_code' => $row[1],
                         'phone' => $row[2],
@@ -108,11 +115,21 @@ class DueController extends Controller
                         'balance' => $row[18],
                         'current_status' => $row[19],
 
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
-        
-                    DueReport::create($insertDueReport);
-                }
             }
+
+            if (empty($records)) {
+                throw new \UnexpectedValueException('The due-report spreadsheet contains no importable rows.');
+            }
+
+            DB::transaction(function () use ($records) {
+                DueReport::query()->delete();
+                foreach (array_chunk($records, 500) as $chunk) {
+                    DueReport::insert($chunk);
+                }
+            });
             $timestamp = Carbon::now();
 
             return response()->json([

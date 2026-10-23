@@ -5,7 +5,6 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -88,19 +87,9 @@ class SubjectController extends Controller
             return ['success' => true,'msg' =>'successfully created'];
     }
         catch (\Exception $e) {
-            return ['success' => false,'msg' => $e->getMessage()];
+            report($e);
+            return ['success' => false,'msg' => 'Unable to create the subject.'];
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
     }
 
     /**
@@ -144,7 +133,8 @@ class SubjectController extends Controller
                 $brand->save();
                 return ['success' => true,'msg' =>'successfully updated'];
             } catch (\Exception $e) {
-                return ['success' => false, 'msg' => $e->getMessage()];
+                report($e);
+                return ['success' => false, 'msg' => 'Unable to update the subject.'];
             }
         }
     }
@@ -163,7 +153,8 @@ class SubjectController extends Controller
                 $brand->delete();
                 return response()->json(['success' => true,'msg' =>'successfully deleted']);
             } catch (\Exception $e) {
-                return response()->json(['success' => false,'msg' => $e->getMessage()]);
+                report($e);
+                return response()->json(['success' => false,'msg' => 'Unable to delete the subject.'], 500);
             }
         }
     }

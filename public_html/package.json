@@ -2,12 +2,18 @@
     "private": true,
     "scripts": {
         "dev": "npm run development",
-        "development": "mix",
+        "development": "NODE_OPTIONS=--openssl-legacy-provider mix",
         "watch": "mix watch",
         "watch-poll": "mix watch -- --watch-options-poll=1000",
         "hot": "mix watch --hot",
         "prod": "npm run production",
-        "production": "mix --production"
+        "production": "NODE_OPTIONS=--openssl-legacy-provider mix --production",
+        "cf:dev": "wrangler dev",
+        "cf:deploy": "wrangler deploy",
+        "cf:types": "wrangler types"
+    },
+    "engines": {
+        "node": ">=18 <21"
     },
     "devDependencies": {
         "axios": "^0.21",
@@ -19,7 +25,10 @@
         "postcss": "^8.1.14",
         "resolve-url-loader": "^3.1.0",
         "sass": "^1.15.2",
-        "sass-loader": "^8.0.0"
+        "sass-loader": "^8.0.0",
+        "@cloudflare/workers-types": "^5.20261023.1",
+        "typescript": "^5.9.3",
+        "wrangler": "^4.136.0"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.2",

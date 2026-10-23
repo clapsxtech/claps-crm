@@ -11,6 +11,7 @@ use Google_Service_Sheets_ValueRange;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PerformanceController extends Controller
 {
@@ -29,7 +30,9 @@ class PerformanceController extends Controller
             'teacher_name' => 'required',
             'teacher_code' => 'required',
             'student_name' => 'required',
+            'student_code' => 'required',
             'topic' => 'required',
+            'password' => 'required|string|max:255',
         ];
 
         $messages = [
@@ -54,12 +57,14 @@ class PerformanceController extends Controller
             $performance->remark             = $request->remark;
             $performance->created_at = Carbon::now();
             $performance->updated_at = Carbon::now();
-            $password = $request->password;
+            $teacher = Master::where('teacher_name', $request->teacher_name)
+                ->where('teacher_code', $request->teacher_code)
+                ->where('student_name', $request->student_name)
+                ->where('student_code', $request->student_code)
+                ->first();
 
-            $hardcodedPassword = '121';
-            if ($password !== $hardcodedPassword) {
-                $response = ['success' => false, 'msg' => 'Passwords do not match.'];
-                return response()->json($response);
+            if (!$teacher || !hash_equals((string) $teacher->teacher_dob, (string) $request->password)) {
+                return response()->json(['success' => false, 'msg' => 'Teacher verification failed.'], 422);
             }
 
             $performance->save();
@@ -99,7 +104,8 @@ class PerformanceController extends Controller
 
             return response()->json(['success' => true, 'msg' => 'Successfully created']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+            Log::error('Unable to submit teacher performance', ['exception' => $e]);
+            return response()->json(['success' => false, 'msg' => 'Unable to submit the performance record.'], 500);
         }
     }
 }

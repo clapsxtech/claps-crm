@@ -14,7 +14,6 @@ class TeacherReportController extends Controller
    
     public function index(Request $request)
     { 
-        // ::all();
         if ($request->ajax()) {
             $data = TeacherReport::select('id','student_name','student_code','teacher_name','teacher_code','subject','date','date_submitted','chapter','topic','hour_taken','homework_status')->orderBy('date_submitted', 'desc'); 
             return DataTables::of($data)

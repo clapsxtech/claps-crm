@@ -14,16 +14,10 @@ class GoogleSpreadsheetController extends Controller
 {
     public function index(Request $request)
     {
-        // $this->sheetData();
         if ($request->ajax()) {
             $data = Teacher::select('id', 'teacher_name', 'teacher_code', 'status', 'type', 'subject', 'medium')->orderBy('id', 'ASC');
             return DataTables::of($data)
                 ->addIndexColumn()
-                // ->addColumn('action', function ($row) {
-                //     $button = '<button type="button" data-href="' . route('general_services.edit', $row->id) . '" class="btn btn-xs btn-primary edit_button" data-container=".modal_class"><i class="fa fa-edit"></i></button>&nbsp';
-                //     $button .= '<button data-href="' . route('delete', ['general_services', $row->id]) . '" class="btn btn-xs btn-primary btn-modal"><i class="fa fa-trash"></i></button>';
-                //     return $button;
-                // })
                 ->filter(function ($instance) use ($request) {
                     if (!empty($request->get('search'))) {
                         $instance->where(function ($w) use ($request) {
@@ -32,7 +26,6 @@ class GoogleSpreadsheetController extends Controller
                         });
                     }
                 })
-                // ->rawColumns(['action'])
                 ->make(true);
         }
         return view('admin.teacher.index');

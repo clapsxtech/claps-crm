@@ -109,34 +109,6 @@ class TimeTableController extends Controller
 }
 
 
-    public function timetableReport22(Request $request)
-    {
-        if ($request->ajax()) {
-
-            $data = TimeTable::select('id', 'teacher_name', 'student_name', 'dob', 'subject', 'topic', 'date', 'hour_taken', 'date_submitted')->orderBy('date', 'desc');
-            if ($request->has('student_name')) {
-                if ($request->input('student_name') !== "all") {
-                    $data->where('student_name', $request->input('student_name'));
-                }
-            }
-            if ($request->has('teacher_name')) {
-                $data->where('teacher_name', $request->input('teacher_name'));
-            }
-            if ($request->has('dob')) {
-                $data->where('dob', $request->input('dob'));
-            }
-
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
-        }
-
-        $teachers = TimeTable::select('teacher_name')
-            ->distinct()
-            ->get();
-
-        return view('timetable', compact('teachers'));
-    }
     public function timetableReport()
     {
         $timeTables = TimeTable::all();

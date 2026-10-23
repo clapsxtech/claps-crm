@@ -2,16 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\admin\GoogleSpreadsheetController;
-use App\Http\Controllers\admin\StudentsController;
-use App\Http\Controllers\TeacherReportController;
 use App\Http\Controllers\admin\MasterController;
 use App\Http\Controllers\MarklistReportController;
 use App\Http\Controllers\TimeTableController;
-use App\Http\Controllers\DueController;
-use App\Http\Controllers\admin\GetStudentsController;
-
-
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -29,7 +22,7 @@ class DailyQuote extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Synchronize master, timetable, and mark-list data from Google Sheets';
 
     /**
      * Create a new command instance.
@@ -48,27 +41,18 @@ class DailyQuote extends Command
      */
     public function handle()
     {
-        Log::info('fetch:sheet-data command executed at ' . now());
-    
+        Log::info('Google Sheets synchronization started.', ['started_at' => now()]);
+
         try {
-        
-        $MasterController = app(MasterController::class);
-        // $TeacherReportController = app(TeacherReportController::class);
-        $MarklistReportController = app(MarklistReportController::class);
-        $Timetample = app(TimeTableController::class);
-        // $DueController = app(DueController::class);
-        // $GetStudentSynkdata=app(GetStudentsController::class);
+            app(MasterController::class)->MastersSynkdata();
+            app(TimeTableController::class)->syncTimeTableData();
+            app(MarklistReportController::class)->syncMarklistReportData();
 
-
-        // $GetStudentSynkdata->GetStudentSynkdata();
-        $MasterController->MastersSynkdata();
-        // $DueController->syncDueReportData();
-        $Timetample->syncTimeTableData();
-        $MarklistReportController->syncMarklistReportData();
-
-            Log::info('Scheduled task completed at: ' . now());
+            Log::info('Google Sheets synchronization completed.', ['completed_at' => now()]);
+            return self::SUCCESS;
         } catch (\Exception $e) {
-            Log::error('Error in scheduled task: ' . $e->getMessage());
+            report($e);
+            return self::FAILURE;
         }
     }
 }

@@ -9,21 +9,14 @@ class RoleController extends Controller
 {   
     public function index()
     {   
-        // if (!auth()->user()->can('administration')) {
-        //     abort(403, 'Unauthorized action.');
-        // }
         if (request()->ajax()) {
             $roles = Role::select(['name', 'id']);
             return DataTables::of($roles)
                 ->addColumn('action', function ($row) {
                         $action = '';
-                        // if (auth()->user()->can('administration')) {
-                            $action .= '<a href="'.url('admin/roles').'/'.$row->id.'/edit" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i> EDIT</a>';
-                        // }
-                        // if (auth()->user()->can('administration')) {
+                        $action .= '<a href="'.url('admin/roles').'/'.$row->id.'/edit" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i> EDIT</a>';
                         $action .= '&nbsp
                         <button data-href="'.route('delete',['roles',$row->id]).'" class="btn btn-xs btn-primary btn-modal"><i class="fa fa-trash"></i></button>';
-                        // }
                         return $action;
                 })
                 ->removeColumn('id')
@@ -34,17 +27,11 @@ class RoleController extends Controller
     }
     public function create()
     {   
-        // if (!auth()->user()->can('administration')) {
-        //     abort(403, 'Unauthorized action.');
-        // }
         $permission = Permission::select('id','name')->get();
         return view('admin.role.create')->with(compact('permission'));
     }
     public function store(Request $request)
     {
-        // if (!auth()->user()->can('administration')) {
-        //     abort(403, 'Unauthorized action.');
-        // }
         try {
             $role_name = $request->input('name');
             $permissions = $request->input('permissions');
@@ -62,15 +49,13 @@ class RoleController extends Controller
                 $output = ['status' => 'warning','message' =>'Role already exist'];
             }
         } catch (\Exception $e) {
-            $output = ['status' => 'danger','message' =>$e->getMessage()];
+            report($e);
+            $output = ['status' => 'danger','message' => 'Unable to create the role.'];
         }
         return redirect('admin/roles')->with($output);
     }
     public function edit($id)
     {   
-        // if (!auth()->user()->can('administration')) {
-        //     abort(403, 'Unauthorized action.');
-        // }
         $permission = Permission::select('id','name')->get();
         $role = Role::with(['permissions'])->find($id);
         $role_permissions = [];
@@ -81,9 +66,6 @@ class RoleController extends Controller
     }
     public function update(Request $request, $id)
     {
-        // if (!auth()->user()->can('administration')) {
-        //     abort(403, 'Unauthorized action.');
-        // }
         try {
             $role_name = $request->input('name');
             $permissions = $request->input('permissions');
@@ -110,7 +92,8 @@ class RoleController extends Controller
                 $output = ['status' => 'danger','message' =>'role exist'];
             }
         } catch (\Exception $e) {
-            $output = ['status' => false,'message' =>$e->getMessage()];
+            report($e);
+            $output = ['status' => false,'message' => 'Unable to update the role.'];
         }
         return redirect('admin/roles')->with($output);
     }
@@ -124,7 +107,6 @@ class RoleController extends Controller
         $non_existing_permissions = array_diff($permissions, $exising_permissions);
         if (!empty($non_existing_permissions)) {
             foreach ($non_existing_permissions as $new_permission) {
-                $time_stamp = now();
                 Permission::create([
                     'name' => $new_permission,
                     'guard_name' => 'admin'
@@ -134,16 +116,14 @@ class RoleController extends Controller
     }
     public function destroy($id)
     {   
-        // if (!auth()->user()->can('administration')) {
-        //     return ['success' => false,'msg' => 'Unauthorised access'];
-        // }
         if (request()->ajax()) {
             try {
                 $roles = Role::findOrFail($id);
                 $roles->delete();
                 $output = ['success' => true,'msg' =>'successfully deleted'];
             } catch (\Exception $e) {
-                $output = ['success' => false,'msg' => $e->getMessage()];
+                report($e);
+                $output = ['success' => false,'msg' => 'Unable to delete the role.'];
             }
             return $output;
         }

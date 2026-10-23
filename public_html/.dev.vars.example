@@ -1,0 +1,12 @@
+APP_KEY=base64:generate-a-real-laravel-key
+APP_URL=http://localhost:8787
+DB_HOST=mysql.example.com
+DB_DATABASE=clapslearn
+DB_USERNAME=clapslearn
+DB_PASSWORD=replace-me
+GOOGLE_CREDENTIALS_BASE64=base64-encoded-service-account-json
+MYSQL_SSL_CA_BASE64=
+AWS_ACCESS_KEY_ID=r2-access-key-id
+AWS_SECRET_ACCESS_KEY=r2-secret-access-key
+R2_ACCOUNT_ID=cloudflare-account-id
+R2_BUCKET_NAME=clapslearn-uploads

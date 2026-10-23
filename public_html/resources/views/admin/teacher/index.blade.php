@@ -88,7 +88,6 @@
             {data: 'type', name: 'type'},
             {data: 'subject', name: 'subject'},
             {data: 'medium', name: 'medium'},
-            // {data: 'action', name: 'action'}
 
         ],
         lengthMenu: [[10, 50, 100, -1], [10, 50, 100, "All"]],

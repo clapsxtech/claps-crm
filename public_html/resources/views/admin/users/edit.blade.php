@@ -171,7 +171,6 @@
                                 type="text" id="custom_fields">
                         </div>
                         <?php $address = json_decode($users['address'], true, 4);
-                        // print_r($address['permanent_address']);die;
                         ?>
 
                         <div class="clearfix"></div>

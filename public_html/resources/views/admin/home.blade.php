@@ -2,32 +2,27 @@
 
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
         <section class="content-header">
           <div class="container-fluid">
-            <div class="row mb-2">
-              <div class="col-sm-6">
-                <h1>Dashboard</h1>
+            <div class="dashboard-hero">
+              <div>
+                <small class="text-uppercase">Clapslearn workspace</small>
+                <h1>Welcome back, {{ Auth::user()->name }}</h1>
+                <p>Manage academic records, attendance, schedules, and reports from one place.</p>
               </div>
-              <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Home</a></li>
-                  <li class="breadcrumb-item active">Dashboard</li>
-                </ol>
-              </div>
+              <a href="{{ route('marklist.create') }}" class="btn btn-light"><i class="fas fa-plus"></i> Add marks</a>
             </div>
-          </div><!-- /.container-fluid -->
+          </div>
         </section>
-    
-        <!-- Main content -->
         <section class="content">
           <div class="container-fluid">
-            
-            <!-- /.row -->
+            <div class="quick-grid" aria-label="Quick actions">
+              <a class="quick-card" href="{{ route('workhour.index') }}"><i class="fas fa-clock"></i><div><strong>Work hours</strong><span>Review and manage attendance</span></div></a>
+              <a class="quick-card" href="{{ route('marklist.index') }}"><i class="fas fa-clipboard-check"></i><div><strong>Mark list</strong><span>Record and review results</span></div></a>
+              <a class="quick-card" href="{{ route('timetable.index') }}"><i class="fas fa-calendar-alt"></i><div><strong>Timetable</strong><span>Keep schedules organized</span></div></a>
+              <a class="quick-card" href="{{ route('marklistreport.index') }}"><i class="fas fa-chart-bar"></i><div><strong>Reports</strong><span>Explore learning performance</span></div></a>
+            </div>
           </div>
-          <!-- /.container-fluid -->
         </section>
-        <!-- /.content -->
       </div>
-      <!-- /.content-wrapper -->
       @include('admin.layouts.footer')

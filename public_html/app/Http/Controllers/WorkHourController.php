@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Google\Client;
 use Illuminate\Support\Facades\DB;
 use Google\Service\Sheets;
-use Google_Service_Sheets_ValueRange;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
@@ -72,9 +71,9 @@ class WorkHourController extends Controller
         if (!empty($request->get('status'))) {
             $status = $request->get('status');
             if ($status === 'true') {
-                $query->whereRaw('MONTH(date_submitted) = MONTH(date)');
+                $query->whereRaw('YEAR(date_submitted) = YEAR(date) AND MONTH(date_submitted) = MONTH(date)');
             } elseif ($status === 'false') {
-                $query->whereRaw('MONTH(date_submitted) != MONTH(date)');
+                $query->whereRaw('(YEAR(date_submitted) != YEAR(date) OR MONTH(date_submitted) != MONTH(date))');
             }
         }
     
@@ -91,12 +90,14 @@ class WorkHourController extends Controller
             ->filter(function ($query) use ($request) {
                 if (!empty($request->get('search'))) {
                     $search = $request->get('search');
-                    $query->where('teacher_name', 'LIKE', "%$search%")
-                          ->orWhere('teacher_code', 'LIKE', "%$search%")
-                          ->orWhere('student_name', 'LIKE', "%$search%")
-                          ->orWhere('student_code', 'LIKE', "%$search%")
-                          ->orWhere('subject', 'LIKE', "%$search%")
-                          ->orWhere('date', 'LIKE', "%$search%");
+                    $query->where(function ($searchQuery) use ($search) {
+                        $searchQuery->where('teacher_name', 'LIKE', "%$search%")
+                            ->orWhere('teacher_code', 'LIKE', "%$search%")
+                            ->orWhere('student_name', 'LIKE', "%$search%")
+                            ->orWhere('student_code', 'LIKE', "%$search%")
+                            ->orWhere('subject', 'LIKE', "%$search%")
+                            ->orWhere('date', 'LIKE', "%$search%");
+                    });
                 }
             })
             ->addColumn('created_at', function ($row) {
@@ -201,7 +202,6 @@ class WorkHourController extends Controller
             'chapter' => 'required',
             'topic' => 'required',
             'hour_taken' => 'required',
-            'homework_status' => 'required',
             'homework_status' => 'required|in:yes,no',
         ];
 
@@ -249,7 +249,8 @@ class WorkHourController extends Controller
 
             return response()->json(['success' => true, 'msg' => 'Successfully created']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+            report($e);
+            return response()->json(['success' => false, 'msg' => 'Unable to save the work-hour record.'], 500);
         }
     }
     public function frontetHourUploadCreate()
@@ -284,7 +285,6 @@ class WorkHourController extends Controller
                 'chapter' => 'required',
                 'topic' => 'required',
                 'hour_taken' => 'required',
-                'homework_status' => 'required',
                 'homework_status' => 'required|in:yes,no',
             ];
             $messages = [
@@ -315,7 +315,8 @@ class WorkHourController extends Controller
                 $workhour->save();
                 return ['success' => true, 'msg' => 'successfully updated'];
             } catch (\Exception $e) {
-                return ['success' => false, 'msg' => $e->getMessage()];
+                report($e);
+                return ['success' => false, 'msg' => 'Unable to update the work-hour record.'];
             }
         }
     }
@@ -336,15 +337,17 @@ class WorkHourController extends Controller
         $values = $response->getValues();
 
         if ($values) {
-            WorkHour::truncate();
-
             $dataRows = array_slice($values, 1);
+            $records = [];
 
             foreach ($dataRows as $row) {
-                if (count($row) >= 15) {
+                if (count($row) < 16) {
+                    throw new \UnexpectedValueException('A work-hour spreadsheet row has fewer than 16 columns.');
+                }
+
                     $dateString = $row[5];
                     $date = Carbon::createFromFormat('d/m/Y', $dateString)->format('Y-m-d');
-                    $insertMaster = [
+                    $records[] = [
                         'teacher_name' => $row[0],
                         'teacher_code' => $row[1],
                         'student_name' => $row[2],
@@ -362,11 +365,21 @@ class WorkHourController extends Controller
                         'payment_per_hour' => $row[14],
                         'total_amount' => $row[15],
 
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
-
-                    WorkHour::create($insertMaster);
-                }
             }
+
+            if (empty($records)) {
+                throw new \UnexpectedValueException('The work-hour spreadsheet contains no importable rows.');
+            }
+
+            DB::transaction(function () use ($records) {
+                WorkHour::query()->delete();
+                foreach (array_chunk($records, 500) as $chunk) {
+                    WorkHour::insert($chunk);
+                }
+            });
             $timestamp = Carbon::now();
 
             return response()->json([
@@ -503,7 +516,8 @@ class WorkHourController extends Controller
                 $workhours->delete();
                 return response()->json(['success' => true, 'msg' => 'successfully deleted']);
             } catch (\Exception $e) {
-                return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+                report($e);
+                return response()->json(['success' => false, 'msg' => 'Unable to delete the work-hour record.'], 500);
             }
         }
     }
@@ -594,17 +608,22 @@ class WorkHourController extends Controller
         $callback = function () use ($workHours) {
             $file = fopen('php://output', 'w');
 
+            $safeCell = static function ($value) {
+                $value = (string) $value;
+                return preg_match('/^[=+\-@]/', $value) ? "'".$value : $value;
+            };
+
             fputcsv($file, ['ID', 'Teacher Name', 'Teacher Code', 'Student Name', 'Student Code', 'Date', 'Work Hour']);
 
             foreach ($workHours as $workHour) {
                 fputcsv($file, [
-                    $workHour->id,
-                    $workHour->teacher_name,
-                    $workHour->teacher_code,
-                    $workHour->student_name,
-                    $workHour->student_code,
-                    $workHour->date,
-                    $workHour->hour_taken,
+                    $safeCell($workHour->id),
+                    $safeCell($workHour->teacher_name),
+                    $safeCell($workHour->teacher_code),
+                    $safeCell($workHour->student_name),
+                    $safeCell($workHour->student_code),
+                    $safeCell($workHour->date),
+                    $safeCell($workHour->hour_taken),
 
                 ]);
             }

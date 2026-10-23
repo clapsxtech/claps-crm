@@ -7,6 +7,7 @@
     <title>Student Attendance Report Form</title>
     <link rel="stylesheet" href="{{ asset('frontent_form/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('frontent_form/daterangepicker.css') }}">
     <style>
         body {
@@ -116,7 +117,7 @@
     </style>
 </head>
 
-<body>
+<body class="public-page">
     <section class="h-100 gradient-custom">
         <div class="container py-5 h-100">
             <div class="row">

@@ -13,17 +13,10 @@ class StudentsController extends Controller
 {
     public function index(Request $request)
     {
-        // $this->sheetData();
         if ($request->ajax()) {
             $data = Students::select('id', 'student_name', 'student_code', 'status', 'hour_rate', 'category', 'source', 'hours')->orderBy('id', 'ASC');
-            // $data = Students::orderBy('id', 'ASC')->get();
             return DataTables::of($data)
                 ->addIndexColumn()
-                // ->addColumn('action', function ($row) {
-                //     $button = '<button type="button" data-href="' . route('general_services.edit', $row->id) . '" class="btn btn-xs btn-primary edit_button" data-container=".modal_class"><i class="fa fa-edit"></i></button>&nbsp';
-                //     $button .= '<button data-href="' . route('delete', ['general_services', $row->id]) . '" class="btn btn-xs btn-primary btn-modal"><i class="fa fa-trash"></i></button>';
-                //     return $button;
-                // })
                 ->filter(function ($instance) use ($request) {
                     if (!empty($request->get('search'))) {
                         $instance->where(function ($w) use ($request) {
@@ -32,7 +25,6 @@ class StudentsController extends Controller
                         });
                     }
                 })
-                // ->rawColumns(['action'])
                 ->make(true);
         }
         return view('admin.students.index');
@@ -81,72 +73,5 @@ class StudentsController extends Controller
     } else {
         return response()->json(['message' => 'Data not found']);
     }
-    }
-    
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

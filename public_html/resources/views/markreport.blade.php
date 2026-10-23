@@ -7,6 +7,7 @@
     <title>Mark Report Form</title>
     <link rel="stylesheet" href="{{ asset('frontent_form/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <style>
         body {
             margin: 0;
@@ -115,7 +116,7 @@
     </style>
 </head>
 
-<body>
+<body class="public-page">
     <section class="h-100 gradient-custom">
         <div class="container py-5 h-100">
             <div class="row">
@@ -198,8 +199,6 @@
                     d.teacher_name = $('#teacher_name').val();
                     d.dob = $('#dob').val();
                     d.student_name = $('#student_name').val();
-                    // d.fromdate = $('#fromdate').val();
-                    // d.filter_date_to = $('#todate').val();   
 
                 }
             },

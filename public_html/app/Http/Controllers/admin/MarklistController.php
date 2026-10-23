@@ -38,15 +38,6 @@ class MarklistController extends Controller
                     $button .= '<button data-href="' . route('delete', ['marklist', $row->id]) . '" class="btn btn-xs btn-danger btn-modal"><i class="fa fa-trash"></i></button>';
                     return $button;
                 })
-                // ->addColumn('status',function ($row) {
-                //     if($row->status==1){
-                //         return 'CONFIRMED';
-                //     }else if($row->status==2){
-                //         return 'TREATED';
-                //     }else if($row->status==3){
-                //         return 'CANCELLED';
-                //     }
-                // })
                 ->filter(function ($instance) use ($request) {
                     if (!empty($request->get('search'))) {
                         $instance->where(function ($w) use ($request) {
@@ -76,7 +67,6 @@ class MarklistController extends Controller
     ->where('status', 'Available✅')
     ->orderBy('teacher_name', 'asc') 
     ->get();
-        // dd($students);
         $subject = Subject::select('id','name')->get();
         return view('admin.marklist.create')->with(compact('subject','students','teachers'));
     }
@@ -172,7 +162,8 @@ class MarklistController extends Controller
     
             return response()->json(['success' => true, 'msg' => 'Successfully created']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+            report($e);
+            return response()->json(['success' => false, 'msg' => 'Unable to create the mark-list record.'], 500);
         }
     }
      public function store1(Request $request)
@@ -260,20 +251,10 @@ class MarklistController extends Controller
 
         return ['success' => true, 'msg' => 'successfully created and added to Google Sheet'];
     } catch (\Exception $e) {
-        return ['success' => false, 'msg' => $e->getMessage()];
+        report($e);
+        return ['success' => false, 'msg' => 'Unable to create the mark-list record.'];
     }
      }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -329,7 +310,8 @@ class MarklistController extends Controller
                 $marklist->save();
                 return ['success' => true,'msg' =>'successfully updated'];
             } catch (\Exception $e) {
-                return ['error' => false, 'msg' => $e->getMessage()];
+                report($e);
+                return ['success' => false, 'msg' => 'Unable to update the mark-list record.'];
             }
         }
     }
@@ -348,7 +330,8 @@ class MarklistController extends Controller
                 $departments->delete();
                 return response()->json(['success' => true,'msg' =>'successfully deleted']);
             } catch (\Exception $e) {
-                return response()->json(['success' => false,'msg' => $e->getMessage()]);
+                report($e);
+                return response()->json(['success' => false,'msg' => 'Unable to delete the mark-list record.'], 500);
             }
         }
     }

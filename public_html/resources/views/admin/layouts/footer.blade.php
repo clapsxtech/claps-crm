@@ -1,8 +1,8 @@
       <footer class="main-footer">
         <div class="float-right d-none d-sm-block">
-          <b>Version</b> 1.0.1.1
+          <b>Clapslearn</b> Admin
         </div>
-        <p>Copyright © {{date('Y')}} - <a href="www.zentrona.in">Razbiller</a>.  All rights reserved</p>
+        <span>© {{date('Y')}} Clapslearn. All rights reserved.</span>
       </footer>
     
       <!-- Control Sidebar -->
@@ -54,23 +54,35 @@
     <script src="{{asset('adminlte/bootstrap-colorpicker.min.js')}}"></script>
     <script src="{{asset('adminlte/jquery-ui.min.js')}}"></script>
 
+    <script>
+      toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        newestOnTop: true,
+        positionClass: 'toast-top-right',
+        timeOut: 3500
+      };
+
+      if ($.fn.dataTable) {
+        $.extend(true, $.fn.dataTable.defaults, {
+          pageLength: 25,
+          lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+          responsive: true,
+          autoWidth: false,
+          language: {
+            search: '',
+            searchPlaceholder: 'Search records…',
+            processing: 'Loading records…',
+            emptyTable: 'No records available',
+            zeroRecords: 'No matching records found'
+          }
+        });
+      }
+
+      $('[data-toggle="tooltip"]').tooltip();
+    </script>
+
     <script type="text/javascript" src="{{asset('core/js/jquery.magnific-popup.min.js')}}"></script>
     <script type="text/javascript" src="{{asset('core/js/slick.min.js')}}"></script>
     <script type="text/javascript" src="{{asset('core/js/custom.jquery.js')}}"></script>
     <script type="text/javascript" src="{{asset('adminlte/jquery.validate.min.js')}}"></script>
-    {{-- <script>
-      $(document).on('change','#category_id',function(){ 
-        var catId = $(this).val();
-        $.ajax({
-                method: "POST",
-                url: "{{route('subCategoryByCategoryID')}}",
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    catId:catId
-                    },
-                dataType: "json",
-                }).done(function( res ) {
-                    $('#sub_category_id').html(res.html);
-            });
-       });
-    </script> --}}

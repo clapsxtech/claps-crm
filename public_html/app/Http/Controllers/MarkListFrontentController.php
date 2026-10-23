@@ -11,52 +11,8 @@ use Google\Service\Sheets;
 use Google_Service_Sheets_ValueRange;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
-use Yajra\DataTables\Facades\DataTables;
 class MarkListFrontentController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     if ($request->ajax()) {
-    //         $data = WorkHour::select('id','teacher_name','teacher_code',
-    //         'student_name','student_code','subject','date','chapter',
-    //         'topic','topic','hour_taken','mark_confirmation','created_at'); 
-    //         return DataTables::of($data)
-    //                 ->addIndexColumn()
-    //                 ->addColumn('action', function ($row) {
-    //                     $button = '<button type="button" data-href="'.route('subjects.edit',$row->id).'" class="btn btn-xs btn-primary edit_button" data-container=".modal_class"><i class="fa fa-edit"></i></button>&nbsp';
-    //                     $button .='<button data-href="'.route('delete',['subjects',$row->id]).'" class="btn btn-xs btn-primary btn-modal"><i class="fa fa-trash"></i></button>';
-    //                     return $button;
-    //                 })
-    //                 ->addColumn('status', function ($row) {
-    //                     if($row->status==1){
-    //                        return 'ACTIVE';
-    //                     }elseif($row->status==0){
-    //                         return 'IN ACTIVE';
-    //                     }
-    //                 })
-    //                 ->filter(function ($instance) use ($request) {
-    //                     if (!empty($request->get('search'))) {
-    //                          $instance->where(function($w) use($request){
-    //                             $search = $request->get('search');
-    //                             $w->Where('name', 'LIKE', "%$search%");
-    //                         });
-    //                     }
-    //                 })
-    //                 ->rawColumns(['status','action'])
-    //                 ->make(true);
-    //     }
-    //     return view('admin.workhour.index');
-    // }
-
-    public function create()
-    {
-       $teachers = Master::select('teacher_name')
-    ->distinct()
-    ->orderBy('teacher_name', 'asc')
-    ->get();
-        $subject = Subject::select('id','name')->get();
-        return view('admin.workhour.create')->with(compact('teachers','subject'));
-    }
     public function getStudentinfo(Request $request)
    {
     $teacherName = $request->input('teacher_name');
@@ -170,7 +126,8 @@ public function store(Request $request)
 
        return response()->json(['success' => true, 'msg' => 'Successfully created']);
    } catch (\Exception $e) {
-       return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+       report($e);
+       return response()->json(['success' => false, 'msg' => 'Unable to save the result.'], 500);
    }
 }
   public function frontetMarkUploadCreate()

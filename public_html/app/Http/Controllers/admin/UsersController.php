@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class UsersController extends Controller
 { 
@@ -50,6 +53,7 @@ class UsersController extends Controller
             'phone'                             => 'required|min:10|max:10|unique:users',
             'password'                          => 'min:6|required_with:confirm_password|same:confirm_password',
             'confirm_password'                  => 'min:6',
+            'profile_photo'                     => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
         ];
         $messages = [
             'name.required'       => 'Name Required',
@@ -59,12 +63,12 @@ class UsersController extends Controller
             return response()->json(['error' => false, 'msg' => $validator->errors()->first()]);
         }
         $bank_details = array(
-            "account_holder_name" => $request->bank_details['account_holder_name'],
-            "account_number" => $request->bank_details['account_number'],
-            "bank_name" => $request->bank_details['bank_name'],
-            "bank_code" => $request->bank_details['bank_code'],
-            "branch" => $request->bank_details['branch'],
-            "tax_payer_id" => $request->bank_details['tax_payer_id']
+            "account_holder_name" => $request->input('bank_details.account_holder_name'),
+            "account_number" => $request->input('bank_details.account_number'),
+            "bank_name" => $request->input('bank_details.bank_name'),
+            "bank_code" => $request->input('bank_details.bank_code'),
+            "branch" => $request->input('bank_details.branch'),
+            "tax_payer_id" => $request->input('bank_details.tax_payer_id')
         );
         $address = array(
             "permanent_address" => $request->permanent_address,
@@ -75,9 +79,9 @@ class UsersController extends Controller
             if ($request->hasFile('profile_photo')) {
                 $path = public_path('/uploads/profile_photo');
                 if (!file_exists($path)) {
-                    File::makeDirectory($path, $mode = 0777, true, true);
+                    File::makeDirectory($path, 0755, true, true);
                 }
-                $imageName =  uniqid().'.'.$request->profile_photo->extension();
+                $imageName = Str::uuid().'.'.$request->file('profile_photo')->extension();
                 $request->profile_photo->move(public_path('/uploads/profile_photo'),$imageName);
                 $profile_photo = '/uploads/profile_photo/'.$imageName;
             }
@@ -107,7 +111,8 @@ class UsersController extends Controller
             $user->save();
             return ['success' => true,'msg' => "succussfully added"];
         } catch (\Exception $e) {
-            return ['error' => false,'msg' => $e->getMessage()];
+            Log::error('Unable to create user', ['exception' => $e]);
+            return ['success' => false, 'msg' => 'Unable to create the user.'];
         }
     }
 
@@ -122,10 +127,10 @@ class UsersController extends Controller
         if (request()->ajax()) {
             $rules = [
             'name'                              => 'required|string|min:3|max:30',
-            'email'                             => 'required|email|min:3|max:50',
-            'phone'                             => 'required|min:10|max:10',
-            'password'                          => 'required_with:confirm_password|same:confirm_password',
-            // 'confirm_password'                  => 'min:6',
+            'email'                             => ['required', 'email', 'min:3', 'max:50', Rule::unique('users')->ignore($id)],
+            'phone'                             => ['required', 'min:10', 'max:10', Rule::unique('users')->ignore($id)],
+            'password'                          => 'nullable|min:6|required_with:confirm_password|same:confirm_password',
+            'profile_photo'                     => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             ];
             $messages = [
                 'name.required'    => 'Name Required',
@@ -135,12 +140,12 @@ class UsersController extends Controller
                 return response()->json(['error' => false, 'msg' => $validator->errors()->first()]);
             }
             $bank_details = array(
-                "account_holder_name" => $request->bank_details['account_holder_name'],
-                "account_number" => $request->bank_details['account_number'],
-                "bank_name" => $request->bank_details['bank_name'],
-                "bank_code" => $request->bank_details['bank_code'],
-                "branch" => $request->bank_details['branch'],
-                "tax_payer_id" => $request->bank_details['tax_payer_id']
+                "account_holder_name" => $request->input('bank_details.account_holder_name'),
+                "account_number" => $request->input('bank_details.account_number'),
+                "bank_name" => $request->input('bank_details.bank_name'),
+                "bank_code" => $request->input('bank_details.bank_code'),
+                "branch" => $request->input('bank_details.branch'),
+                "tax_payer_id" => $request->input('bank_details.tax_payer_id')
             );
             $address = array(
                 "permanent_address" => $request->permanent_address,
@@ -149,7 +154,6 @@ class UsersController extends Controller
             try {
             $user = User::findOrFail($id);
             $newPassword = $request->password;
-            // print_r($newPassword);die;
             $user->business_id = Auth::user()->business_id;
             $user->name = $request->name;
             $user->email = $request->email;
@@ -168,10 +172,7 @@ class UsersController extends Controller
             $user->service_expiry = $request->service_expiry;
             $user->address = json_encode($address);
             $user->bank_details   = json_encode($bank_details);
-            if(empty($newPassword)){
-                $user->update($request->except('password'));
-            }else{
-                $user->update($request->all());
+            if (!empty($newPassword)) {
                 $user->password = Hash::make($request->password);
             }
 
@@ -179,14 +180,15 @@ class UsersController extends Controller
                     if(file_exists(public_path().$user->profile_photo) && !empty($user->profile_photo)){
                         unlink(public_path().$user->profile_photo);
                     }
-                    $file =  uniqid().'.'.$request->profile_photo->extension();
+                    $file = Str::uuid().'.'.$request->file('profile_photo')->extension();
                     $request->profile_photo->move(public_path('/uploads/profile_photo'),$file);
                     $user->profile_photo='/uploads/profile_photo/'.$file;
                 }
                 $user->save();
                 return response()->json(['success' => true,'msg' =>'successfully updated']);
             } catch (\Exception $e) {
-                return ['error' => false, 'msg' => $e->getMessage()];
+                Log::error('Unable to update user', ['user_id' => $id, 'exception' => $e]);
+                return ['success' => false, 'msg' => 'Unable to update the user.'];
             }
     }}
     public function Profile()
@@ -204,7 +206,8 @@ class UsersController extends Controller
                 $user->delete();
                 return response()->json(['success' => true,'msg' =>'successfully deleted']);
             } catch (\Exception $e) {
-                return response()->json(['error' => false,'msg' => $e->getMessage()]);
+                Log::error('Unable to delete user', ['user_id' => $id, 'exception' => $e]);
+                return response()->json(['success' => false, 'msg' => 'Unable to delete the user.'], 500);
             }
         }
     }
