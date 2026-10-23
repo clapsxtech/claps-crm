@@ -22,8 +22,8 @@ class MarklistController extends Controller
             // Public legacy rows store names; admin rows store string IDs.
             // Resolve only matching IDs/codes and retain names when no ID exists.
             $data = Marklist::query()
-                ->select('marklists.*', DB::raw('COALESCE(teachers.teacher_name, marklists.teacher_name) as teacher_name'),
-                    DB::raw('COALESCE(students.student_name, marklists.student_name) as student_name'), 'subjects.name as subject_name')
+                ->select('marklists.*', DB::raw('COALESCE(teachers.teacher_name, marklists.teacher_name) as resolved_teacher_name'),
+                    DB::raw('COALESCE(students.student_name, marklists.student_name) as resolved_student_name'), 'subjects.name as subject_name')
                 ->leftJoin('subjects', 'marklists.subject', '=', 'subjects.id')
                 ->leftJoin('students', function ($join) {
                     $join->on('marklists.student_name', '=', DB::raw('CAST(students.id AS CHAR)'))
@@ -34,7 +34,22 @@ class MarklistController extends Controller
                 })
                 ->orderByDesc('marklists.updated_at');
 
-            return DataTables::of($data)
+            $table = DataTables::of($data);
+            foreach ([
+                'teacher_name' => 'COALESCE(teachers.teacher_name, marklists.teacher_name)',
+                'student_name' => 'COALESCE(students.student_name, marklists.student_name)',
+                'teacher_code' => 'marklists.teacher_code',
+                'subject_name' => 'subjects.name',
+            ] as $column => $expression) {
+                $table->filterColumn($column, function ($query, $keyword) use ($expression) { $query->whereRaw($expression.' LIKE ?', ['%'.$keyword.'%']); });
+                $table->orderColumn($column, function ($query, $order) use ($expression) { $query->orderByRaw($expression.' '.(strtolower($order) === 'desc' ? 'DESC' : 'ASC')); });
+            }
+            return $table
+                // Distinct SQL aliases keep the derived count query valid on MySQL/MariaDB.
+                ->editColumn('teacher_name', function ($row) { return $row->resolved_teacher_name; })
+                ->editColumn('student_name', function ($row) { return $row->resolved_student_name; })
+                ->removeColumn('resolved_teacher_name')
+                ->removeColumn('resolved_student_name')
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
                     return '<button type="button" data-href="'.e(route('marklist.edit', $row->id)).'" data-keyboard="false" data-backdrop="static" class="btn btn-xs btn-primary edit_button" data-container=".modal_class"><i class="fa fa-edit"></i></button>';
@@ -110,3 +125,4 @@ class MarklistController extends Controller
         return response()->json(['success' => true, 'msg' => 'Successfully deleted locally.']);
     }
 }
+

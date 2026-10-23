@@ -195,11 +195,20 @@ class AccessPrivacyTest extends TestCase
     public function test_failed_timetable_insert_rolls_back_snapshot_delete(): void
     {
         $this->timetable();
-        DB::unprepared("CREATE TRIGGER reject_timetable BEFORE INSERT ON time_tables BEGIN SELECT RAISE(ABORT, 'Test insert failure'); END;");
+        // Inject once inside the service transaction, without DDL that implicitly commits on MySQL.
+        $armed = true;
+        DB::listen(function ($query) use (&$armed) {
+            $sql = str_replace(['`', '"'], '', strtolower($query->sql));
+            if ($armed && strpos($sql, 'insert into time_tables ') === 0) {
+                $armed = false;
+                throw new QueryException($query->sql, $query->bindings, new \RuntimeException('Synthetic insert failure'));
+            }
+        });
         try {
             $this->invokeSnapshot(new TimeTableController(), [['header'], ['New Student', '', '', '10:00', 'Mathematics', 'QA Teacher', '1']]);
             $this->fail('The insert should fail.');
         } catch (QueryException $exception) { $this->assertDatabaseCount('time_tables', 1); }
+        finally { $armed = false; }
         $this->assertDatabaseHas('time_tables', ['student_name' => 'QA Student']);
     }
 
@@ -211,3 +220,4 @@ class AccessPrivacyTest extends TestCase
         $this->assertDatabaseCount('marklist_reports', 1); $this->assertDatabaseCount('time_tables', 1);
     }
 }
+

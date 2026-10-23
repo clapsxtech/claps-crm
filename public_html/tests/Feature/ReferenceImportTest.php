@@ -142,10 +142,18 @@ class ReferenceImportTest extends TestCase
     public function test_database_failure_rolls_back_snapshot_deletion(): void
     {
         $this->createMaster(['student_code' => 'OLD']);
-        DB::unprepared("CREATE TRIGGER reject_master_insert BEFORE INSERT ON masters BEGIN SELECT RAISE(ABORT, 'synthetic failure'); END");
+        // Inject once inside the service transaction, without DDL that implicitly commits on MySQL.
+        $armed = true;
+        DB::listen(function ($query) use (&$armed) {
+            $sql = str_replace(['`', '"'], '', strtolower($query->sql));
+            if ($armed && strpos($sql, 'insert into masters ') === 0) {
+                $armed = false;
+                throw new QueryException($query->sql, $query->bindings, new \RuntimeException('Synthetic insert failure'));
+            }
+        });
         try { app(MasterController::class)->importSnapshot($this->values([$this->masterRow()])); $this->fail('Expected insertion failure.'); }
         catch (QueryException $exception) { $this->assertDatabaseHas('masters', ['student_code' => 'OLD']); }
-        finally { DB::unprepared('DROP TRIGGER reject_master_insert'); }
+        finally { $armed = false; }
     }
 
     public function test_google_omitted_trailing_optional_cells_are_preserved_as_empty_fields(): void
@@ -172,3 +180,4 @@ class ReferenceImportTest extends TestCase
         }
     }
 }
+

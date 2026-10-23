@@ -147,6 +147,18 @@ class ResultSubmissionTest extends TestCase
         $response = $this->getJson('/admin/marklist', ['X-Requested-With' => 'XMLHttpRequest'])->assertOk();
         $this->assertSame('QA Teacher', $response->json('data.0.teacher_name'));
         $this->assertSame('QA Student', $response->json('data.0.student_name'));
+        $query = ['draw'=>1,'start'=>0,'length'=>10,'search'=>['value'=>'QA','regex'=>false],
+            'order'=>[['column'=>0,'dir'=>'asc']],
+            'columns'=>array_map(function ($name) { return ['data'=>$name,'name'=>$name,'searchable'=>'true','orderable'=>'true','search'=>['value'=>'','regex'=>false]]; }, ['teacher_name','teacher_code','student_name','subject_name'])];
+        $searched = $this->getJson('/admin/marklist?'.http_build_query($query), ['X-Requested-With'=>'XMLHttpRequest'])->assertOk();
+        $this->assertSame(1, (int)$searched->json('recordsFiltered'));
+        $this->assertSame('QA Teacher', $searched->json('data.0.teacher_name'));
+        foreach ([1,2,3] as $column) {
+            $query['order'][0]['column']=$column;
+            $query['order'][0]['dir']='desc';
+            $this->getJson('/admin/marklist?'.http_build_query($query), ['X-Requested-With'=>'XMLHttpRequest'])->assertOk();
+        }
+
     }
 
     public function test_student_lookup_requires_verification_and_omits_credentials_and_rates(): void
@@ -205,3 +217,4 @@ class ResultSubmissionTest extends TestCase
     }
 
 }
+

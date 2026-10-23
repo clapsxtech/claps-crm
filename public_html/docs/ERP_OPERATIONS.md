@@ -35,7 +35,7 @@ The dashboard supports search and independent pagination for every register (50 
 
 See `ERP_MIGRATION.md` for read-only normalized preview. No importer or automatic Sheets conversion exists. Before cutover: map stable codes, reconcile historical attendance/opening balances at one cutoff, obtain verified source totals, resolve duplicate identities and rates, test on a cloned source, and approve reconciliation. Historical consumption must never be charged again on top of imported balances.
 
-Still required before full replacement: approved payroll/invoice policies and workflows, real-data import/reconciliation, partial-day availability exceptions, staff assignment administration, payment reversal/refund workflow, production MySQL concurrency validation, and browser acceptance on the intended host. The old teacher logging flow and normalized lesson attendance are separate until mapped during migration; do not dual-enter the same class in both systems as a financial source.
+Still required before full replacement: approved payroll/invoice policies and workflows, real-data import/reconciliation, partial-day availability exceptions, staff assignment administration, payment reversal/refund workflow, production-database-version acceptance, and browser acceptance on the intended host. The old teacher logging flow and normalized lesson attendance are separate until mapped during migration; do not dual-enter the same class in both systems as a financial source.
 
 No production deployment, source import, credential setup or external notification is performed by this code checkpoint.
 
@@ -48,3 +48,7 @@ In AA, register one student and one eligible teacher, assign a subject, and ente
 For duplicate testing, create two non-overlapping finished lessons for the same pair on one day. Import both before verification, then record the Gallabox reply and choose the erroneous attendance ID. Only its charge should reverse. Marking a genuine repeat must retain both charges without another debit. Test a holiday exception, a schedule replacement, and a second page of records before inviting staff to trial the testbed.
 
 These are test acceptance instructions, not instructions to run a production migration or perform payments. Receipt entry records a payment that already happened; it does not collect money.
+
+## Native database validation
+
+The MariaDB 10.11.18 default-database test configuration passes 186 tests / 1088 assertions after fresh-install and DataTables compatibility fixes. Some isolated service tests intentionally remain SQLite; the HTTP/default-database tests exercise native MariaDB. Four real two-process REPEATABLE READ concurrency probes also pass. See `ERP_MYSQL_TESTING.md` for the guarded opt-in harness. This does not certify other MySQL versions or replace acceptance on the intended host. Browser acceptance remains blocked because the supported cloud browser cannot reach the isolated test-server namespace.

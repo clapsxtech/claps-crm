@@ -23,7 +23,7 @@ class CreateGetStudentsTable extends Migration
             $table->string('section')->nullable();
             $table->string('number')->nullable();
             $table->string('total')->nullable();
-            $table->string('last_month ')->nullable();
+            $table->string('last_month')->nullable();
             $table->string('amount_recieved')->nullable();
             $table->string('staff_name')->nullable();
             $table->string('tt_hour')->nullable();
@@ -41,3 +41,4 @@ class CreateGetStudentsTable extends Migration
         Schema::dropIfExists('get_students');
     }
 }
+
