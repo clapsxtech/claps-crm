@@ -55,7 +55,7 @@ class ErpBusinessHttpTest extends TestCase
         $this->assertSame(0,DB::table('erp_ledger')->where('kind','teacher_payment')->count());
         $this->saved('salary-paid',$payload+['already_paid'=>'1'],'money');
         $paid=DB::table('erp_ledger')->where('reference','BHTTP-PAID')->first(); $this->assertSame(-12000,(int)$paid->amount_paise);
-        $this->get(route('erp.business',[$this->unit,'money']))->assertOk()->assertSee('BHTTP-PAID')->assertSee('8000');
+        $this->get(route('erp.business',[$this->unit,'money']))->assertOk()->assertSee('BHTTP-PAID')->assertSee('INR 80.00');
         $audit=json_decode(DB::table('erp_audit')->where('action','teacher_payment.recorded')->value('payload'),true); $this->assertFalse($audit['money_transferred_by_app']);
         $this->saved('salary-reverse',['entry_id'=>$paid->id,'reason'=>'Correct incorrectly recorded external salary payment'],'money');
         $this->assertSame(20000,(int)DB::table('erp_ledger')->where('teacher_id',$this->teacher)->sum('amount_paise'));

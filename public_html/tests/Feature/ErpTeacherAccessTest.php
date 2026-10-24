@@ -27,6 +27,7 @@ class ErpTeacherAccessTest extends TestCase
         Facade::clearResolvedInstances(); Facade::setFacadeApplication($this->container);
         require_once __DIR__.'/../../database/migrations/2026_10_23_130000_create_erp_core_tables.php'; (new \CreateErpCoreTables())->up();
         require_once __DIR__.'/../../database/migrations/2026_10_23_150000_create_erp_business_workflows.php'; (new \CreateErpBusinessWorkflows())->up();
+        require_once __DIR__.'/../../database/migrations/2026_10_23_170000_add_intervals_to_erp_exceptions.php'; (new \AddIntervalsToErpExceptions())->up();
         DB::table('erp_units')->insert([['id'=>1,'code'=>'SYN-AA','name'=>'Synthetic AA'],['id'=>2,'code'=>'SYN-BB','name'=>'Synthetic BB']]);
         DB::table('erp_teachers')->insert([['id'=>1,'user_id'=>11,'code'=>'SYN-T1','name'=>'Synthetic Teacher','timezone'=>'Asia/Kolkata','status'=>'active'],['id'=>2,'user_id'=>22,'code'=>'SYN-T2','name'=>'Other Teacher','timezone'=>'Asia/Kolkata','status'=>'active']]);
         DB::table('erp_teacher_units')->insert([['teacher_id'=>1,'unit_id'=>1],['teacher_id'=>2,'unit_id'=>2]]);

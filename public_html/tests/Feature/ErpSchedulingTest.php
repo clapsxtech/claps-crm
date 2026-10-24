@@ -29,6 +29,8 @@ class ErpSchedulingTest extends TestCase
         (new \CreateErpCoreTables())->up();
         require_once __DIR__.'/../../database/migrations/2026_10_23_140000_add_request_reference_to_erp_lessons.php';
         (new \AddRequestReferenceToErpLessons())->up();
+        require_once __DIR__.'/../../database/migrations/2026_10_23_170000_add_intervals_to_erp_exceptions.php';
+        (new \AddIntervalsToErpExceptions())->up();
         DB::table('erp_units')->insert(['id'=>1,'code'=>'TEST','name'=>'Synthetic unit','timezone'=>'Asia/Kolkata']);
         DB::table('erp_students')->insert(['id'=>1,'unit_id'=>1,'registered_on'=>'2027-01-01','code'=>'SYN-S1','name'=>'Synthetic Student','timezone'=>'Asia/Kolkata','status'=>'active','grade'=>'8','syllabus'=>'CBSE']);
         DB::table('erp_teachers')->insert(['id'=>1,'code'=>'SYN-T1','name'=>'Synthetic Teacher','timezone'=>'Asia/Kolkata','status'=>'active']);
@@ -246,6 +248,166 @@ class ErpSchedulingTest extends TestCase
         $this->rejects(fn()=> $this->service->reschedule(1,1,['lesson_id'=>$lessons[0]->id,'date'=>'2027-01-05','start_time'=>'11:00','timezone'=>'Asia/Kolkata','reason'=>'Move','teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>'call','confirmation_note'=>'Both confirmed']));
         $this->assertSame('cancelled',$this->service->cancel(1,1,['lesson_id'=>$lessons[0]->id,'reason'=>'Stop teaching'])->status);
         $this->assertSame('2027-01-15',$this->service->endAgreement(1,1,['agreement_id'=>$a->id,'ends_on'=>'2027-01-15'])->ends_on);
+    }
+    private function exceptionPayload(array $overrides=[]): array {
+        return array_merge(['student_id'=>1,'date'=>'2027-01-05','start_time'=>'11:00','end_time'=>'12:00','timezone'=>'Asia/Kolkata','reason'=>'Synthetic partial-day appointment'],$overrides);
+    }
+    public function test_partial_exceptions_are_payload_bound_audited_and_allow_multiple_adjacent_windows(): void {
+        $p=$this->exceptionPayload(); $first=$this->service->exception(1,1,$p);
+        $this->assertSame('2027-01-05 05:30:00',$first->starts_at); $this->assertSame('2027-01-05 06:30:00',$first->ends_at);
+        $this->assertSame('Asia/Kolkata',$first->timezone);
+        $this->assertSame($first->id,$this->service->exception(1,1,$p)->id);
+        foreach ([['reason'=>'Changed reason'],['timezone'=>'Asia/Colombo'],['start_time'=>'11:30','end_time'=>'12:30'],['start_time'=>'10:00','end_time'=>'13:00'],['start_time'=>'11:15','end_time'=>'11:45']] as $change) {
+            $this->rejects(fn()=> $this->service->exception(1,1,array_merge($p,$change)));
+        }
+        $this->rejects(fn()=> $this->service->exception(1,1,['student_id'=>1,'date'=>$p['date'],'reason'=>$p['reason']]));
+        $this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'12:00','end_time'=>'13:00']));
+        $this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'16:00','end_time'=>'17:00']));
+        $this->assertSame(3,DB::table('erp_exceptions')->count());
+        $this->assertSame(3,DB::table('erp_audit')->where('action','availability.exception_created')->count());
+        $audit=json_decode(DB::table('erp_audit')->where('entity_id',$first->id)->where('action','availability.exception_created')->value('payload'),true);
+        $this->assertFalse($audit['full_day']); $this->assertSame($first->starts_at,$audit['starts_at']); $this->assertSame($first->ends_at,$audit['ends_at']);
+        $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_partial_exception_only_blocks_overlapping_one_offs_with_half_open_boundaries(): void {
+        $e=$this->assignment(); $this->windows();
+        $this->service->exception(1,1,$this->exceptionPayload(['student_id'=>null,'teacher_id'=>1]));
+        foreach ([['start_time'=>'10:30','duration_minutes'=>60],['start_time'=>'11:00','duration_minutes'=>60],['start_time'=>'11:59','duration_minutes'=>2],['start_time'=>'10:00','duration_minutes'=>180]] as $change) {
+            $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$this->extraPayload($e,$change)));
+        }
+        $before=$this->service->scheduleExtra(1,1,$this->extraPayload($e,['start_time'=>'10:00','duration_minutes'=>60,'reference'=>'ADJACENT-BEFORE']));
+        $after=$this->service->scheduleExtra(1,1,$this->extraPayload($e,['start_time'=>'12:00','duration_minutes'=>60,'reference'=>'ADJACENT-AFTER']));
+        $this->assertSame('2027-01-05 05:30:00',$before->ends_at); $this->assertSame('2027-01-05 06:30:00',$after->starts_at);
+        $this->assertSame(2,DB::table('erp_lessons')->count()); $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_partial_exception_preserves_existing_lessons_and_requires_only_overlaps_be_resolved(): void {
+        $e=$this->assignment(); $this->windows(); $lesson=$this->service->scheduleExtra(1,1,$this->extraPayload($e,['duration_minutes'=>60]));
+        $this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'10:00','end_time'=>'11:00']));
+        $this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'12:00','end_time'=>'13:00']));
+        $p=$this->exceptionPayload(['start_time'=>'11:15','end_time'=>'11:45']);
+        $this->rejects(fn()=> $this->service->exception(1,1,$p));
+        $this->assertSame('scheduled',DB::table('erp_lessons')->where('id',$lesson->id)->value('status'));
+        $this->assertSame(2,DB::table('erp_exceptions')->count());
+        $this->service->cancel(1,1,['lesson_id'=>$lesson->id,'reason'=>'Explicitly resolved before exception']);
+        $this->service->exception(1,1,$p);
+        $this->assertSame('cancelled',DB::table('erp_lessons')->where('id',$lesson->id)->value('status'));
+        $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_recurring_confirmation_checks_actual_interval_not_the_entire_exception_date(): void {
+        $e=$this->assignment(); $this->windows();
+        $this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-01-04','start_time'=>'10:30','end_time'=>'11:30']));
+        $before=$this->confirm($this->agreement($e,['start_time'=>'09:30','ends_on'=>'2027-01-04']));
+        $this->assertSame('confirmed',$before->status);
+        $blocked=$this->agreement($e,['start_time'=>'10:30','ends_on'=>'2027-01-04']);
+        $this->rejects(fn()=> $this->confirm($blocked));
+        $after=$this->confirm($this->agreement($e,['start_time'=>'11:30','ends_on'=>'2027-01-04']));
+        $this->assertCount(1,$this->service->materialize(1,1,['agreement_id'=>$before->id,'from'=>'2027-01-04','through'=>'2027-01-04']));
+        $this->assertCount(1,$this->service->materialize(1,1,['agreement_id'=>$after->id,'from'=>'2027-01-04','through'=>'2027-01-04']));
+        $this->assertSame('proposed',DB::table('erp_agreements')->where('id',$blocked->id)->value('status'));
+        $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_partial_exception_added_after_confirmation_blocks_materialization_atomically(): void {
+        $this->windows(); $a=$this->confirm($this->agreement($this->assignment()));
+        $this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-01-11','start_time'=>'10:30','end_time'=>'11:30']));
+        $this->rejects(fn()=> $this->service->materialize(1,1,['agreement_id'=>$a->id,'from'=>'2027-01-04','through'=>'2027-01-18']));
+        $this->assertSame(0,DB::table('erp_lessons')->count());
+        $this->assertSame(0,DB::table('erp_audit')->where('action','lessons.materialized')->count());
+        $this->assertCount(1,$this->service->materialize(1,1,['agreement_id'=>$a->id,'from'=>'2027-01-04','through'=>'2027-01-04']));
+        $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_partial_exception_protects_reschedules_without_mutating_original_on_failure(): void {
+        [$a,$lessons]=$this->generated(); $original=$lessons[0];
+        $this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'12:00','end_time'=>'13:00']));
+        $p=['lesson_id'=>$original->id,'date'=>'2027-01-05','start_time'=>'12:00','timezone'=>'Asia/Kolkata','reason'=>'Move lesson','teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>'call','confirmation_note'=>'Synthetic renewed bilateral confirmation'];
+        $this->rejects(fn()=> $this->service->reschedule(1,1,$p));
+        $this->assertSame('scheduled',DB::table('erp_lessons')->where('id',$original->id)->value('status'));
+        $this->assertSame(0,DB::table('erp_lessons')->whereNotNull('replaces_lesson_id')->count());
+        $replacement=$this->service->reschedule(1,1,array_merge($p,['start_time'=>'11:00']));
+        $this->assertSame($original->id,(int)$replacement->replaces_lesson_id);
+        $this->assertSame('2027-01-05 06:30:00',$replacement->ends_at);
+        $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_exception_timezone_snapshot_spans_utc_dates_and_survives_profile_change(): void {
+        $e=$this->assignment(); $this->windows();
+        $p=$this->exceptionPayload(['student_id'=>null,'teacher_id'=>1,'date'=>'2027-01-03','start_time'=>'20:00','end_time'=>'21:00','timezone'=>'America/Los_Angeles']);
+        $exception=$this->service->exception(1,1,$p);
+        $this->assertSame('2027-01-04 04:00:00',$exception->starts_at); $this->assertSame('2027-01-04 05:00:00',$exception->ends_at);
+        DB::table('erp_teachers')->where('id',1)->update(['timezone'=>'Pacific/Auckland']);
+        $this->assertSame($exception->id,$this->service->exception(1,1,$p)->id);
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$this->extraPayload($e,['date'=>'2027-01-04','start_time'=>'10:00'])));
+        $this->service->scheduleExtra(1,1,$this->extraPayload($e,['date'=>'2027-01-03','start_time'=>'10:00']));
+        $this->assertSame(1,DB::table('erp_lessons')->count());
+    }
+    public function test_full_day_snapshots_and_legacy_rows_keep_distinct_timezone_semantics(): void {
+        $e=$this->assignment(); $this->windows();
+        $full=$this->service->exception(1,1,['teacher_id'=>1,'date'=>'2027-01-05','reason'=>'New full day']);
+        $this->assertSame('2027-01-04 18:30:00',$full->starts_at); $this->assertSame('2027-01-05 18:30:00',$full->ends_at);
+        $this->assertSame('Asia/Kolkata',$full->timezone);
+        $audit=json_decode(DB::table('erp_audit')->where('action','availability.exception_created')->value('payload'),true); $this->assertTrue($audit['full_day']);
+        DB::table('erp_teachers')->where('id',1)->update(['timezone'=>'America/Los_Angeles']);
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$this->extraPayload($e,['start_time'=>'08:00'])));
+        $this->service->scheduleExtra(1,1,$this->extraPayload($e,['date'=>'2027-01-06','start_time'=>'08:00','reference'=>'AFTER-SNAPSHOT-DAY']));
+        $legacyId=DB::table('erp_exceptions')->insertGetId(['unit_id'=>1,'teacher_id'=>1,'date'=>'2027-01-03','reason'=>'Legacy teacher day']);
+        $legacy=$this->service->exception(1,1,['teacher_id'=>1,'date'=>'2027-01-03','reason'=>'Legacy teacher day']);
+        $this->assertSame($legacyId,$legacy->id); $this->assertNull($legacy->starts_at); $this->assertNull($legacy->ends_at); $this->assertNull($legacy->timezone);
+        $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$this->extraPayload($e,['date'=>'2027-01-04','start_time'=>'10:00'])));
+        $this->rejects(fn()=> $this->service->exception(1,1,$this->exceptionPayload(['student_id'=>null,'teacher_id'=>1,'date'=>'2027-01-03','timezone'=>'America/Los_Angeles'])));
+        $this->assertSame(1,DB::table('erp_audit')->where('action','availability.exception_created')->count());
+    }
+    public function test_partial_exception_inputs_reject_missing_pairs_overnight_and_dst_wall_times(): void {
+        foreach ([['start_time'=>null],['end_time'=>''],['timezone'=>''],['timezone'=>'Not/AZone'],['end_time'=>'11:00'],['start_time'=>'23:00','end_time'=>'01:00'],['start_time'=>'11:00:00'],['date'=>'2027-03-14','start_time'=>'02:30','end_time'=>'04:00','timezone'=>'America/New_York'],['date'=>'2027-03-14','start_time'=>'01:00','end_time'=>'02:30','timezone'=>'America/New_York'],['date'=>'2027-11-07','start_time'=>'01:30','end_time'=>'03:00','timezone'=>'America/New_York'],['date'=>'2027-11-07','start_time'=>'00:30','end_time'=>'01:30','timezone'=>'America/New_York']] as $change) {
+            $this->rejects(fn()=> $this->service->exception(1,1,$this->exceptionPayload($change)));
+        }
+        $this->assertSame(0,DB::table('erp_exceptions')->count()); $this->assertSame(0,DB::table('erp_audit')->count());
+        $spring=$this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-03-14','start_time'=>'01:30','end_time'=>'03:30','timezone'=>'America/New_York']));
+        $this->assertSame(3600,strtotime($spring->ends_at.' UTC')-strtotime($spring->starts_at.' UTC'));
+        $fall=$this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-11-07','start_time'=>'00:30','end_time'=>'02:30','timezone'=>'America/New_York']));
+        $this->assertSame(10800,strtotime($fall->ends_at.' UTC')-strtotime($fall->starts_at.' UTC'));
+    }
+    public function test_midnight_endpoint_allows_exact_day_splits_but_rejects_dst_midnight_gaps_and_folds(): void {
+        $late=$this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'23:00','end_time'=>'00:00']));
+        $this->assertSame('2027-01-05 17:30:00',$late->starts_at); $this->assertSame('2027-01-05 18:30:00',$late->ends_at);
+        $early=$this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-01-06','start_time'=>'00:00','end_time'=>'01:00']));
+        $this->assertSame($late->ends_at,$early->starts_at);
+        $this->assertSame($late->id,$this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'23:00','end_time'=>'00:00']))->id);
+        $this->rejects(fn()=> $this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'00:00','end_time'=>'00:00'])));
+        // Beirut skips the next day's 00:00; Havana repeats it. Neither endpoint is silently shifted.
+        $this->rejects(fn()=> $this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-03-27','start_time'=>'23:00','end_time'=>'00:00','timezone'=>'Asia/Beirut'])));
+        $this->rejects(fn()=> $this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-11-06','start_time'=>'23:00','end_time'=>'00:00','timezone'=>'America/Havana'])));
+        $this->assertSame(2,DB::table('erp_exceptions')->count()); $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_interval_exceptions_preserve_unit_and_single_teacher_pool_guards(): void {
+        $p=$this->exceptionPayload();
+        $this->rejects(fn()=> $this->service->exception(2,1,$p));
+        $this->rejects(fn()=> $this->service->exception(2,1,array_merge($p,['student_id'=>null,'teacher_id'=>1])));
+        $this->rejects(fn()=> $this->service->exception(1,1,array_merge($p,['teacher_id'=>1])));
+        Capsule::schema()->drop('erp_teacher_units');
+        Capsule::schema()->create('erp_teacher_units',function($t) { $t->increments('id'); $t->integer('teacher_id'); $t->integer('unit_id'); });
+        DB::table('erp_teacher_units')->insert([['teacher_id'=>1,'unit_id'=>1],['teacher_id'=>1,'unit_id'=>2]]);
+        $this->rejects(fn()=> $this->service->exception(1,1,array_merge($p,['student_id'=>null,'teacher_id'=>1])));
+        $this->assertSame(0,DB::table('erp_exceptions')->count());
+    }
+    public function test_malformed_hybrid_snapshots_fail_closed_in_recording_and_scheduling(): void {
+        $e=$this->assignment(); $this->windows();
+        foreach ([['starts_at'=>'2027-01-05 05:30:00'],['ends_at'=>'2027-01-05 06:30:00'],['timezone'=>'Asia/Kolkata'],['starts_at'=>'2027-01-05 05:30:00','ends_at'=>'2027-01-05 06:30:00'],['starts_at'=>'2027-01-05 06:30:00','ends_at'=>'2027-01-05 05:30:00','timezone'=>'Asia/Kolkata']] as $partial) {
+            $id=DB::table('erp_exceptions')->insertGetId(array_merge(['unit_id'=>1,'student_id'=>1,'date'=>'2027-01-05','reason'=>'Synthetic corrupt fixture'],$partial));
+            $this->rejects(fn()=> $this->service->scheduleExtra(1,1,$this->extraPayload($e)));
+            $this->rejects(fn()=> $this->service->exception(1,1,$this->exceptionPayload(['start_time'=>'15:00','end_time'=>'16:00'])));
+            DB::table('erp_exceptions')->where('id',$id)->delete();
+        }
+        $this->assertSame(0,DB::table('erp_lessons')->count()); $this->assertSame(0,DB::table('erp_ledger')->count());
+    }
+    public function test_exception_migration_preserves_legacy_data_and_refuses_destructive_snapshot_rollback(): void {
+        $migration=new \AddIntervalsToErpExceptions(); $migration->down();
+        $id=DB::table('erp_exceptions')->insertGetId(['unit_id'=>1,'student_id'=>1,'date'=>'2027-01-05','reason'=>'Untouched old holiday','created_at'=>'2026-01-01 00:00:00']);
+        $migration->up();
+        $saved=DB::table('erp_exceptions')->where('id',$id)->first();
+        $this->assertNull($saved->starts_at); $this->assertNull($saved->ends_at); $this->assertNull($saved->timezone);
+        $this->assertSame('Untouched old holiday',$saved->reason); $this->assertSame('2026-01-01 00:00:00',$saved->created_at);
+        $this->service->exception(1,1,$this->exceptionPayload(['date'=>'2027-01-06']));
+        try { $migration->down(); $this->fail('Snapshot data must not be reinterpreted by rollback.'); }
+        catch (\RuntimeException $expected) { $this->assertStringContainsString('Cannot remove exception intervals',$expected->getMessage()); }
+        $this->assertTrue(Capsule::schema()->hasColumn('erp_exceptions','starts_at')); $this->assertSame(2,DB::table('erp_exceptions')->count());
     }
     public function test_dst_nonexistent_and_ambiguous_times_are_rejected(): void {
         $this->rejects(fn()=> $this->service->localToUtc('2027-03-14','02:30','America/New_York'));

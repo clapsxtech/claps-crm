@@ -53,6 +53,17 @@ function migrationProvenance(string $cutoff): void {
     }
 }
 function executeOperation(string $operation, string $dir, string $name): array {
+    if (in_array($operation, ['interval_exception_hold','interval_extra_hold','interval_materialize_hold'], true)) {
+        return DB::transaction(function() use($operation,$dir,$name) {
+            DB::table('erp_teachers')->where('id',1)->lockForUpdate()->first();
+            DB::table('erp_students')->where('id',1)->lockForUpdate()->first();
+            mark($dir.'/'.$name.'.locked'); awaitFile($dir.'/release');
+            return executeOperation(substr($operation,0,-5),$dir,$name);
+        });
+    }
+    if ($operation === 'interval_exception') return (array)(new Scheduling())->exception(1,1,['teacher_id'=>1,'date'=>'2026-01-05','start_time'=>'10:30','end_time'=>'11:30','timezone'=>'UTC','reason'=>'Synthetic concurrent partial-day exception']);
+    if ($operation === 'interval_extra') return (array)(new Scheduling())->scheduleExtra(1,1,['enrollment_id'=>1,'date'=>'2026-01-05','start_time'=>'10:00','duration_minutes'=>60,'timezone'=>'UTC','kind'=>'extra','teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>'call','confirmation_note'=>'Synthetic bilateral confirmation','reference'=>'INTERVAL-CONCURRENT-EXTRA']);
+    if ($operation === 'interval_materialize') return (new Scheduling())->materialize(1,1,['agreement_id'=>1,'from'=>'2026-01-05','through'=>'2026-01-05']);
     if ($operation === 'cutoff_hold') return DB::transaction(function() use($dir,$name) {
         DB::table('erp_teachers')->where('id',1)->lockForUpdate()->first();
         DB::table('erp_students')->where('id',1)->lockForUpdate()->first();
@@ -113,7 +124,14 @@ if (($argv[1] ?? '') === 'worker') {
             }
         });
         mark($dir.'/'.$name.'.ready'); awaitFile($dir.'/start');
-        $result = executeOperation($operation, $dir, $name);
+        if ($name === 'waiter' && in_array($operation,['interval_exception','interval_extra','interval_materialize'],true)) {
+            $result = DB::transaction(function() use($operation,$dir,$name) {
+                // Establish a stale REPEATABLE READ snapshot before waiting for the participant lock.
+                DB::table('erp_exceptions')->where('unit_id',1)->get();
+                mark($dir.'/'.$name.'.discovered');
+                return executeOperation($operation,$dir,$name);
+            });
+        } else $result = executeOperation($operation, $dir, $name);
         file_put_contents($dir.'/'.$name.'.json', json_encode(['ok' => true, 'result' => $result], JSON_THROW_ON_ERROR));
     } catch (Throwable $e) {
         file_put_contents($dir.'/'.$name.'.json', json_encode(['ok' => false, 'class' => get_class($e), 'message' => $e->getMessage()], JSON_THROW_ON_ERROR));
@@ -122,12 +140,14 @@ if (($argv[1] ?? '') === 'worker') {
 }
 
 require_once $base.'/database/migrations/2026_10_23_130000_create_erp_core_tables.php';
+require_once $base.'/database/migrations/2026_10_23_140000_add_request_reference_to_erp_lessons.php';
 require_once $base.'/database/migrations/2026_10_23_150000_create_erp_business_workflows.php';
 require_once $base.'/database/migrations/2026_10_23_160000_index_erp_migration_targets.php';
+require_once $base.'/database/migrations/2026_10_23_170000_add_intervals_to_erp_exceptions.php';
 function resetFixture(): void {
     $migration = new CreateErpCoreTables();
     $business = new CreateErpBusinessWorkflows();
-    $business->down(); $migration->down(); $migration->up(); $business->up(); (new IndexErpMigrationTargets())->up();
+    $business->down(); $migration->down(); $migration->up(); (new AddRequestReferenceToErpLessons())->up(); $business->up(); (new IndexErpMigrationTargets())->up(); (new AddIntervalsToErpExceptions())->up();
     DB::table('erp_units')->insert(['id' => 1, 'code' => 'PROBE', 'name' => 'Synthetic concurrency unit', 'timezone' => 'UTC']);
     DB::table('erp_students')->insert(['id' => 1, 'unit_id' => 1, 'code' => 'PROBE-S', 'name' => 'Synthetic student', 'registered_on' => '2026-01-01', 'timezone' => 'UTC', 'status' => 'active', 'grade' => '8', 'syllabus' => 'Synthetic']);
     DB::table('erp_teachers')->insert(['id' => 1, 'code' => 'PROBE-T', 'name' => 'Synthetic teacher', 'timezone' => 'UTC', 'status' => 'active']);
@@ -173,6 +193,22 @@ function requestFixture(string $reference): void {
 }
 function receiptFixture(string $reference): void {
     (new Finance())->payment(1,1,['student_id'=>1,'amount_paise'=>10000,'reference'=>$reference]);
+}
+
+function intervalFixture(bool $recurring = false): void {
+    resetFixture(); DB::table('erp_lessons')->delete();
+    foreach (['student_id'=>1,'teacher_id'=>1] as $field=>$id) {
+        (new Scheduling())->availability(1,1,[$field=>$id,'weekday'=>1,'start_time'=>'09:00','end_time'=>'13:00','timezone'=>'UTC','starts_on'=>'2026-01-05','ends_on'=>'2026-01-05']);
+    }
+    if ($recurring) {
+        $agreement=(new Scheduling())->proposeAgreement(1,1,['enrollment_id'=>1,'weekday'=>1,'start_time'=>'10:00','duration_minutes'=>60,'timezone'=>'UTC','starts_on'=>'2026-01-05','ends_on'=>'2026-01-05']);
+        (new Scheduling())->confirmAgreement(1,1,['agreement_id'=>$agreement->id,'teacher_confirmed'=>true,'student_confirmed'=>true,'confirmation_channel'=>'call','confirmation_note'=>'Synthetic recurring confirmation before concurrent exception']);
+    }
+}
+function intervalRaceResult(array $results, bool $exceptionWins): void {
+    check($results['holder']['ok'] && !$results['waiter']['ok'] && $results['waiter']['class']===Illuminate\Validation\ValidationException::class, 'Overlapping lesson and exception did not serialize to a domain rejection: '.json_encode($results));
+    check(DB::table('erp_exceptions')->count()===($exceptionWins?1:0) && DB::table('erp_lessons')->count()===($exceptionWins?0:1), 'Concurrent interval conflict left missing or overlapping scheduling records.');
+    check(DB::table('erp_ledger')->count()===0 && DB::table('erp_attendance')->count()===0, 'Exception/scheduling race created financial or attendance events.');
 }
 
 $report=['database'=>$database,'server'=>DB::selectOne('SELECT VERSION() AS version')->version,'isolation'=>'REPEATABLE READ','scenarios'=>[]];
@@ -265,6 +301,19 @@ try {
     check(DB::table('erp_attendance')->count()===2, 'Unrelated mapped parties did not both submit.');
     check(DB::table('erp_audit')->where('action','attendance.submitted')->count()===2 && DB::table('erp_ledger')->count()===2, 'Retried submission duplicated audit or posted financial events.');
     $report['scenarios']['unrelated_parties_share_immutable_batch_current_read']='PASS';
+    intervalFixture(); $r=simultaneous('interval_exception','same_partial_exception'); allOk($r);
+    check($r['a']['result']['id']===$r['b']['result']['id'] && DB::table('erp_exceptions')->count()===1, 'Concurrent exception replay created duplicate rows.');
+    check(DB::table('erp_audit')->where('action','availability.exception_created')->count()===1 && DB::table('erp_lessons')->count()===0 && DB::table('erp_ledger')->count()===0, 'Concurrent exception replay duplicated audit or changed teaching/finance.');
+    $report['scenarios']['same_partial_exception_concurrent_replay']='PASS';
+
+    intervalFixture(); $r=interleaved('interval_exception_hold','interval_extra','exception_before_extra'); intervalRaceResult($r,true);
+    $report['scenarios']['partial_exception_before_one_off_current_read']='PASS';
+    intervalFixture(); $r=interleaved('interval_extra_hold','interval_exception','extra_before_exception'); intervalRaceResult($r,false);
+    $report['scenarios']['one_off_before_partial_exception_current_read']='PASS';
+    intervalFixture(true); $r=interleaved('interval_exception_hold','interval_materialize','exception_before_materialize'); intervalRaceResult($r,true);
+    $report['scenarios']['partial_exception_before_materialization_current_read']='PASS';
+    intervalFixture(true); $r=interleaved('interval_materialize_hold','interval_exception','materialize_before_exception'); intervalRaceResult($r,false);
+    $report['scenarios']['materialization_before_partial_exception_current_read']='PASS';
     $report['status']='PASS';
 } catch (Throwable $e) { $report['status']='FAIL'; $report['error']=$e->getMessage(); }
 file_put_contents($artifactRoot.'/last-result.json',json_encode($report,JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR));

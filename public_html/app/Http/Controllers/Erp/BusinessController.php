@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Erp;
 use App\Http\Controllers\Controller;
-use App\Modules\Erp\Services\{Access,People,MoneyOperations,Operations};
+use App\Modules\Erp\Services\{Access,People,MoneyOperations,Operations,MoneyInput};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 class BusinessController extends Controller
@@ -28,6 +28,10 @@ class BusinessController extends Controller
         }
         $tables=['dashboard'=>['tasks','duplicate_reviews'],'money'=>['payment_requests','ledger'],'followups'=>['tasks','task_items','followups'],'staff'=>['memberships'],'migration'=>['migration_history'],'attendance'=>['attendance','duplicate_reviews'],'timetable'=>['agreements','exceptions']];
         foreach($tables[$page]??[] as $table){$query=DB::table('erp_'.$table)->where('unit_id',$unit);if($page==='dashboard'&&$table==='tasks')$query->where('status','!=','completed');if($page==='dashboard'&&$table==='duplicate_reviews')$query->where('status','pending');$data[$table]=$query->orderByDesc('id')->paginate(25,['*'],$table.'_page')->withQueryString();}
+        if(isset($data['tasks'])){
+            $remaining=DB::table('erp_task_items')->where('unit_id',$unit)->whereIn('task_id',$data['tasks']->pluck('id'))->whereNull('completed_at')->select('task_id')->selectRaw('COUNT(*) AS remaining')->groupBy('task_id')->pluck('remaining','task_id');
+            foreach($data['tasks'] as $task)$task->remaining_items=(int)($remaining[$task->id]??0);
+        }
         if(isset($data['payment_requests'])){$summaries=(new \App\Modules\Erp\Services\Reporting())->requestSummaries($unit,$data['payment_requests']->pluck('id')->all());foreach($data['payment_requests'] as $row)foreach($summaries[$row->id] as $key=>$value)$row->$key=$value;}
         if($page==='followups'){ $latest=DB::table('erp_followups')->where('unit_id',$unit)->select(DB::raw('MAX(id) AS id'))->groupBy('student_id');$data['followup_due']=DB::table('erp_followups')->where('unit_id',$unit)->whereIn('id',$latest)->whereNotNull('next_due_on')->where('next_due_on','<=',now($business->timezone)->toDateString())->orderBy('next_due_on')->paginate(25,['*'],'followup_due_page')->withQueryString(); }
         if($page==='migration')$reconciliation=(new \App\Modules\Erp\Services\Reporting())->reconciliation($unit);else $reconciliation=null;
@@ -37,15 +41,17 @@ class BusinessController extends Controller
             $filters=$request->validate(['date'=>'nullable|date_format:Y-m-d|after_or_equal:2000-01-03|before_or_equal:2099-12-27','student'=>'nullable|string|max:100','teacher'=>'nullable|string|max:100','status'=>'nullable|in:scheduled,completed,cancelled,rescheduled,no_show']);
             $timetable=(new \App\Modules\Erp\Services\Timetable())->week($unit,$business->timezone,$filters);
         }
+        $queues=in_array($page,['dashboard','attendance'])?(new \App\Modules\Erp\Services\WorkQueues())->attendance($unit):null;
+        $labels=(new \App\Modules\Erp\Services\RecordLabels())->forPages($unit,$data);
         $forms=config('erp_forms.'.$page,[]);
-        return view('erp.business',compact('business','page','pages','data','metrics','forms','reconciliation','timetable'));
+        return view('erp.business',compact('business','page','pages','data','metrics','forms','reconciliation','timetable','queues','labels'));
     }
     public function mutate(Request $request,int $unit,string $action)
     {
         (new Access())->unit($request->user(),$unit);$map=[
             'student-update'=>[Operations::class,'updateStudent'],'task-update'=>[Operations::class,'updateTask'],'task-item'=>[Operations::class,'addTaskItem'],'task-item-complete'=>[Operations::class,'completeTaskItem'],'followup'=>[Operations::class,'recordFollowup'],'membership-grant'=>[Operations::class,'grantMembership'],'membership-revoke'=>[Operations::class,'revokeMembership'],'teacher-link'=>[Operations::class,'linkTeacherUser'],'teacher-unlink'=>[Operations::class,'unlinkTeacherUser'],
             'salary-paid'=>[MoneyOperations::class,'recordTeacherPayment'],'salary-reverse'=>[MoneyOperations::class,'reverseTeacherPayment'],'receipt-reverse'=>[MoneyOperations::class,'reverseReceipt'],'receipt-correct'=>[MoneyOperations::class,'correctReceipt'],'request-create'=>[MoneyOperations::class,'createPaymentRequest'],'request-cancel'=>[MoneyOperations::class,'cancelPaymentRequest'],'request-allocate'=>[MoneyOperations::class,'allocateReceipt']];
-        abort_unless(isset($map[$action]),404);[$class,$method]=$map[$action];$payload=$request->except('_token','return_page');if(in_array($action,['student-update','task-update'])){
+        abort_unless(isset($map[$action]),404);[$class,$method]=$map[$action];$payload=MoneyInput::forAction($request->except('_token','return_page'),$action);if(in_array($action,['student-update','task-update'])){
             $clearable=$action==='student-update'?['guardian_contact','meeting_url']:['notes','student_id','assigned_to','due_on'];
             $clear=$request->input('clear_fields',[]);$request->validate(['clear_fields'=>'sometimes|array','clear_fields.*'=>'string|in:'.implode(',',$clearable)]);
             $payload=array_filter($payload,function($v){return $v!==null&&$v!=='';});unset($payload['clear_fields']);

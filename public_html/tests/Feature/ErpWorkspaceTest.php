@@ -80,7 +80,7 @@ class ErpWorkspaceTest extends TestCase
         $this->assertTrue($reapproved['student_financial_posted']);
         $this->assertSame(3000, (int) DB::table('erp_ledger')->where('teacher_id', $teacher['id'])->sum('amount_paise'));
         $this->assertSame(14000, (int) DB::table('erp_ledger')->where('student_id', $student['id'])->sum('amount_paise'));
-        $workspace = $this->get('/erp/units/'.$this->unit)->assertOk()->assertSee('approved accrual paise')->assertSee('not proof of payment');
+        $workspace = $this->get('/erp/units/'.$this->unit)->assertOk()->assertSee('approved earnings (INR)')->assertSee('not proof of payment');
         $this->assertSame(3000, $workspace->viewData('data')['teachers']->first()->approved_accrual_paise);
         $this->assertSame(2, DB::table('erp_attendance_batches')->count());
         $this->assertDatabaseHas('erp_audit', ['action' => 'attendance.corrected', 'actor_id' => $this->admin->id]);

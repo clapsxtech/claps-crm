@@ -102,7 +102,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "student_id",
-          "label": "Student Id",
+          "label": "Student",
           "type": "lookup",
           "required": true,
           "options": [
@@ -181,7 +181,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "student_id",
-          "label": "Student Id",
+          "label": "Student",
           "type": "lookup",
           "required": true,
           "options": [
@@ -189,9 +189,9 @@ return json_decode(<<<'JSON'
           ]
         },
         {
-          "name": "amount_paise",
-          "label": "Amount Paise",
-          "type": "number",
+          "name": "amount_inr",
+          "label": "Amount (INR)",
+          "type": "money",
           "required": true,
           "options": null
         },
@@ -212,7 +212,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "student_id",
-          "label": "Student Id",
+          "label": "Student",
           "type": "lookup",
           "required": true,
           "options": [
@@ -220,9 +220,9 @@ return json_decode(<<<'JSON'
           ]
         },
         {
-          "name": "amount_paise",
-          "label": "Amount Paise",
-          "type": "number",
+          "name": "amount_inr",
+          "label": "Amount (INR)",
+          "type": "money",
           "required": true,
           "options": null
         },
@@ -264,7 +264,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "request_id",
-          "label": "Request Id",
+          "label": "Payment request",
           "type": "lookup",
           "required": true,
           "options": [
@@ -273,7 +273,7 @@ return json_decode(<<<'JSON'
         },
         {
           "name": "payment_id",
-          "label": "Payment Id",
+          "label": "Receipt",
           "type": "lookup",
           "required": true,
           "options": [
@@ -281,9 +281,9 @@ return json_decode(<<<'JSON'
           ]
         },
         {
-          "name": "amount_paise",
-          "label": "Amount Paise",
-          "type": "number",
+          "name": "amount_inr",
+          "label": "Amount (INR)",
+          "type": "money",
           "required": true,
           "options": null
         }
@@ -297,7 +297,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "request_id",
-          "label": "Request Id",
+          "label": "Payment request",
           "type": "lookup",
           "required": true,
           "options": [
@@ -321,7 +321,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "entry_id",
-          "label": "Entry Id",
+          "label": "Ledger entry",
           "type": "lookup",
           "required": true,
           "options": [
@@ -329,9 +329,9 @@ return json_decode(<<<'JSON'
           ]
         },
         {
-          "name": "amount_paise",
-          "label": "Amount Paise",
-          "type": "number",
+          "name": "amount_inr",
+          "label": "Amount (INR)",
+          "type": "money",
           "required": true,
           "options": null
         },
@@ -359,7 +359,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "entry_id",
-          "label": "Entry Id",
+          "label": "Ledger entry",
           "type": "lookup",
           "required": true,
           "options": [
@@ -383,7 +383,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "teacher_id",
-          "label": "Teacher Id",
+          "label": "Teacher",
           "type": "lookup",
           "required": true,
           "options": [
@@ -391,9 +391,9 @@ return json_decode(<<<'JSON'
           ]
         },
         {
-          "name": "amount_paise",
-          "label": "Amount Paise",
-          "type": "number",
+          "name": "amount_inr",
+          "label": "Amount (INR)",
+          "type": "money",
           "required": true,
           "options": null
         },
@@ -437,7 +437,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "entry_id",
-          "label": "Entry Id",
+          "label": "Ledger entry",
           "type": "lookup",
           "required": true,
           "options": [
@@ -470,7 +470,7 @@ return json_decode(<<<'JSON'
         },
         {
           "name": "student_id",
-          "label": "Student Id",
+          "label": "Student",
           "type": "lookup",
           "required": false,
           "options": [
@@ -510,7 +510,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "task_id",
-          "label": "Task Id",
+          "label": "Task",
           "type": "lookup",
           "required": true,
           "options": [
@@ -568,7 +568,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "task_id",
-          "label": "Task Id",
+          "label": "Task",
           "type": "lookup",
           "required": true,
           "options": [
@@ -592,7 +592,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "item_id",
-          "label": "Item Id",
+          "label": "Checklist item",
           "type": "lookup",
           "required": true,
           "options": [
@@ -609,7 +609,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "student_id",
-          "label": "Student Id",
+          "label": "Student",
           "type": "lookup",
           "required": true,
           "options": [
@@ -659,7 +659,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "user_id",
-          "label": "User Id",
+          "label": "Existing account",
           "type": "lookup",
           "required": true,
           "options": [
@@ -687,7 +687,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "user_id",
-          "label": "User Id",
+          "label": "Existing account",
           "type": "lookup",
           "required": true,
           "options": [
@@ -704,7 +704,7 @@ return json_decode(<<<'JSON'
       "fields": [
         {
           "name": "teacher_id",
-          "label": "Teacher Id",
+          "label": "Teacher",
           "type": "lookup",
           "required": true,
           "options": [
@@ -713,7 +713,7 @@ return json_decode(<<<'JSON'
         },
         {
           "name": "user_id",
-          "label": "User Id",
+          "label": "Existing account",
           "type": "lookup",
           "required": true,
           "options": [

@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Erp;
 use App\Http\Controllers\Controller;
-use App\Modules\Erp\Services\{Access,Audit,People,Scheduling,Attendance,Finance};
+use App\Modules\Erp\Services\{Access,Audit,People,Scheduling,Attendance,Finance,MoneyInput};
 use App\Modules\IdentityAccess\Services\SiteAccessPolicy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +46,7 @@ class WorkspaceController extends Controller
     }
     public function mutate(Request $request,int $unit,string $action)
     {
-        (new Access())->unit($request->user(),$unit); $actor=(int)$request->user()->id; $p=$request->except('_token');
+        (new Access())->unit($request->user(),$unit); $actor=(int)$request->user()->id; $p=MoneyInput::forAction($request->except('_token'),$action);
         $map=['student'=>[People::class,'student'],'teacher'=>[People::class,'teacher'],'eligibility'=>[People::class,'eligibility'],'task'=>[People::class,'task'],'complete-task'=>[People::class,'completeTask'],'mark'=>[People::class,'mark'],'assign'=>[Scheduling::class,'assign'],'end-assignment'=>[Scheduling::class,'endAssignment'],'availability'=>[Scheduling::class,'availability'],'propose'=>[Scheduling::class,'proposeAgreement'],'confirm'=>[Scheduling::class,'confirmAgreement'],'materialize'=>[Scheduling::class,'materialize'],'reschedule'=>[Scheduling::class,'reschedule'],'cancel'=>[Scheduling::class,'cancel'],'extra'=>[Scheduling::class,'scheduleExtra'],'exception'=>[Scheduling::class,'exception'],'end-agreement'=>[Scheduling::class,'endAgreement'],'attendance'=>[Attendance::class,'submit'],'payment'=>[Finance::class,'payment']];
         if($action==='import-batch'){ $p['attendance_ids']=is_array($request->input('attendance_ids'))?$request->input('attendance_ids'):array_filter(array_map('trim',explode(',',(string)$request->input('attendance_ids')))); $result=(new Attendance())->importBatch($unit,$actor,$p); }
         elseif($action==='approve')$result=(new Attendance())->approve($unit,$actor,(int)$request->input('attendance_id'));
@@ -56,7 +56,7 @@ class WorkspaceController extends Controller
         if($request->expectsJson())return response()->json(['result'=>$result]);
         $message='Saved and audited.';
         if($action==='approve')$message='Attendance approved. Teacher accrual: '.(!empty($result->teacher_financial_posted)?'posted':'none (demo or disabled policy)').'. Student charge: '.(!empty($result->student_financial_posted)?'already imported':'not imported').'. No money was transferred.';
-        if(in_array($request->input('return_page'),['people','money','followups']))return redirect()->route('erp.business',[$unit,$request->input('return_page')])->with('status',$message);
+        if(in_array($request->input('return_page'),['people','money','followups','dashboard','attendance']))return redirect()->route('erp.business',[$unit,$request->input('return_page')])->with('status',$message);
         return redirect()->route('erp.workspace',$unit)->with('status',$message);
     }
     public function receipt(Request $request,int $unit,int $entry)

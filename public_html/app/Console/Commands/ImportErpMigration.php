@@ -7,11 +7,13 @@ use Illuminate\Validation\ValidationException;
 
 class ImportErpMigration extends Command
 {
-    protected $signature = 'erp:migration-import {file : Local JSON envelope} {--execute : Commit explicitly approved snapshot} {--confirm-digest= : Exact canonical preview SHA256} {--cutoff= : Explicit approved cutoff date} {--target-database= : Explicit destination database} {--actor= : Existing unit administrator user ID} {--allow-production : Additional deliberate production opt-in}';
+    protected $signature = 'erp:migration-import {file : Local JSON envelope} {--execute : Commit explicitly approved snapshot} {--rehearse : Exercise import and reconciliation then roll back; non-production only} {--reconcile : Read-only check against an existing exact committed snapshot} {--confirm-digest= : Exact canonical preview SHA256} {--cutoff= : Explicit approved cutoff date} {--target-database= : Explicit destination database} {--actor= : Existing unit administrator user ID} {--allow-production : Additional deliberate production opt-in}';
     protected $description = 'Preview a normalized migration by default; commit only with all explicit safety gates';
 
     public function handle(MigrationImporter $importer): int
     {
+        if ((int) $this->option('execute') + (int) $this->option('rehearse') + (int) $this->option('reconcile') > 1) return $this->invalid('migration_modes_are_mutually_exclusive');
+        if ($this->option('rehearse') && $this->option('allow-production')) return $this->invalid('production_rehearsal_forbidden');
         $file = $this->argument('file');
         if (!is_string($file) || strpos($file, '://') !== false || !is_file($file) || !is_readable($file)) return $this->invalid('readable_local_file_required');
         $bytes = @file_get_contents($file, false, null, 0, 5242881);
@@ -19,8 +21,8 @@ class ImportErpMigration extends Command
         try {
             $data = json_decode($bytes, true, 64, JSON_THROW_ON_ERROR | JSON_BIGINT_AS_STRING);
             if (!is_array($data) || array_diff(array_keys($data), ['rows','references']) || !isset($data['rows'],$data['references']) || !is_array($data['rows']) || !is_array($data['references'])) return $this->invalid('invalid_envelope');
-            if (!$this->option('execute')) {
-                $result = $importer->preview($data['rows'], $data['references']);
+            if (!$this->option('execute') && !$this->option('rehearse')) {
+                $result = $this->option('reconcile') ? $importer->reconcile($data['rows'], $data['references']) : $importer->preview($data['rows'], $data['references']);
                 $this->line(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                 return $result['valid'] ? 0 : 1;
             }
@@ -29,7 +31,9 @@ class ImportErpMigration extends Command
             $target = $this->option('target-database');
             if (!is_string($target) || $target === '' || $target !== ($data['references']['target_database'] ?? null)) return $this->invalid('explicit_target_confirmation_required');
             if (!is_string($this->option('confirm-digest')) || !is_string($this->option('cutoff'))) return $this->invalid('explicit_digest_and_cutoff_required');
-            $result = $importer->execute($data['rows'], $data['references'], $this->option('confirm-digest'), $this->option('cutoff'), (int) $actor, (bool) $this->option('allow-production'));
+            $result = $this->option('rehearse')
+                ? $importer->rehearse($data['rows'], $data['references'], $this->option('confirm-digest'), $this->option('cutoff'), (int) $actor)
+                : $importer->execute($data['rows'], $data['references'], $this->option('confirm-digest'), $this->option('cutoff'), (int) $actor, (bool) $this->option('allow-production'));
             $this->line(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             return 0;
         } catch (ValidationException $e) {

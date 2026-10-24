@@ -114,6 +114,10 @@ class MigrationPreview
                         else $totals[$field] = $sum;
                     }
                 }
+                if ($owner === 'teacher' && $this->money($row['amount_paise'] ?? null)) {
+                    if ($row['amount_paise'] < 0) $issue($n, 'amount_paise', 'teacher_advance_requires_review');
+                    if ($row['amount_paise'] > 1000000000) $issue($n, 'amount_paise', 'teacher_opening_exceeds_operational_limit');
+                }
                 if (!$this->money($row['amount_paise'] ?? null)) $issue($n, 'amount_paise', 'invalid_integer_paise');
                 if (($row['currency'] ?? null) !== 'INR') $issue($n, 'currency', 'unsupported_currency');
                 if (!$this->date($row['as_of'] ?? null)) $issue($n, 'as_of', 'invalid_date');

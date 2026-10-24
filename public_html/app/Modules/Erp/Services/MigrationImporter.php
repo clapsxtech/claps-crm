@@ -22,11 +22,13 @@ class MigrationImporter
             $this->structure($rows, $references);
             $report = (new MigrationPreview())->preview($rows, $references);
             $report['digest'] = $this->digest(['rows' => $rows, 'references' => $references]);
-            $report['schema_version'] = 1;
+            $report['schema_version'] = $references['schema_version'];
             if ($report['valid']) {
                 $this->eligibilities($rows, $references);
                 $this->destination($rows, $references, false);
                 $report['counts']['eligibility'] = count($references['teacher_eligibilities']);
+                $batch = DB::table('erp_migration_batches')->where('source_id', $references['source_manifest']['source_id'])->where('cutoff', $references['cutoff_date'])->first();
+                if ($batch) $report['reconciliation'] = (new MigrationReconciliation())->verify($rows, $references, $report, $batch);
             }
             return $report;
         } catch (ValidationException $e) {
@@ -34,6 +36,42 @@ class MigrationImporter
         } catch (\Throwable $e) {
             return $this->invalid('invalid_input_or_unavailable_destination');
         }
+    }
+
+    /** Read-only exact-snapshot check, not a current cash/payroll balance certification. */
+    public function reconcile(array $rows, array $references): array
+    {
+        return DB::transaction(function () use ($rows, $references) {
+            $report = $this->preview($rows, $references);
+            if (!$report['valid']) return ['mode'=>'reconcile', 'reconciled'=>false] + $report;
+            if (!isset($report['reconciliation'])) return ['mode'=>'reconcile', 'reconciled'=>false] + $this->invalid('matching_committed_batch_required');
+            return ['mode'=>'reconcile', 'reconciled'=>true] + $report;
+        });
+    }
+
+    /** Exercises the real import and reconciliation, then rolls back even on success. */
+    public function rehearse(array $rows, array $references, string $expectedDigest, string $approvedCutoff, int $actorId): array
+    {
+        if (app()->environment('production')) $this->fail('production_rehearsal_forbidden');
+        if (config('integrations.sheets.enabled', false) || config('google.service.enable', false)) $this->fail('rehearsal_requires_disabled_integrations');
+        $connection = DB::connection();
+        if (!in_array($connection->getDriverName(), ['sqlite', 'mysql'], true)) $this->fail('rehearsal_transaction_support_unverified');
+        if ($connection->getDriverName() === 'mysql') {
+            $tables = ['erp_students','erp_teachers','erp_teacher_units','erp_eligibilities','erp_enrollments','erp_ledger','erp_migration_batches','erp_migration_mappings','erp_migration_history','erp_audit'];
+            $engines = DB::table('information_schema.TABLES')->where('TABLE_SCHEMA', $connection->getDatabaseName())->whereIn('TABLE_NAME', $tables)->pluck('ENGINE');
+            if ($engines->count() !== count($tables) || $engines->contains(function ($engine) { return strtoupper($engine) !== 'INNODB'; })) $this->fail('rehearsal_requires_transactional_tables');
+        }
+        $level = $connection->transactionLevel();
+        $connection->beginTransaction();
+        try {
+            $result = $this->execute($rows, $references, $expectedDigest, $approvedCutoff, $actorId);
+        } finally {
+            // Preserve an enclosing test/caller transaction while discarding this rehearsal/savepoint.
+            if ($connection->transactionLevel() > $level) $connection->rollBack($level);
+        }
+        $reconciliation = $result['reconciliation'];
+        unset($reconciliation['batch_id']); // A rolled-back ID must never look like a committed batch.
+        return ['dry_run'=>true, 'can_import'=>false, 'valid'=>true, 'rehearsed'=>true, 'rolled_back'=>true, 'replayed'=>$result['replayed'], 'writes'=>0, 'attempted_writes'=>$result['writes'], 'digest'=>$result['digest'], 'counts'=>$result['counts'], 'totals'=>$result['totals'], 'reconciliation'=>$reconciliation];
     }
 
     public function execute(array $rows, array $references, string $expectedDigest, string $approvedCutoff, int $actorId, bool $allowProduction = false): array
@@ -64,7 +102,9 @@ class MigrationImporter
             $batch = DB::table('erp_migration_batches')->where('source_id', $source)->where('cutoff', $references['cutoff_date'])->lockForUpdate()->first();
             if ($batch) {
                 if (!hash_equals($batch->digest, $digest)) $this->fail('source_cutoff_already_imported_with_different_digest');
-                return ['dry_run' => false, 'replayed' => true, 'batch_id' => (int) $batch->id, 'digest' => $digest, 'counts' => json_decode($batch->counts, true), 'totals' => json_decode($batch->totals, true), 'writes' => 0];
+                $this->destination($rows, $references, true);
+                $reconciliation = (new MigrationReconciliation())->verify($rows, $references, $report, $batch, true);
+                return ['reconciliation' => $reconciliation, 'dry_run' => false, 'replayed' => true, 'batch_id' => (int) $batch->id, 'digest' => $digest, 'counts' => json_decode($batch->counts, true), 'totals' => json_decode($batch->totals, true), 'writes' => 0];
             }
             $this->destination($rows, $references, true);
             $now = now()->format('Y-m-d H:i:s');
@@ -92,11 +132,12 @@ class MigrationImporter
                         $overlap = DB::table('erp_enrollments')->where('student_id', $values['student_id'])->where('subject_id', $values['subject_id'])->where('starts_on', '<=', $values['ends_on'] ?? '9999-12-31')->where(function ($q) use ($values) { $q->whereNull('ends_on')->orWhere('ends_on', '>=', $values['starts_on']); })->lockForUpdate()->first();
                         if ($overlap) $this->fail('destination_assignment_overlap');
                     } elseif ($type === 'opening_balance') {
-                        $studentId = $ids['student'][$row['owner_id']];
-                        DB::table('erp_students')->where('id', $studentId)->lockForUpdate()->first();
-                        if (DB::table('erp_ledger')->where('student_id', $studentId)->lockForUpdate()->first()) $this->fail('opening_balance_requires_empty_student_ledger');
+                        $owner = $row['owner_type'];
+                        $ownerId = $ids[$owner][$row['owner_id']];
+                        DB::table($this->table($owner))->where('id', $ownerId)->lockForUpdate()->first();
+                        if (DB::table('erp_ledger')->where($owner.'_id', $ownerId)->lockForUpdate()->first()) $this->fail('opening_balance_requires_empty_'.$owner.'_ledger');
                         $event = 'migration:opening:'.hash('sha256', $source.'|'.$row['external_id']);
-                        $values = ['unit_id' => $unitId, 'student_id' => $studentId, 'teacher_id' => null, 'attendance_id' => null, 'kind' => 'opening_balance', 'amount_paise' => $row['amount_paise'], 'currency' => 'INR', 'reference' => 'MIGRATION:'.$event, 'event_key' => $event, 'occurred_at' => $references['cutoff_date'].' 00:00:00', 'created_by' => $actorId];
+                        $values = ['unit_id' => $unitId, 'student_id' => $owner === 'student' ? $ownerId : null, 'teacher_id' => $owner === 'teacher' ? $ownerId : null, 'attendance_id' => null, 'kind' => 'opening_balance', 'amount_paise' => $row['amount_paise'], 'currency' => 'INR', 'reference' => 'MIGRATION:'.$event, 'event_key' => $event, 'occurred_at' => $references['cutoff_date'].' 00:00:00', 'created_by' => $actorId];
                     } else {
                         $values = ['batch_id' => $batchId, 'unit_id' => $unitId, 'enrollment_id' => $ids['assignment'][$row['assignment_id']], 'external_id' => $row['external_id'], 'starts_at' => str_replace(['T','Z'], [' ',''], $row['starts_at']), 'actual_minutes' => $row['actual_minutes'], 'status' => $row['status'], 'financial_effect' => 'none', 'created_at' => $now];
                     }
@@ -108,30 +149,36 @@ class MigrationImporter
                 }
             }
             Audit::record(null, $actorId, 'migration.imported', 'migration_batch', $batchId, ['digest' => $digest, 'cutoff' => $references['cutoff_date'], 'counts' => $report['counts']]); ++$writes;
-            return ['dry_run' => false, 'replayed' => false, 'batch_id' => (int) $batchId, 'digest' => $digest, 'counts' => $report['counts'], 'totals' => $report['totals'], 'writes' => $writes];
+            $batch = DB::table('erp_migration_batches')->where('id', $batchId)->first();
+            $reconciliation = (new MigrationReconciliation())->verify($rows, $references, $report, $batch, true);
+            return ['reconciliation' => $reconciliation, 'dry_run' => false, 'replayed' => false, 'batch_id' => (int) $batchId, 'digest' => $digest, 'counts' => $report['counts'], 'totals' => $report['totals'], 'writes' => $writes];
         }, 3);
     }
 
     private function structure(array $rows, array $references): void
     {
         if (!$rows || count($rows) > 5000 || array_keys($rows) !== range(0, count($rows) - 1)) $this->fail('invalid_rows_list');
-        if (($references['schema_version'] ?? null) !== 1) $this->fail('schema_version_1_required');
-        foreach (['unit_codes','subject_codes','subject_ids','subject_names','teacher_eligibilities'] as $key) if (!isset($references[$key]) || !is_array($references[$key])) $this->fail('invalid_reference_catalog');
+        if (!in_array($references['schema_version'] ?? null, [1, 2], true)) $this->fail('supported_schema_version_required');
+        foreach (['unit_codes','subject_codes','subject_ids','subject_names','teacher_eligibilities'] as $key) if (!isset($references[$key]) || !is_array($references[$key]) || count($references[$key]) > 5000) $this->fail('invalid_reference_catalog');
         foreach (['unit_codes','subject_codes','teacher_eligibilities'] as $key) if ($references[$key] && array_keys($references[$key]) !== range(0, count($references[$key]) - 1)) $this->fail('reference_catalog_must_be_list');
         if (!is_string($references['target_database'] ?? null) || trim($references['target_database']) === '') $this->fail('explicit_target_database_required');
         foreach ($rows as $row) {
             if (!is_array($row) || !is_string($row['type'] ?? null) || !isset(self::FIELDS[$row['type']])) $this->fail('unknown_row_type');
             if (array_diff(array_keys($row), self::FIELDS[$row['type']])) $this->fail('unsupported_row_fields');
             foreach (['name','grade','syllabus'] as $key) if (isset($row[$key]) && (!is_string($row[$key]) || strlen($row[$key]) > ($key === 'name' ? 255 : 100))) $this->fail('invalid_text_length');
-            if ($row['type'] === 'opening_balance' && ($row['owner_type'] ?? null) !== 'student') $this->fail('teacher_opening_balance_not_supported');
+            if ($row['type'] === 'opening_balance' && ($row['owner_type'] ?? null) === 'teacher' && $references['schema_version'] !== 2) $this->fail('teacher_opening_requires_schema_version_2');
             if ($row['type'] === 'teacher' && (!is_array($row['unit_codes'] ?? null) || array_keys($row['unit_codes']) !== [0])) $this->fail('teacher_requires_one_unit_list');
             $statuses = ['student'=>['active','paused','stopped'],'teacher'=>['active','inactive'],'assignment'=>['active','ended']];
             if (isset($statuses[$row['type']]) && !in_array($row['status'] ?? null, $statuses[$row['type']], true)) $this->fail('explicit_status_required');
             if ($row['type'] === 'assignment') foreach (['student_rate_paise','teacher_rate_paise'] as $field) if (!is_int($row[$field] ?? null) || $row[$field] < 0 || $row[$field] > 100000000) $this->fail('rate_exceeds_operational_limit');
             if ($row['type'] === 'assignment' && $row['status'] === 'ended' && !isset($row['ends_on'])) $this->fail('ended_assignment_requires_end_date');
         }
-        $openings = []; foreach ($rows as $row) if ($row['type'] === 'opening_balance' && is_string($row['owner_id'] ?? null)) $openings[$row['owner_id']] = true;
-        foreach ($rows as $row) if ($row['type'] === 'student' && (!is_string($row['external_id'] ?? null) || !isset($openings[$row['external_id']]))) $this->fail('explicit_student_opening_balance_required');
+        $openings = [];
+        foreach ($rows as $row) if ($row['type'] === 'opening_balance' && is_string($row['owner_type'] ?? null) && is_string($row['owner_id'] ?? null)) $openings[$row['owner_type']][$row['owner_id']] = true;
+        foreach ($rows as $row) {
+            if ($row['type'] === 'student' && (!is_string($row['external_id'] ?? null) || !isset($openings['student'][$row['external_id']]))) $this->fail('explicit_student_opening_balance_required');
+            if ($references['schema_version'] === 2 && $row['type'] === 'teacher' && (!is_string($row['external_id'] ?? null) || !isset($openings['teacher'][$row['external_id']]))) $this->fail('explicit_teacher_opening_balance_required');
+        }
     }
 
     private function eligibilities(array $rows, array $references): void
@@ -174,36 +221,17 @@ class MigrationImporter
             $hashRow = $row; if ($type === 'eligibility') unset($hashRow['type']);
             if ($mapping && (!hash_equals($mapping->row_digest, $this->digest($hashRow)) || $mapping->target_type !== $this->table($type))) $this->fail('existing_mapping_conflict');
             if (!$mapping && $type === 'opening_balance') {
-                $owner = DB::table('erp_migration_mappings')->where('source_id', $source)->where('entity_type', 'student')->where('external_id', $row['owner_id']); if ($lock) $owner->lockForUpdate();
+                $owner = DB::table('erp_migration_mappings')->where('source_id', $source)->where('entity_type', $row['owner_type'])->where('external_id', $row['owner_id']); if ($lock) $owner->lockForUpdate();
                 $owner = $owner->first();
                 if ($owner) {
-                    $ledger = DB::table('erp_ledger')->where('student_id', $owner->target_id); if ($lock) $ledger->lockForUpdate();
-                    if ($ledger->first()) $this->fail('opening_balance_requires_empty_student_ledger');
+                    $ledger = DB::table('erp_ledger')->where($row['owner_type'].'_id', $owner->target_id); if ($lock) $ledger->lockForUpdate();
+                    if ($ledger->first()) $this->fail('opening_balance_requires_empty_'.$row['owner_type'].'_ledger');
                 }
             }
-            if (in_array($type, ['student','teacher'], true)) {
+            if ($mapping) (new MigrationReconciliation())->checkRow($row, $references, $mapping, $lock);
+            if (!$mapping && in_array($type, ['student','teacher'], true)) {
                 $query = DB::table($this->table($type))->where('code', $row['external_id']); if ($lock) $query->lockForUpdate();
-                $existing = $query->first();
-                if ($existing && (!$mapping || (int) $mapping->target_id !== (int) $existing->id)) $this->fail('unmanaged_stable_code_conflict');
-                if ($mapping && !$existing) $this->fail('mapped_target_missing');
-                if ($mapping) {
-                    foreach (['name','timezone','status'] as $field) if ($existing->$field !== $row[$field]) $this->fail('mapped_target_drift');
-                    $unitCode = $type === 'student' ? $row['unit_code'] : $row['unit_codes'][0];
-                    $unitId = (int) DB::table('erp_units')->where('code', $unitCode)->value('id');
-                    if ($type === 'student') {
-                        foreach (['registered_on','grade','syllabus'] as $field) if ($existing->$field !== $row[$field]) $this->fail('mapped_target_drift');
-                        if ((int) $existing->unit_id !== $unitId) $this->fail('mapped_target_unit_drift');
-                    } else {
-                        $memberships = DB::table('erp_teacher_units')->where('teacher_id', $existing->id); if ($lock) $memberships->lockForUpdate();
-                        $memberships = $memberships->get();
-                        if ($memberships->count() !== 1 || (int) $memberships->first()->unit_id !== $unitId) $this->fail('mapped_target_unit_drift');
-                    }
-                }
-            } elseif ($mapping) {
-                $target = DB::table($this->table($type))->where('id', $mapping->target_id); if ($lock) $target->lockForUpdate();
-                $target = $target->first();
-                if (!$target) $this->fail('mapped_target_missing');
-                if ($type !== 'eligibility' && (int) $target->unit_id !== (int) DB::table('erp_units')->where('code', $row['unit_code'])->value('id')) $this->fail('mapped_target_unit_drift');
+                if ($query->first()) $this->fail('unmanaged_stable_code_conflict');
             }
         }
         $query = DB::table('erp_migration_batches')->where('source_id', $source)->where('cutoff', $references['cutoff_date']); if ($lock) $query->lockForUpdate();
@@ -229,12 +257,7 @@ class MigrationImporter
     private function digest(array $value): string { return hash('sha256', $this->json($value)); }
     private function json(array $value): string
     {
-        $normalize = function ($item) use (&$normalize) {
-            if (!is_array($item)) return $item;
-            if ($item && array_keys($item) !== range(0, count($item) - 1)) ksort($item, SORT_STRING);
-            return array_map($normalize, $item);
-        };
-        return json_encode($normalize($value), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return MigrationReconciliation::canonicalJson($value);
     }
     private function fail(string $code): void { throw ValidationException::withMessages(['migration' => $code]); }
     private function invalid(string $code): array

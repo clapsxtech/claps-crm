@@ -51,10 +51,16 @@ Every scenario uses real independent connections in separate PHP processes. Each
 12. A cutoff committed while a submission waits is visible through current reads; pre-cutoff submission writes neither attendance nor ledger.
 13. Unrelated imported parties sharing one immutable batch pass a current-read barrier without unnecessary batch serialization. Controller-shaped outer transactions retry bounded InnoDB gap-lock deadlocks, preserving exactly one attendance/audit per lesson.
 
+14. Two simultaneous identical timed exceptions return the same record and create one audit event, with no lesson or ledger writes.
+15. A timed exception commits while a one-off lesson waits; the stale-snapshot waiter observes the exception and rejects.
+16. A one-off lesson commits while an exception waits; the exception observes the scheduled lesson and rejects without silently cancelling it.
+17. A timed exception commits while recurring materialization waits; the waiter rejects without creating any lesson.
+18. Materialization commits while an exception waits; the exception rejects and preserves the scheduled lesson. Both race orders verify zero attendance/financial writes.
+
 Attendance submission retries the entire transaction up to three attempts only for database concurrency failures. This is normal deadlock recovery, not a weaker isolation level; validation failures are not retried, and exhaustion remains an error.
 
 The harness prints JSON and returns zero only on success. It writes `last-result.json` and per-worker results/stdout/stderr under the artifact directory, never into the repository. Barrier waits are bounded; failures identify the unsuccessful scenario. Test artifacts contain synthetic fixture data only. No runtime outputs, credentials, or database files should be committed.
 
 ## Observed evidence and limits
 
-The isolated thirteen-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.
+The isolated eighteen-scenario harness passed on MariaDB `10.11.18-MariaDB-0+deb12u1` using InnoDB and `REPEATABLE READ`. This is evidence for that specific server/version and exercised interleavings, not universal MySQL certification or permission to deploy. Re-run against the intended deployment engine/version and configuration before release. The probe covers the ERP migration and operations only; it does not establish that all legacy application migrations are compatible with that server.

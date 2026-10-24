@@ -114,7 +114,7 @@ class Scheduling
             $this->audit($unitId,$actorId,'availability.created','availability',$row->id); return $row;
         });
     }
-    /** Full local-date unavailability. Existing lessons must be explicitly resolved first. */
+    /** Full local-date or bounded same-date unavailability; never silently cancel lessons. */
     public function exception(int $unitId, int $actorId, array $p) {
         $this->required($p,['date','reason']);
         return DB::transaction(function () use ($unitId,$actorId,$p) {
@@ -124,15 +124,49 @@ class Scheduling
             $person=DB::table($teacherId ? 'erp_teachers' : 'erp_students')->where('id',$id)->lockForUpdate()->first();
             if (!$person || ($studentId && (int)$person->unit_id !== $unitId)) $this->fail('Person not found in this unit.');
             if ($teacherId && (DB::table('erp_teacher_units')->where('teacher_id',$id)->lockForUpdate()->get()->count() !== 1 || !DB::table('erp_teacher_units')->where('teacher_id',$id)->where('unit_id',$unitId)->lockForUpdate()->first())) $this->fail('Teacher must belong only to this unit pool.');
-            $day=$this->date($p['date']); $reason=trim($p['reason']); if ($reason === '') $this->fail('An exception reason is required.');
-            $start=$this->localToUtc($day,'00:00',$person->timezone);
-            $end=$this->localToUtc((new DateTimeImmutable($day))->modify('+1 day')->format('Y-m-d'),'00:00',$person->timezone);
-            if (DB::table('erp_lessons')->where($field,$id)->where('status','scheduled')->where('starts_at','<',$end)->where('ends_at','>',$start)->lockForUpdate()->first()) $this->fail('Reschedule or cancel existing lessons on this local date before recording an exception.');
-            $existing=DB::table('erp_exceptions')->where('unit_id',$unitId)->where($field,$id)->where('date',$day)->lockForUpdate()->first();
-            if ($existing) { if ($existing->reason !== $reason) $this->fail('An exception already exists for this local date.'); return $existing; }
-            $row=$this->insert('erp_exceptions',['unit_id'=>$unitId,'student_id'=>$studentId,'teacher_id'=>$teacherId,'date'=>$day,'reason'=>$reason]);
-            $this->audit($unitId,$actorId,'availability.exception_created','exception',$row->id,['date'=>$day,'timezone'=>$person->timezone,'reason'=>$reason]); return $row;
+            $day=$this->date($p['date']);
+            if (!is_string($p['reason']) || trim($p['reason']) === '') $this->fail('An exception reason is required.');
+            $reason=trim($p['reason']);
+            $hasStart=isset($p['start_time']) && $p['start_time'] !== ''; $hasEnd=isset($p['end_time']) && $p['end_time'] !== '';
+            if ($hasStart !== $hasEnd) $this->fail('Provide both start and end times, or leave both blank for a full day.');
+            if ($hasStart) $this->required($p,['timezone']);
+            $timezone=isset($p['timezone']) && $p['timezone'] !== '' ? $p['timezone'] : $person->timezone;
+            if (!is_string($timezone) || ($hasStart && (!is_string($p['start_time']) || !is_string($p['end_time'])))) $this->fail('Use local HH:mm times and an IANA timezone.');
+            // 00:00 is the exclusive next-midnight endpoint, never an implicit general overnight range.
+            $nextMidnight=$hasStart && $p['end_time'] === '00:00' && $p['start_time'] !== '00:00';
+            $start=$this->localToUtc($day,$hasStart ? $p['start_time'] : '00:00',$timezone);
+            $end=$this->localToUtc($hasStart && !$nextMidnight ? $day : (new DateTimeImmutable($day))->modify('+1 day')->format('Y-m-d'),$hasEnd ? $p['end_time'] : '00:00',$timezone);
+            if ($end <= $start) $this->fail('An exception must end after it starts on the same local date; split overnight windows into separate dates.');
+            if (DB::table('erp_lessons')->where($field,$id)->where('status','scheduled')->where('starts_at','<',$end)->where('ends_at','>',$start)->lockForUpdate()->first()) $this->fail('Reschedule or cancel existing lessons overlapping this exception before recording it.');
+            foreach ($this->exceptionOverlaps($unitId,$field,$id,$start,$end,$person->timezone) as $existing) {
+                // Legacy full days remain date-based and are never upgraded or reinterpreted by replay.
+                $same=$existing->starts_at === null
+                    ? (!$hasStart && $existing->date === $day && $timezone === $person->timezone)
+                    : ($existing->date === $day && $existing->starts_at === $start && $existing->ends_at === $end && $existing->timezone === $timezone);
+                if ($same && $existing->reason === $reason) return $existing;
+                $this->fail('An overlapping exception already exists. Exact retries must retain the same interval, timezone and reason.');
+            }
+            $row=$this->insert('erp_exceptions',['unit_id'=>$unitId,'student_id'=>$studentId,'teacher_id'=>$teacherId,'date'=>$day,'reason'=>$reason,'starts_at'=>$start,'ends_at'=>$end,'timezone'=>$timezone]);
+            $this->audit($unitId,$actorId,'availability.exception_created','exception',$row->id,['date'=>$day,'timezone'=>$timezone,'starts_at'=>$start,'ends_at'=>$end,'full_day'=>!$hasStart,'reason'=>$reason]); return $row;
         });
+    }
+    /** Half-open UTC intervals, with a separate compatibility branch for untouched legacy dates. */
+    private function exceptionOverlaps($unitId,$field,$id,$start,$end,$personTimezone) {
+        $base=DB::table('erp_exceptions')->where('unit_id',$unitId)->where($field,$id);
+        // Only the all-null triple is legacy. A damaged hybrid must not widen a window or vanish.
+        $invalid=(clone $base)->where(function ($q) {
+            $q->where(function ($q) { $q->whereNull('starts_at')->where(function ($q) { $q->whereNotNull('ends_at')->orWhereNotNull('timezone'); }); })
+                ->orWhere(function ($q) { $q->whereNotNull('starts_at')->where(function ($q) { $q->whereNull('ends_at')->orWhereNull('timezone')->orWhere('timezone',''); }); })
+                ->orWhereColumn('ends_at','<=','starts_at');
+        })->lockForUpdate()->first();
+        if ($invalid) $this->fail('This participant has an incomplete or invalid exception interval. Correct the saved exception before scheduling.');
+        $zone=$this->zone($personTimezone);
+        $first=(new DateTimeImmutable($start,new DateTimeZone('UTC')))->setTimezone($zone)->format('Y-m-d');
+        $last=(new DateTimeImmutable($end,new DateTimeZone('UTC')))->modify('-1 second')->setTimezone($zone)->format('Y-m-d');
+        return (clone $base)->where(function ($q) use ($start,$end,$first,$last) {
+            $q->where(function ($q) use ($start,$end) { $q->where('starts_at','<',$end)->where('ends_at','>',$start); })
+                ->orWhere(function ($q) use ($first,$last) { $q->whereNull('starts_at')->whereNull('ends_at')->whereNull('timezone')->whereBetween('date',[$first,$last]); });
+        })->orderBy('id')->lockForUpdate()->get();
     }
     /** End a recurring version prospectively; rates and all historic lesson rows remain unchanged. */
     public function endAgreement(int $unitId, int $actorId, array $p) {
@@ -199,10 +233,7 @@ class Scheduling
     private function coverage($unitId,$e,$start,$end) {
         foreach (['student_id'=>$e->student_id,'teacher_id'=>$e->teacher_id] as $field=>$id) {
             $person=$this->row($field === 'student_id' ? 'erp_students' : 'erp_teachers',$id,null,true);
-            $zone=$this->zone($person->timezone);
-            $first=(new DateTimeImmutable($start,new DateTimeZone('UTC')))->setTimezone($zone)->format('Y-m-d');
-            $last=(new DateTimeImmutable($end,new DateTimeZone('UTC')))->modify('-1 second')->setTimezone($zone)->format('Y-m-d');
-            if (DB::table('erp_exceptions')->where('unit_id',$unitId)->where($field,$id)->whereBetween('date',[$first,$last])->lockForUpdate()->first()) $this->fail('A date-specific holiday or unavailability exception blocks this lesson.');
+            if ($this->exceptionOverlaps($unitId,$field,$id,$start,$end,$person->timezone)->isNotEmpty()) $this->fail('A date-specific holiday or unavailability exception overlaps this lesson.');
             $covered=false;
             foreach (DB::table('erp_availability')->where('unit_id',$unitId)->where($field,$id)->lockForUpdate()->get() as $window) {
                 $day=(new DateTimeImmutable($start,new DateTimeZone('UTC')))->setTimezone($this->zone($window->timezone))->format('Y-m-d');
