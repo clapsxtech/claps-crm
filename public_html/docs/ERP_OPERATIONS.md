@@ -66,3 +66,9 @@ Team access manages existing verified site accounts only; it does not create cre
 For synthetic acceptance, add a checklist task assigned to a synthetic staff account and complete it through My assigned tasks. Create a 20000-paise request, allocate an existing receipt, correct that receipt and verify the request reopens until the replacement is allocated. Record and reverse a synthetic already-paid teacher amount within accrued payable. Confirm the ledger remains explainable and no external action occurs.
 
 Ledger receipt timestamps are recorded in the installation timezone and are labeled accordingly. Keep the installation timezone stable until a separately reviewed timestamp migration; legacy ledger timestamps do not carry a per-row zone. Lesson timestamps and approved migration cutoff boundaries are UTC and must not be reinterpreted as installation time.
+
+## Weekly timetable
+
+The Timetable tab now includes a unit-timezone weekly board with named students, teachers and subjects. Choose a date in the week, filter by student/teacher name or code and lesson status, and move between weeks without losing filters. UTC offsets remain visible across daylight-saving transitions. Cancelled and rescheduled originals remain historical records; overnight classes appear on each overlapping date. More than 250 matches is explicitly marked incomplete, never presented as the full week.
+
+Action links open the existing scheduling forms without submitting anything. Select the indicated lesson by name or ID and explicitly save after checking the details. Viewing planned classes never records attendance or changes either financial stream. Full-day exceptions and recurring agreements remain separate registers; partial-day editing is tracked in ERP_GAP_TRACKER.md.
