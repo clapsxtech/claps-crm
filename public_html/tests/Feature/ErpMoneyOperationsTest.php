@@ -146,7 +146,7 @@ class ErpMoneyOperationsTest extends TestCase
             $sql = str_replace(['`', '"'], '', strtolower($query->sql));
             if ($armed && strpos($sql, 'insert into erp_ledger ') === 0 && in_array('FAIL-REPLACEMENT', $query->bindings, true)) {
                 $armed = false;
-                throw new \Illuminate\Database\QueryException($query->sql, $query->bindings, new \RuntimeException('Synthetic replacement insert failure'));
+                throw new \Illuminate\Database\QueryException($query->connectionName, $query->sql, $query->bindings, new \RuntimeException('Synthetic replacement insert failure'));
             }
         });
         try {

@@ -10,3 +10,14 @@ storage/logs/*
 vendor
 npm-debug.log
 .phpunit.result.cache
+.phpunit.cache
+phpunit.xml.bak
+bootstrap/cache/*.php
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+public/uploads/*
+# Reviewed frontend distributions are source, not Composer dependencies.
+!resources/vendor/
+!resources/vendor/**

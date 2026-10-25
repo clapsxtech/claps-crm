@@ -201,7 +201,7 @@ class AccessPrivacyTest extends TestCase
             $sql = str_replace(['`', '"'], '', strtolower($query->sql));
             if ($armed && strpos($sql, 'insert into time_tables ') === 0) {
                 $armed = false;
-                throw new QueryException($query->sql, $query->bindings, new \RuntimeException('Synthetic insert failure'));
+                throw new QueryException($query->connectionName, $query->sql, $query->bindings, new \RuntimeException('Synthetic insert failure'));
             }
         });
         try {

@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Fideloper\Proxy\TrustProxies as Middleware;
+use Illuminate\Http\Middleware\TrustProxies as Middleware;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\IpUtils;
@@ -20,7 +20,7 @@ class TrustProxies extends Middleware
 
     public function handle(Request $request, Closure $next)
     {
-        $proxies = $this->validatedProxies($this->config->get('proxy.trusted_proxies', ''));
+        $proxies = $this->validatedProxies(config('proxy.trusted_proxies', ''));
         Request::setTrustedProxies($proxies, $this->headers);
 
         $remote = $request->server->get('REMOTE_ADDR', '');
@@ -71,7 +71,7 @@ class TrustProxies extends Middleware
 
     private function applyCanonicalOrigin(Request $request): void
     {
-        $origin = trim((string) $this->config->get('proxy.public_origin', ''));
+        $origin = trim((string) config('proxy.public_origin', ''));
         if ($origin === '') {
             return;
         }

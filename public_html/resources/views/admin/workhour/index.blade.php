@@ -130,7 +130,7 @@
 <div class="modal fade modal_class" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
 @include('admin.layouts.footer')
 @include('admin.layouts.scripts')
-<script src="//cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
+<script src="{{ asset('browser-vendor/ion.rangeSlider.min.js') }}"></script>
 <script>
     $(document).ready(function() {
         $('#daterange').daterangepicker({

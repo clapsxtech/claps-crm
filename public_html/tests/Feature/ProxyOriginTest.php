@@ -121,7 +121,7 @@ class ProxyOriginTest extends TestCase
             ->assertOk()->assertJson(['origin' => 'https://logs.example.test:8443', 'form' => 'https://logs.example.test:8443/login']);
     }
 
-    /** @dataProvider invalidProxyConfiguration */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidProxyConfiguration')]
     public function test_invalid_and_wildcard_proxy_configuration_fails_closed(string $proxies): void
     {
         config(['proxy.trusted_proxies' => $proxies]);
@@ -130,12 +130,12 @@ class ProxyOriginTest extends TestCase
         $this->get('http://logs.example.test/_proxy-origin-test');
     }
 
-    public function invalidProxyConfiguration(): array
+    public static function invalidProxyConfiguration(): array
     {
         return array_map(fn ($value) => [$value], ['*', '**', '0.0.0.0/0', '::/0', '10.0.0.1/33', '::1/129', 'proxy.local', '10.0.0.1/no', '10.0.0.1/24/4']);
     }
 
-    /** @dataProvider invalidPublicOrigins */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidPublicOrigins')]
     public function test_invalid_public_origin_fails_closed(string $origin): void
     {
         config(['proxy.public_origin' => $origin]);
@@ -144,7 +144,7 @@ class ProxyOriginTest extends TestCase
         $this->get('http://logs.example.test/_proxy-origin-test');
     }
 
-    public function invalidPublicOrigins(): array
+    public static function invalidPublicOrigins(): array
     {
         return array_map(fn ($value) => [$value], ['http://logs.example.test', 'https://logs.example.test/path', 'https://user@logs.example.test', 'https://logs.example.test?x=1', 'https://logs.example.test#fragment', 'https://not a host.test', 'https://logs.example.test:0']);
     }

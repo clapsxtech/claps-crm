@@ -288,7 +288,7 @@ class ErpTimetableTest extends TestCase
         $this->get($this->url())->assertRedirect(route('login'));
     }
 
-    /** @dataProvider invalidFilters */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidFilters')]
     public function test_malformed_and_unbounded_filters_are_validation_errors(array $query, string $field): void
     {
         $this->getJson($this->url($query))->assertUnprocessable()->assertJsonValidationErrors($field);
@@ -345,7 +345,7 @@ class ErpTimetableTest extends TestCase
         $lesson = $this->lesson('2026-10-20 10:00:00', '2026-10-20 11:00:00', ['status' => 'completed']);
         DB::table('erp_attendance')->insert(['unit_id' => $this->unit, 'lesson_id' => $lesson, 'actual_minutes' => 60, 'status' => 'submitted', 'submitted_by' => $this->admin->id]);
         DB::table('erp_ledger')->insert(['unit_id' => $this->unit, 'student_id' => $this->student, 'kind' => 'payment', 'amount_paise' => 12000, 'currency' => 'INR', 'reference' => 'WEEK-RECORDED-PAYMENT', 'event_key' => 'week-payment', 'occurred_at' => '2026-10-19 08:00:00', 'created_by' => $this->admin->id]);
-        $tables = array_values(array_filter(DB::connection()->getDoctrineSchemaManager()->listTableNames(), function ($table) {
+        $tables = array_values(array_filter(DB::connection()->getSchemaBuilder()->getTableListing(null, false), function ($table) {
             return strpos($table, 'erp_') === 0 || $table === 'integration_outbox';
         }));
         $snapshot = function () use ($tables) {

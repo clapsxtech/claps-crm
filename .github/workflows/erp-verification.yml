@@ -1,0 +1,74 @@
+name: Manual synthetic ERP verification
+
+# Publication must not start a deployment or access live integrations.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.4']
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: erp_probe_concurrency
+          MARIADB_USER: erp_probe
+          # Disposable service fixture, never an application credential.
+          MARIADB_PASSWORD: synthetic-test-only
+          MARIADB_ROOT_PASSWORD: synthetic-root-only
+        ports:
+          - 33306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    defaults:
+      run:
+        working-directory: public_html
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: bcmath, curl, dom, fileinfo, gd, mbstring, pdo_mysql, pdo_sqlite, xml, zip
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: public_html/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          mkdir -p bootstrap/cache storage/framework/{cache/data,sessions,views} storage/logs
+          composer install --no-interaction --prefer-dist
+          composer check-platform-reqs
+          npm ci
+      - name: Verify application and assets
+        run: |
+          composer audit
+          php vendor/bin/phpunit
+          php vendor/bin/phpunit --order-by=random --random-order-seed=20261025
+          php tests/Integration/erp-recovery-drill.php
+          npm run production
+          npm test
+          npm audit
+          npx tsc --noEmit
+      - name: Verify isolated native concurrency
+        env:
+          ERP_PROBE_HOST: 127.0.0.1
+          ERP_PROBE_PORT: '33306'
+          ERP_PROBE_DATABASE: erp_probe_concurrency
+          ERP_PROBE_USER: erp_probe
+          ERP_PROBE_PASSWORD: synthetic-test-only
+          ERP_PROBE_ALLOW_RESET: erp_probe_concurrency
+        run: php tests/Integration/erp-mysql-concurrency.php

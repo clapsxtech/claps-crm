@@ -1,5 +1,4 @@
 require('./bootstrap');
-require('select2');
 
 $(function () {
     const setButtonLoading = (button, loading) => {

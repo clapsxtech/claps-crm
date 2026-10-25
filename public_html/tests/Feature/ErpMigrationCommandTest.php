@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Console\Commands\PreviewErpMigration;
 use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -13,13 +14,17 @@ class ErpMigrationCommandTest extends TestCase
     {
         $file = $literalPath ? $input : tempnam(sys_get_temp_dir(), 'synthetic-erp-preview-');
         if (!$literalPath) file_put_contents($file, $input);
+        $previousContainer = Container::getInstance();
         try {
+            $application = new Application();
+            $application->instance('env', 'testing');
             $command = new PreviewErpMigration();
-            $command->setLaravel(new Container());
+            $command->setLaravel($application);
             $tester = new CommandTester($command);
             $status = $tester->execute(['file' => $file]);
             return [$status, json_decode($tester->getDisplay(), true), $tester->getDisplay()];
         } finally {
+            Container::setInstance($previousContainer);
             if (!$literalPath) unlink($file);
         }
     }

@@ -8,7 +8,7 @@ Code-only work, using synthetic local fixtures. Main publication is authorized; 
 | 2 | Partial-day exceptions and planning usability | Explicit local date/time boundaries; overlap/collision checks and existing-lesson protection; full-day compatibility; DST validation; AA/BB isolation | Implemented and verified; 18 native concurrency scenarios and synthetic browser interval/replay checks passed |
 | 3 | Action-oriented daily queues and rupee UX | Named actionable records; pending import distinct from teacher approval; decimal INR input parsed without floating point; money storage remains integer paise; idempotent operations preserved | Implemented and verified; synthetic browser import/approval separation and exact INR checks passed |
 | 4 | Migration opening balances and historical teacher dues | Explicit signed opening semantics and UTC cutoff; preview/digest/reconciliation; synthetic repeat/rollback/cutoff tests; history never charged again; no implicit payment | Implemented and verified with synthetic fixtures; real source mapping and approved opening totals remain gated |
-| 5 | Continuous integration and supported framework | Reproducible synthetic CI; dependency/framework compatibility audit; supported upgrade with full regression and explicit remaining security findings | Manual-only CI prepared; isolated Laravel 12 upgrade passes baseline regression and PHP audit; integrated upgrade and Node security remediation pending |
+| 5 | Continuous integration and supported framework | Reproducible synthetic CI; dependency/framework compatibility audit; supported upgrade with full regression and explicit remaining security findings | Integrated Laravel 12 and reproducible asset/security updates reconstructed and freshly verified; manual-only workflow included. See ERP_FINAL_INTEGRATION_ACCEPTANCE.md for exact current evidence and unperformed native/browser/container checks. |
 
 ## Non-code release gates
 
@@ -25,8 +25,8 @@ The weekly board is a read-only projection, not an availability editor or drag-a
 
 These are separate from the five audited-gap stages above. Implement only grounded business rules; do not silently expand staff access.
 
-- Unified student profile: read-only unit-admin overview linking named assignments, timetable, attendance, balance/receipt history and follow-ups. Reuse current access boundaries and separate student charges from teacher earnings.
-- Guided staff workflow: context-preserving navigation and explicit next actions, without inventing approval or messaging automation. Known current issue: server validation collapses the form details and clears entity selections; preserve form context safely in a focused follow-up.
+- Unified student profile: implemented read-only unit-admin overview with named, independently paginated histories and isolated student balances; fresh access/isolation/non-mutation tests passed.
+- Guided staff workflow: context-preserving navigation and explicit next actions, without inventing approval or messaging automation. Scoped form recovery and lookup retention are implemented and tested; real-device visual acceptance remains outstanding.
 - Finer permissions: requires an approved role/action/data-access matrix. Existing explicit unit-admin and own-teacher/task access stays in force until reviewed.
 - Backup/restore: prepare documented, synthetic restore drills and integrity checks. Real backup destinations, retention, credentials and production restore need explicit operational choices and authorization.
 - Monitoring: define health/error/audit indicators and synthetic verification. Hosting-specific alert channels, access, budgets and operational ownership remain unconfigured.

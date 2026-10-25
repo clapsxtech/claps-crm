@@ -195,7 +195,7 @@ class StaffProvisioningTest extends TestCase
     {
         $directory = storage_path('framework/testing/staff-public-'.uniqid());
         File::ensureDirectoryExists($directory);
-        $this->app->instance('path.public', $directory);
+        $this->app->usePublicPath($directory);
         $sentinel = $directory.'/do-not-delete.txt';
         File::put($sentinel, 'Keep this file.');
         try {
@@ -217,7 +217,7 @@ class StaffProvisioningTest extends TestCase
     {
         $directory = storage_path('framework/testing/staff-public-'.uniqid());
         File::ensureDirectoryExists($directory);
-        $this->app->instance('path.public', $directory);
+        $this->app->usePublicPath($directory);
         $admin = $this->createAdmin();
         $dispatcher = User::getEventDispatcher();
         User::setEventDispatcher(new \Illuminate\Events\Dispatcher($this->app));

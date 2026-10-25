@@ -8,35 +8,32 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
-        "brian2694/laravel-toastr": "^5.56",
-        "doctrine/dbal": "^3.3",
-        "fideloper/proxy": "^4.4",
-        "fruitcake/laravel-cors": "^2.0",
-        "guzzlehttp/guzzle": "^7.0.1",
-        "laravel/framework": "^8.12",
-        "laravel/sanctum": "^2.13",
-        "laravel/tinker": "^2.5",
-        "laravel/ui": "^3.2",
-        "revolution/laravel-google-sheets": "^6.0",
+        "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.9",
+        "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.10",
+        "laravel/ui": "^4.6",
+        "revolution/laravel-google-sheets": "^7.0",
         "socialiteproviders/microsoft": "^4.1",
-        "spatie/laravel-permission": "^5.5",
-        "yajra/laravel-datatables-oracle": "~9.0",
-        "yoeunes/toastr": "^1.2",
+        "spatie/laravel-permission": "^6.0",
+        "yajra/laravel-datatables-oracle": "^12.0",
         "ext-bcmath": "*"
     },
     "require-dev": {
-        "facade/ignition": "^2.5",
-        "fakerphp/faker": "^1.9.1",
+        "fakerphp/faker": "^1.23",
         "laravel/sail": "^1.0.1",
-        "mockery/mockery": "^1.4.2",
-        "nunomaduro/collision": "^5.0",
-        "phpunit/phpunit": "^9.3.3"
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.0",
+        "phpunit/phpunit": "^11.0"
     },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "platform": {
+            "php": "8.2.30"
+        }
     },
     "extra": {
         "laravel": {
@@ -55,7 +52,7 @@
             "Tests\\": "tests/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
         "post-autoload-dump": [

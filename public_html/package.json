@@ -1,38 +1,55 @@
 {
-    "private": true,
-    "scripts": {
-        "dev": "npm run development",
-        "development": "NODE_OPTIONS=--openssl-legacy-provider mix",
-        "watch": "mix watch",
-        "watch-poll": "mix watch -- --watch-options-poll=1000",
-        "hot": "mix watch --hot",
-        "prod": "npm run production",
-        "production": "NODE_OPTIONS=--openssl-legacy-provider mix --production",
-        "cf:dev": "wrangler dev",
-        "cf:deploy": "wrangler deploy",
-        "cf:types": "wrangler types",
-        "test:deployment": "node --test tests/Deployment/*.test.cjs"
-    },
-    "engines": {
-        "node": ">=22 <23"
-    },
-    "devDependencies": {
-        "axios": "^0.21",
-        "bootstrap": "^4.0.0",
-        "jquery": "^3.2",
-        "laravel-mix": "^6.0.39",
-        "lodash": "^4.17.19",
-        "popper.js": "^1.12",
-        "postcss": "^8.1.14",
-        "resolve-url-loader": "^3.1.0",
-        "sass": "^1.15.2",
-        "sass-loader": "^8.0.0",
-        "@cloudflare/workers-types": "^5.20261023.1",
-        "typescript": "^5.9.3",
-        "wrangler": "^4.136.0"
-    },
-    "dependencies": {
-        "@fortawesome/fontawesome-free": "^5.15.2",
-        "admin-lte": "^3.0.5"
-    }
+  "private": true,
+  "scripts": {
+    "dev": "npm run development",
+    "development": "node scripts/build-assets.mjs",
+    "watch": "node scripts/build-assets.mjs --watch",
+    "watch-poll": "node scripts/build-assets.mjs --watch",
+    "hot": "node scripts/build-assets.mjs --watch",
+    "prod": "npm run production",
+    "production": "node scripts/build-assets.mjs --production",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy",
+    "cf:types": "wrangler types",
+    "test:deployment": "node --test tests/Deployment/*.test.cjs",
+    "build": "npm run production",
+    "test:assets": "node --test tests/Assets/*.test.cjs",
+    "test": "node --test tests/Assets/*.test.cjs tests/Deployment/*.test.cjs"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261023.1",
+    "esbuild": "^0.28.2",
+    "jsdom": "^27.4.0",
+    "sass": "^1.106.1",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.136.0"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "5.15.4",
+    "axios": "^1.20.0",
+    "bootstrap": "4.6.2",
+    "datatables.net": "1.13.11",
+    "datatables.net-bs4": "1.13.11",
+    "datatables.net-buttons": "1.7.0",
+    "datatables.net-buttons-bs4": "1.7.0",
+    "datatables.net-responsive": "2.2.7",
+    "datatables.net-responsive-bs4": "2.2.7",
+    "daterangepicker": "3.1.0",
+    "gsap": "3.12.7",
+    "ion-rangeslider": "2.3.1",
+    "jquery": "3.7.1",
+    "jszip": "3.10.2",
+    "lodash": "^4.18.1",
+    "moment": "2.31.0",
+    "pdfmake": "0.2.23",
+    "popper.js": "1.16.1",
+    "select2": "4.0.13",
+    "toastr": "2.1.4"
+  },
+  "overrides": {
+    "undici": "^7.30.1"
+  }
 }

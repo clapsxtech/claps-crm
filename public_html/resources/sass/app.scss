@@ -8,12 +8,14 @@
 $fa-font-path:"../webfonts";
 
 // Bootstrap
-@import '~bootstrap/scss/bootstrap';
+@import 'bootstrap/scss/bootstrap';
 
 // AdminLTE
-@import '~admin-lte/dist/css/adminlte.css';
+@import '../vendor/admin-lte/adminlte.css';
 
-@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
-@import "~@fortawesome/fontawesome-free/scss/solid.scss";
-@import "~@fortawesome/fontawesome-free/scss/regular.scss";
-@import "~@fortawesome/fontawesome-free/scss/brands.scss";
+@import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "@fortawesome/fontawesome-free/scss/solid.scss";
+@import "@fortawesome/fontawesome-free/scss/regular.scss";
+@import "@fortawesome/fontawesome-free/scss/brands.scss";
+// Select2 is an explicit runtime dependency, not an AdminLTE transitive dependency.
+@import 'select2/dist/css/select2.css';

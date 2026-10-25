@@ -12,6 +12,13 @@ use Tests\TestCase;
 
 class ErpFinanceAttendanceTest extends TestCase
 {
+    // This fixture deliberately builds a separate SQLite schema in setUp(). Do not
+    // begin a RefreshDatabase transaction on a PDO that setUp() then replaces.
+    // Each test gets a newly purged in-memory connection and explicit migrations.
+    public function refreshDatabase(): void
+    {
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

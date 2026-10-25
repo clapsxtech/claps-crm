@@ -148,7 +148,7 @@ class ReferenceImportTest extends TestCase
             $sql = str_replace(['`', '"'], '', strtolower($query->sql));
             if ($armed && strpos($sql, 'insert into masters ') === 0) {
                 $armed = false;
-                throw new QueryException($query->sql, $query->bindings, new \RuntimeException('Synthetic insert failure'));
+                throw new QueryException($query->connectionName, $query->sql, $query->bindings, new \RuntimeException('Synthetic insert failure'));
             }
         });
         try { app(MasterController::class)->importSnapshot($this->values([$this->masterRow()])); $this->fail('Expected insertion failure.'); }

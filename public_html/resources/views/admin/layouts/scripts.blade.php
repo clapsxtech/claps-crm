@@ -53,5 +53,5 @@ $(document).on('submit', 'form#removeForm', function(e) {
     });
 });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="{{ asset('browser-vendor/moment.min.js') }}"></script>
+<script src="{{ asset('browser-vendor/daterangepicker.js') }}"></script>

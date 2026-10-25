@@ -31,7 +31,6 @@
     <script src="{{asset('adminlte/buttons.print.min.js')}}"></script>
     <script src="{{asset('adminlte/buttons.colVis.min.js')}}"></script>
     
-    <script src="{{asset('adminlte/select2.min.js')}}"></script>
     <script>$(document).ready(function(){$('.select2').select2()})</script>
     <script>
       $(function () {
@@ -50,12 +49,10 @@
       });
     </script>
     <!-- Page specific script -->
-    <script src="{{asset('adminlte/toastr.min.js')}}"></script>
-    <script src="{{asset('adminlte/bootstrap-colorpicker.min.js')}}"></script>
-    <script src="{{asset('adminlte/jquery-ui.min.js')}}"></script>
 
     <script>
       toastr.options = {
+        escapeHtml: true,
         closeButton: true,
         progressBar: true,
         newestOnTop: true,
@@ -82,7 +79,3 @@
       $('[data-toggle="tooltip"]').tooltip();
     </script>
 
-    <script type="text/javascript" src="{{asset('core/js/jquery.magnific-popup.min.js')}}"></script>
-    <script type="text/javascript" src="{{asset('core/js/slick.min.js')}}"></script>
-    <script type="text/javascript" src="{{asset('core/js/custom.jquery.js')}}"></script>
-    <script type="text/javascript" src="{{asset('adminlte/jquery.validate.min.js')}}"></script>

@@ -25,3 +25,12 @@ public_html/storage/framework/sessions/*
 !public_html/storage/framework/sessions/.gitignore
 public_html/storage/framework/views/*
 !public_html/storage/framework/views/.gitignore
+
+# Local verification artifacts and generated Laravel manifests
+public_html/.phpunit.cache/
+public_html/phpunit.xml.bak
+public_html/bootstrap/cache/*
+!public_html/bootstrap/cache/.gitignore
+# Licensed, explicitly reviewed frontend distributions (not Composer vendor)
+!public_html/resources/vendor/
+!public_html/resources/vendor/**

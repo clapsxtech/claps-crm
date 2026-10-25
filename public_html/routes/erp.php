@@ -8,6 +8,7 @@ Route::middleware('auth')->prefix('erp')->name('erp.')->group(function () {
     Route::get('/teacher',[\App\Http\Controllers\Erp\TeacherController::class,'index'])->name('teacher.index');
     Route::post('/teacher/attendance',[\App\Http\Controllers\Erp\TeacherController::class,'submit'])->name('teacher.submit');
     Route::get('/',[WorkspaceController::class,'index'])->name('index');
+    Route::get('/units/{unit}/students/{student}',[\App\Http\Controllers\Erp\StudentProfileController::class,'show'])->whereNumber('unit')->whereNumber('student')->name('student-profile');
     Route::get('/units/{unit}/business/{page?}',[\App\Http\Controllers\Erp\BusinessController::class,'page'])->whereNumber('unit')->name('business');
     Route::post('/units/{unit}/business-actions/{action}',[\App\Http\Controllers\Erp\BusinessController::class,'mutate'])->whereNumber('unit')->name('business.mutate');
     Route::get('/units/{unit}/exports/{dataset}',[\App\Http\Controllers\Erp\BusinessController::class,'export'])->whereNumber('unit')->name('export');
