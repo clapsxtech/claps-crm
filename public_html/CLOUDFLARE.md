@@ -47,8 +47,10 @@ instance explicitly when changing images or secrets, then verify `/health`, logi
 ERP pages, and uploads. Never delete the D1 database or uploads bucket to redeploy.
 The restart endpoint is `POST /__cloudflare/restart`, authenticated with
 `Authorization: Bearer <INTERNAL_TOKEN>`. Load the token from private secret storage;
-never put its value in shell history or source control. The next application request
-starts the new container. The health endpoint is a process-readiness check; live
+never put its value in shell history or source control. The restart endpoint starts the new container and waits for `/ready` to verify
+database recovery before returning `ready: true`. Allow up to 180 seconds for
+this operation. The `/health` endpoint is a process-readiness check; `/ready` also checks the
+database without creating sessions; live
 sign-in and a database-backed screen are separate database checks.
 
 ## Database changes

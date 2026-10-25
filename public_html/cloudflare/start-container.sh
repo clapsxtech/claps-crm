@@ -46,6 +46,5 @@ mkdir -p public/uploads/profile_photo
 chown -R www-data:www-data storage bootstrap/cache
 
 php artisan config:cache
-php artisan view:cache
 
 exec apache2-foreground

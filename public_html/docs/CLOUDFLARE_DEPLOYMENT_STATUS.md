@@ -2,7 +2,16 @@
 
 Live URL: **https://erp.clapslearn.in**
 
-## Current performance release
+## Current page-loading and cold-start release
+
+Worker `17b96157-56ec-418e-837f-4cc710cbc813`, image
+`sha256:36b68fa2ca9e17a6bbb068694517b55503cb699f5ca3fa3db93a34f6b8dfee9e`.
+Internal storage routing, batched recovery, build-time view compilation and
+database-ready restart are deployed. Restart-to-ready: 26.16 seconds; all
+54 benchmark requests and live smoke checks passed. See
+[the release results](ERP_COLD_START_RELEASE.md).
+
+## Previous performance release
 
 Worker `b90f796d-9f45-4d09-85b6-398ea010c5ee`, image
 `sha256:8b97acecd4ebcc52190984477abbcc04ce56709d45df6208cc52e7b528ed9e97`.

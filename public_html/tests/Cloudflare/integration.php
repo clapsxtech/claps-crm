@@ -34,6 +34,14 @@ try{$gateway->call('commit',$bad);throw new LogicException('Invalid batch accept
 $final=new D1Connection(new D1Pdo($gateway,$directory.'/final.sqlite'),'final','',['driver'=>'sqlite','name'=>'final']);
 check($final->table('erp_units')->where('id',$unit)->value('name')==="Quote ' and ?",'A failed D1 batch cannot leave partial business writes');
 check(Http::post('http://localhost:8790/__cloudflare/database/state',[])->status()===401,'Database gateway denies unauthenticated access');
+// Exercise both the batched first pages and the >200-row pagination path.
+$final->transaction(function () use ($final, $suffix) {
+    for ($i=0; $i<205; $i++) $final->table('erp_units')->insert(['code'=>'P-'.$suffix.'-'.$i,'name'=>'Pagination fixture','timezone'=>'UTC']);
+});
+$paginated=new D1Connection(new D1Pdo($gateway,$directory.'/paginated.sqlite'),'paginated','',['driver'=>'sqlite','name'=>'paginated']);
+check($paginated->table('erp_units')->where('code','like','P-'.$suffix.'-%')->count()===205,'Batched recovery preserves records beyond the first 200 rows');
+check(Http::withToken('local-test-only')->post('http://localhost:8790/__cloudflare/database/rows_batch',['tables'=>['erp_d1_revision']])->status()===400,'Batched recovery rejects internal tables');
+check(Http::post('http://localhost:8790/__cloudflare/database/rows_batch',['tables'=>['users']])->status()===401,'Batched recovery requires authentication');
 $key='profile_photo/'.Illuminate\Support\Str::uuid().'.png';$png=base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=');
 check(Http::withToken('local-test-only')->withBody($png,'image/png')->put('http://localhost:8790/__cloudflare/uploads/'.$key)->successful(),'R2 upload');
 check(Http::get('http://localhost:8790/uploads/'.$key)->body()===$png,'R2 read preserves uploaded bytes');

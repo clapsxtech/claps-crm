@@ -21,6 +21,11 @@ class MemoryD1Gateway extends Gateway
     public function call(string $operation, array $payload=[]): array
     {
         $revision = (int) $this->db->query('SELECT revision FROM erp_d1_revision')->fetchColumn();
+        if ($operation === 'rows_batch') {
+            $pages = [];
+            foreach ($payload['tables'] as $table) $pages[$table] = $this->call('rows', ['table' => $table, 'cursor' => null]);
+            return ['pages' => $pages];
+        }
         if ($operation === 'state') return ['revision'=>$revision];
         if ($operation === 'schema') return ['revision'=>$revision,'schema'=>$this->db->query("SELECT type,name,sql FROM sqlite_master WHERE name='accounts'")->fetchAll(PDO::FETCH_ASSOC),'sequences'=>$this->db->query('SELECT * FROM sqlite_sequence')->fetchAll(PDO::FETCH_ASSOC)];
         if ($operation === 'rows') return ['rows'=>$this->db->query('SELECT rowid AS _erp_d1_rowid,* FROM accounts')->fetchAll(PDO::FETCH_ASSOC),'more'=>false];
@@ -50,6 +55,22 @@ class D1TransactionTest extends TestCase
         gc_collect_cycles();
         foreach($this->paths as $path) foreach (glob($path.'*') as $file) if(is_file($file)) unlink($file);
     }
+    public function test_recovery_retries_if_database_changes_during_batched_snapshot(): void
+    {
+        $remote = new class extends MemoryD1Gateway {
+            private int $states = 0;
+            public function call(string $operation, array $payload = []): array
+            {
+                if ($operation === 'state' && ++$this->states === 2) {
+                    $this->db->exec("INSERT INTO accounts(name,amount) VALUES('concurrent',75)");
+                }
+                return parent::call($operation, $payload);
+            }
+        };
+        $db = $this->connection($remote);
+        $this->assertSame(75, (int)$db->table('accounts')->where('name','concurrent')->value('amount'));
+    }
+
     public function test_auto_commit_preserves_insert_ids_and_bound_quotes(): void
     {
         $remote=new MemoryD1Gateway; $db=$this->connection($remote);

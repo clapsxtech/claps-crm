@@ -124,13 +124,15 @@ function workerHarness(appUrl = 'https://logs.example.test', environment = {}, u
             if (name === './monitoring') return { checkOperations: async () => ({ status: 'ok' }) };
             if (name === './storage') return { storageRequest: async () => null };
             assert.equal(name, 'cloudflare:workers');
-            return { DurableObject: class { constructor(ctx, env) { this.ctx = ctx; this.env = env; } } };
+            return { WorkerEntrypoint: class {}, DurableObject: class { constructor(ctx, env) { this.ctx = ctx; this.env = env; } } };
         },
     });
+    const gatewayBinding = {};
     const forwarded = [];
     let startOptions;
     const port = { async fetch(request) {
         if (typeof request === 'string') {
+            assert.equal(request, 'http://container/ready');
             if (probes++ < unavailableProbes) throw new Error('Container is still booting');
             return new Response('ready');
         }
@@ -144,10 +146,11 @@ function workerHarness(appUrl = 'https://logs.example.test', environment = {}, u
             startOptions = options;
             this.running = true;
         },
+        interceptOutboundHttp: async (host, binding) => { assert.equal(host, 'erp-storage.internal'); assert.equal(binding, gatewayBinding); },
         setInactivityTimeout: async () => {},
         getTcpPort(number) { assert.equal(number, 8080); return port; },
     };
-    const worker = new exports.LaravelContainer({ container, blockConcurrencyWhile: (cb) => cb() }, { APP_URL: appUrl, ...environment });
+    const worker = new exports.LaravelContainer({ container, blockConcurrencyWhile: (cb) => cb() }, { APP_URL: appUrl, STORAGE_GATEWAY: gatewayBinding, ...environment });
     return { worker, forwarded, container, get probes() { return probes; }, get startOptions() { return startOptions; } };
 }
 
@@ -179,6 +182,7 @@ test('Worker preserves public Host, query, body and authentication headers over 
     assert.equal(h.startOptions.env.TRUSTED_PROXIES, '');
     assert.equal(h.startOptions.env.SESSION_SECURE_COOKIE, 'true');
     assert.equal(h.startOptions.env.CACHE_DRIVER, 'file');
+    assert.equal(h.startOptions.env.CLOUDFLARE_GATEWAY_URL, 'http://erp-storage.internal');
 });
 
 test('Worker replaces all client-supplied forwarding origin headers and strips spoofed chains', async () => {

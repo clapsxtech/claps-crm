@@ -1,9 +1,10 @@
 import { checkOperations } from "./monitoring";
-import { DurableObject } from "cloudflare:workers";
+import { DurableObject, WorkerEntrypoint } from "cloudflare:workers";
 import { storageRequest, isStorageAuthorized, type StorageEnv } from "./storage";
 
 interface Env extends StorageEnv {
     LARAVEL_CONTAINER: DurableObjectNamespace<LaravelContainer>;
+    STORAGE_GATEWAY: Fetcher;
     APP_KEY: string;
     APP_URL: string;
     TRUSTED_PROXIES?: string;
@@ -13,6 +14,14 @@ interface Env extends StorageEnv {
     GOOGLE_SERVICE_ENABLED?: string;
     GOOGLE_CREDENTIALS_BASE64?: string;
 
+}
+
+// This entrypoint is reached by the container's host-specific internal intercept.
+// The existing bearer-token check still protects every database/storage operation.
+export class StorageGateway extends WorkerEntrypoint<Env> {
+    async fetch(request: Request): Promise<Response> {
+        return await storageRequest(request, this.env) ?? new Response('Not found', { status: 404 });
+    }
 }
 
 const PORT = 8080;
@@ -83,6 +92,7 @@ export class LaravelContainer extends DurableObject<Env> {
 
     private async startAndWaitForPort(): Promise<void> {
         const container = this.ctx.container!;
+        await container.interceptOutboundHttp("erp-storage.internal", this.env.STORAGE_GATEWAY);
 
         if (!container.running) {
             const publicUrl = new URL(this.env.APP_URL);
@@ -110,7 +120,7 @@ export class LaravelContainer extends DurableObject<Env> {
                     GOOGLE_SERVICE_ENABLED: this.env.GOOGLE_SERVICE_ENABLED ?? "false",
                     LOG_CHANNEL: "stderr",
                     DB_CONNECTION: "d1",
-                    CLOUDFLARE_GATEWAY_URL: this.env.APP_URL,
+                    CLOUDFLARE_GATEWAY_URL: "http://erp-storage.internal",
                     CLOUDFLARE_INTERNAL_TOKEN: this.env.INTERNAL_TOKEN,
                     SESSION_DRIVER: "database",
                     SESSION_SECURE_COOKIE: secureOrigin ? "true" : "false",
@@ -131,8 +141,8 @@ export class LaravelContainer extends DurableObject<Env> {
         const readyDeadline = Date.now() + 120_000;
         while (Date.now() < readyDeadline) {
             try {
-                const response = await port.fetch("http://container/health", {
-                    signal: AbortSignal.timeout(5000),
+                const response = await port.fetch("http://container/ready", {
+                    signal: AbortSignal.timeout(20000),
                 });
                 await response.body?.cancel();
                 if (response.ok) return;
@@ -150,7 +160,7 @@ export class LaravelContainer extends DurableObject<Env> {
 export default {
     async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
         try {
-            const report = await checkOperations(env.DB, () => env.LARAVEL_CONTAINER.getByName('production').fetch(new Request(new URL('/health', env.APP_URL))));
+            const report = await checkOperations(env.DB, () => env.LARAVEL_CONTAINER.getByName('production').fetch(new Request(new URL('/ready', env.APP_URL))));
             const message = JSON.stringify({ event: 'erp.operational_health', ...report });
             if (report.status === 'ok') console.log(message);
             else console.error(message);
@@ -165,8 +175,12 @@ export default {
             if (request.method !== 'POST' || !await isStorageAuthorized(request, env)) {
                 return new Response('Unauthorized', { status: 401 });
             }
-            await env.LARAVEL_CONTAINER.getByName('production').restart();
-            return Response.json({ restarted: true }, { headers: { 'Cache-Control': 'no-store' } });
+            const instance = env.LARAVEL_CONTAINER.getByName('production');
+            await instance.restart();
+            const ready = await instance.fetch(new Request(new URL('/ready', env.APP_URL)));
+            await ready.body?.cancel();
+            if (!ready.ok) return Response.json({ restarted: true, ready: false }, { status: 503 });
+            return Response.json({ restarted: true, ready: true }, { headers: { 'Cache-Control': 'no-store' } });
         }
         const storage = await storageRequest(request, env);
         if (storage) return storage;

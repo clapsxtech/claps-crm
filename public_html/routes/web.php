@@ -24,6 +24,14 @@ use App\Http\Controllers\TimeTableController;
 Auth::routes(['register' => false]);
 Route::get('/superadmin/login', [\App\Http\Controllers\Auth\LoginController::class, 'showSuperadminLogin'])->name('superadmin.login');
 Route::get('/staff/login', [\App\Http\Controllers\Auth\LoginController::class, 'showStaffLogin'])->name('staff.login');
+Route::get('/ready', function () {
+    try {
+        \Illuminate\Support\Facades\DB::connection()->select('SELECT 1');
+        return response()->json(['status' => 'ok'])->header('Cache-Control', 'no-store');
+    } catch (\Throwable) {
+        return response()->json(['status' => 'unavailable'], 503)->header('Cache-Control', 'no-store');
+    }
+})->withoutMiddleware('web');
 Route::get('/health', function () {
     return response()->json(['status' => 'ok']);
 })->withoutMiddleware('web');

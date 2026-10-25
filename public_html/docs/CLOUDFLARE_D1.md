@@ -12,8 +12,11 @@ Laravel uses interactive transaction callbacks, reads its own uncommitted writes
 and relies on nested savepoint rollback. D1 exposes atomic statement batches,
 not an interactive SQL transaction protocol. The adapter therefore uses a
 **disposable local SQLite working copy**, protected by an exclusive process lock.
-It validates the copy against D1's revision on connection. A missing or stale copy
-is reconstructed from a paginated D1 snapshot; start/end revisions must match.
+It validates the copy against D1's revision on connection. The container reaches
+the authenticated storage Worker through a host-specific internal outbound intercept,
+avoiding a round trip through the public application hostname. A missing or stale copy
+is reconstructed from a paginated D1 snapshot; initial pages are batched across
+eight tables at a time and start/end revisions must match.
 The copy is never treated as durable storage.
 
 Business SQL executes against the working copy. Successful mutations are journaled.

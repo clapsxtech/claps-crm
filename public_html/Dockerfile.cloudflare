@@ -67,7 +67,9 @@ RUN a2enconf laravel \
     && chmod +x /usr/local/bin/start-container \
     && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache public/uploads/profile_photo \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
-    && php artisan package:discover --ansi
+    && php artisan package:discover --ansi \
+    && php artisan view:cache \
+    && chown -R www-data:www-data storage/framework/views
 
 EXPOSE 8080
 

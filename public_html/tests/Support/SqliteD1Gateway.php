@@ -21,6 +21,11 @@ class SqliteD1Gateway extends Gateway
     public function call(string $operation,array $payload=[]):array
     {
         $revision=(int)$this->remote->query('SELECT revision FROM erp_d1_revision')->fetchColumn();
+        if ($operation === 'rows_batch') {
+            $pages = [];
+            foreach ($payload['tables'] as $table) $pages[$table] = $this->call('rows', ['table' => $table, 'cursor' => null]);
+            return ['pages' => $pages];
+        }
         if($operation==='state')return ['revision'=>$revision];
         if($operation==='schema')return ['revision'=>$revision,'schema'=>$this->remote->query("SELECT type,name,sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' AND substr(name,1,7)!='erp_d1_' ORDER BY CASE type WHEN 'table' THEN 0 ELSE 1 END,name")->fetchAll(PDO::FETCH_ASSOC),'sequences'=>$this->remote->query('SELECT * FROM sqlite_sequence')->fetchAll(PDO::FETCH_ASSOC)];
         if($operation==='rows')return ['rows'=>$this->remote->query('SELECT rowid AS _erp_d1_rowid,* FROM '.D1Pdo::identifier($payload['table']))->fetchAll(PDO::FETCH_ASSOC),'more'=>false];

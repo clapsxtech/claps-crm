@@ -1,0 +1,57 @@
+{
+  "restart": {
+    "restarted": true,
+    "ready": true,
+    "restart_to_database_ready_seconds": 26.16
+  },
+  "pages": {
+    "timestamp": "2026-10-25T10:10:31.265219+00:00",
+    "concurrent_sessions": 3,
+    "measured_requests": 54,
+    "results": {
+      "/health": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1042.26,
+        "p95_ms": 2148.86,
+        "max_ms": 2148.86
+      },
+      "/": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1702.77,
+        "p95_ms": 2219.07,
+        "max_ms": 2219.07
+      },
+      "/tools": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1778.89,
+        "p95_ms": 2922.38,
+        "max_ms": 2922.38
+      },
+      "/erp/units/1/business/dashboard": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1660.56,
+        "p95_ms": 2586.47,
+        "max_ms": 2586.47
+      },
+      "/css/erp.css": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 298.67,
+        "p95_ms": 1383.04,
+        "max_ms": 1383.04
+      },
+      "/js/erp-shell.js": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 287.98,
+        "p95_ms": 1293.79,
+        "max_ms": 1293.79
+      }
+    },
+    "scope": "Small warm read-only production sample, not a capacity certification. Login/logout create and delete sessions; no business records are changed."
+  }
+}

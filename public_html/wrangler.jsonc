@@ -9,6 +9,7 @@
         }
     ],
     "main": "src/index.ts",
+    "services": [{ "binding": "STORAGE_GATEWAY", "service": "clapslearn-logs", "entrypoint": "StorageGateway" }],
     "assets": { "directory": "./.cloudflare-assets", "not_found_handling": "none" },
     "compatibility_date": "2026-10-23",
     "upload_source_maps": true,

@@ -46,11 +46,13 @@ class D1Pdo extends PDO
                 $db->exec('PRAGMA foreign_keys=OFF');
                 $db->beginTransaction();
                 foreach ($snapshot['schema'] as $object) if ($object['type'] === 'table') $db->exec($object['sql']);
-                foreach ($snapshot['schema'] as $object) {
-                    if ($object['type'] !== 'table') continue;
+                $tables = array_values(array_filter($snapshot['schema'], fn($object) => $object['type'] === 'table'));
+                foreach (array_chunk($tables, 8) as $group) {
+                    $initial = $this->gateway->call('rows_batch', ['tables' => array_column($group, 'name')])['pages'];
+                    foreach ($group as $object) {
                     $cursor = null;
                     do {
-                        $page = $this->gateway->call('rows', ['table' => $object['name'], 'cursor' => $cursor]);
+                        $page = $cursor === null ? $initial[$object['name']] : $this->gateway->call('rows', ['table' => $object['name'], 'cursor' => $cursor]);
                         foreach ($page['rows'] as $row) {
                             $cursor = $row['_erp_d1_rowid'];
                             unset($row['_erp_d1_rowid']);
@@ -59,6 +61,7 @@ class D1Pdo extends PDO
                             $insert->execute(array_values($row));
                         }
                     } while ($page['more']);
+                    }
                 }
                 if (isset($snapshot['sequences'])) {
                     $db->exec('DELETE FROM sqlite_sequence');
