@@ -53,5 +53,5 @@ $(document).on('submit', 'form#removeForm', function(e) {
     });
 });
 </script>
-<script src="{{ asset('browser-vendor/moment.min.js') }}"></script>
-<script src="{{ asset('browser-vendor/daterangepicker.js') }}"></script>
+
+<script src="{{ mix('js/report-dates.js') }}"></script>

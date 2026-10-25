@@ -1,17 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="referrer" content="no-referrer">
-    <title>Teacher timetable</title>
-    <link rel="stylesheet" href="{{ asset('frontent_form/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-    <style>body{background:#063436;color:#fff}main{max-width:1100px;margin:auto;padding:3rem 1rem}.schedule{background:#fff;color:#173333;padding:1.25rem;border-radius:12px;margin:1.25rem 0}.table{margin-bottom:0}label{display:block}.status{min-height:1.5rem;margin:1rem 0}</style>
-</head>
-<body class="public-page">
-<main>
+@extends('erp.portal-layout')
+@section('content')
+
+<section class="report-panel">
     <h1>Teacher timetable</h1>
     <p>Enter your teacher name and credential to view only your lessons.</p>
     <form id="timetable-access" autocomplete="off">
@@ -26,7 +16,7 @@
                 <input class="form-control" id="dob" name="dob" type="password" required maxlength="255" autocomplete="off">
             </div>
             <div class="col-md-3 mb-3 align-self-end">
-                <button class="btn btn-light" type="submit" id="view-timetable">View timetable</button>
+                <button class="btn btn-primary" type="submit" id="view-timetable">View timetable</button>
             </div>
         </div>
     </form>
@@ -44,7 +34,10 @@
             </section>
         @endforeach
     </div>
-</main>
+</section>
+
+@endsection
+@section('scripts')
 <script>
 (function () {
     const form = document.getElementById('timetable-access');
@@ -110,5 +103,4 @@
     window.addEventListener('pagehide', clearSchedule);
 })();
 </script>
-</body>
-</html>
+@endsection

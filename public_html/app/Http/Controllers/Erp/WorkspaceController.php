@@ -56,7 +56,7 @@ class WorkspaceController extends Controller
         if($request->expectsJson())return response()->json(['result'=>$result]);
         $message='Saved and audited.';
         if($action==='approve')$message='Attendance approved. Teacher accrual: '.(!empty($result->teacher_financial_posted)?'posted':'none (demo or disabled policy)').'. Student charge: '.(!empty($result->student_financial_posted)?'already imported':'not imported').'. No money was transferred.';
-        if(in_array($request->input('return_page'),['people','money','followups','dashboard','attendance']))return redirect()->route('erp.business',[$unit,$request->input('return_page')])->with('status',$message);
+        if(in_array($request->input('return_page'),['people','academics','money','followups','dashboard','attendance']))return redirect()->route('erp.business',[$unit,$request->input('return_page')])->with('status',$message);
         return redirect()->route('erp.workspace',$unit)->with('status',$message);
     }
     public function receipt(Request $request,int $unit,int $entry)

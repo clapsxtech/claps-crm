@@ -1,5 +1,8 @@
 {
   "/js/app.js": "/js/app.js?id=68aa10ec5108d80044bd",
-  "/css/app.css": "/css/app.css?id=ca468564b34bf7623632",
-  "/css/toastr.css": "/css/toastr.css?id=8d518262bc03ee39c057"
+  "/css/app.css": "/css/app.css?id=a614322044db0e54ed23",
+  "/css/toastr.css": "/css/toastr.css?id=8d518262bc03ee39c057",
+  "/js/erp-shell.js": "/js/erp-shell.js?id=f3323e14264683a0aee3",
+  "/css/erp.css": "/css/erp.css?id=9512c5044ba12e5fc8c5",
+  "/js/report-dates.js": "/js/report-dates.js?id=16db120190100b19c7e6"
 }

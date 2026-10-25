@@ -23,7 +23,7 @@ class People
     public function teacher(int $unitId,int $actorId,array $data)
     {
         $v=Validator::make($data,['code'=>'required|string|max:100|unique:erp_teachers,code','name'=>'required|string|max:255','timezone'=>'required|timezone','user_id'=>'nullable|integer|unique:erp_teachers,user_id'])->validate();
-        if(!empty($v['user_id'])) { $user=\App\Models\User::find($v['user_id']); (new \App\Modules\IdentityAccess\Services\SiteAccessPolicy())->assertSiteMember($user); abort_unless(DB::table('erp_memberships')->where('unit_id',$unitId)->where('user_id',$user->id)->where('role','teacher')->exists(),422,'Provision teacher membership before binding account.'); }
+        if(!empty($v['user_id'])) { (new \App\Modules\IdentityAccess\Services\SiteAccessPolicy())->assertAdministrator(\App\Models\User::find($actorId)); $user=\App\Models\User::find($v['user_id']); (new \App\Modules\IdentityAccess\Services\SiteAccessPolicy())->assertSiteMember($user); abort_unless(DB::table('erp_memberships')->where('unit_id',$unitId)->where('user_id',$user->id)->where('role','teacher')->exists(),422,'Provision teacher membership before binding account.'); }
         return DB::transaction(function()use($unitId,$actorId,$v){$id=DB::table('erp_teachers')->insertGetId($v+['status'=>'active','created_at'=>now(),'updated_at'=>now()]);DB::table('erp_teacher_units')->insert(['teacher_id'=>$id,'unit_id'=>$unitId,'created_at'=>now(),'updated_at'=>now()]);Audit::record($unitId,$actorId,'teacher.registered','teacher',$id,['code'=>$v['code']]);return DB::table('erp_teachers')->find($id);});
     }
     public function eligibility(int $unitId,int $actorId,array $data)

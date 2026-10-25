@@ -1,25 +1,39 @@
-@extends('erp.layout')
+@extends('erp.teacher-layout')
 @section('content')
-<h2>My lessons and attendance</h2>
-<p>{{ $teacher->name }} · Times shown in {{ $teacher->timezone }}.</p>
-<p class="notice">Submit actual minutes only for classes you delivered. Submission stays pending until an administrator imports the attendance batch; it does not charge the student. Cancelled lessons cannot receive attendance.</p>
-<form method="get" action="{{ route('erp.teacher.index') }}">
-<label>From (UTC date)<input type="date" name="from" value="{{ $from }}" required></label>
-<label>Through (UTC date)<input type="date" name="through" value="{{ $through }}" required></label>
-<button type="submit">Show my lessons</button>
-</form>
-@if($truncated)<p class="notice">Showing the first 500 lessons. Narrow the date range to see the remaining lessons.</p>@endif
-<div class="scroll"><table><thead><tr><th>Lesson</th><th>Student</th><th>Subject</th><th>Starts</th><th>Ends</th><th>Status</th><th>Attendance</th></tr></thead><tbody>
-@forelse($lessons as $lesson)
-<tr><td>#{{ $lesson->id }} · {{ $lesson->kind }}</td><td>{{ $lesson->student_name }} ({{ $lesson->student_code }})</td><td>{{ $lesson->subject_name }}</td><td>{{ \Carbon\Carbon::parse($lesson->starts_at,'UTC')->setTimezone($teacher->timezone)->format('d M Y H:i') }}</td><td>{{ \Carbon\Carbon::parse($lesson->ends_at,'UTC')->setTimezone($teacher->timezone)->format('d M Y H:i') }}</td><td>{{ $lesson->status }}</td><td>
-@if($lesson->attendance_id)
-{{ $lesson->actual_minutes }} minutes · {{ $lesson->attendance_status }}<br><small>Ask an administrator for any correction.</small>
-@elseif(in_array($lesson->status,['scheduled','completed']) && \Carbon\Carbon::parse($lesson->ends_at,'UTC')->isPast())
-<form method="post" action="{{ route('erp.teacher.submit') }}">@csrf<input type="hidden" name="lesson_id" value="{{ $lesson->id }}"><label>Actual delivered minutes<input type="number" name="actual_minutes" min="1" max="480" required aria-label="Actual minutes for lesson {{ $lesson->id }}"></label><button type="submit">Submit attendance</button></form>
-@else
-<small>Attendance unavailable until a delivered lesson ends.</small>
+@php
+$titles=['overview'=>'Good to see you, '.$teacher->name,'timetable'=>'My timetable','students'=>'My students','attendance'=>'My lessons and attendance','results'=>'Assessment results','reports'=>'My teaching reports'];
+$recorded=$lessons->whereNotNull('attendance_id');
+$pending=$lessons->filter(fn($lesson)=>!$lesson->attendance_id && in_array($lesson->status,['scheduled','completed']) && \Carbon\Carbon::parse($lesson->ends_at,'UTC')->isPast());
+@endphp
+<div class="page-heading"><div><div class="eyebrow">YOUR TEACHING WORKSPACE</div><h1>{{ $titles[$section] }}</h1><p>Your students, lessons and progress. Signed in as {{ $teacher->name }}.</p></div></div>
+@if(in_array($section,['overview','reports']))
+<div class="teacher-metrics"><div><span>Active assignments</span><strong>{{ $assignments->count() }}</strong></div><div><span>Attendance to submit</span><strong>{{ $pending->count() }}{{ $truncated ? '+' : '' }}</strong></div><div><span>Recorded teaching</span><strong>{{ number_format($recorded->where('attendance_status','!=','rejected')->sum('actual_minutes')/60,2) }} <small>hours</small></strong></div><div><span>Assessment results</span><strong>{{ $results->total() }}</strong></div></div>
+<p class="teacher-hint">Lesson and attendance totals cover {{ $from }} to {{ $through }} ({{ $teacher->timezone }}){{ $truncated ? ', limited to the first 500 lessons' : '' }}. Rejected attendance is excluded from recorded hours.</p>
 @endif
-</td></tr>
-@empty<tr><td colspan="7">No lessons in this date range.</td></tr>@endforelse
-</tbody></table></div>
+@if($section==='overview')
+<div class="teacher-actions"><a href="{{ route('erp.teacher.index',['section'=>'attendance']) }}"><strong>Record attendance</strong><span>Submit time for a completed lesson →</span></a><a href="{{ route('erp.teacher.index',['section'=>'results']) }}"><strong>Add assessment result</strong><span>Record your students’ progress →</span></a></div>
+@endif
+@if(in_array($section,['overview','timetable','attendance','results','reports']))
+<details class="teacher-filters" @if(request()->has('from') || request()->has('through') || request()->has('student')) open @endif><summary>Filter by date · {{ $from }} – {{ $through }}</summary><form method="get" action="{{ route('erp.teacher.index') }}"><input type="hidden" name="section" value="{{ $section }}"><label>From<input type="date" name="from" value="{{ $from }}" required></label><label>Through<input type="date" name="through" value="{{ $through }}" required></label><label>Student<select name="student"><option value="">All my students</option>@foreach($students as $student)<option value="{{ $student->id }}" @selected((string)$studentId===(string)$student->id)>{{ $student->name }} · {{ $student->code }}</option>@endforeach</select></label><button type="submit">Apply filters</button><a href="{{ route('erp.teacher.index',['section'=>$section]) }}">Reset</a></form></details>
+@endif
+@if($section==='students')
+<div class="teacher-cards">@forelse($assignments as $assignment)<article class="teacher-card"><span class="eyebrow">{{ $assignment->code }}</span><h2>{{ $assignment->name }}</h2><p>{{ $assignment->subject_name }}</p><dl><div><dt>Grade</dt><dd>{{ $assignment->grade }}</dd></div><div><dt>Syllabus</dt><dd>{{ $assignment->syllabus }}</dd></div></dl><a class="button button-secondary" href="{{ route('erp.teacher.index',['section'=>'results','assignment'=>$assignment->id]) }}">Record a result</a></article>@empty<div class="teacher-empty"><h2>No students assigned yet</h2><p>Your administrator can assign students and subjects to your teacher account.</p></div>@endforelse</div>
+@endif
+@if(in_array($section,['overview','timetable','attendance','reports']))
+@if($section==='overview')<h2>Your lessons</h2>@endif
+@if($section==='attendance')<p class="notice">Record actual teaching time after the lesson ends. Your submission is sent for administrator review. Ask an administrator to correct an existing record.</p>@endif
+@if($truncated)<p class="notice">Showing the first 500 lessons. Narrow the date range to see the remaining lessons.</p>@endif
+<div class="teacher-cards">@forelse(($section==='overview' ? $lessons->filter(fn($lesson)=>\Carbon\Carbon::parse($lesson->starts_at,'UTC')->isFuture())->take(3)->merge($pending->take(3)) : $lessons) as $lesson)
+<article class="teacher-card"><div class="teacher-card-top"><span class="eyebrow">{{ \Carbon\Carbon::parse($lesson->starts_at,'UTC')->setTimezone($teacher->timezone)->format('D, d M') }}</span><span class="teacher-badge">{{ ucfirst($lesson->status) }}</span></div><h2>{{ $lesson->student_name }}</h2><p>{{ $lesson->subject_name }} · {{ $lesson->kind }}</p><p class="teacher-time">{{ \Carbon\Carbon::parse($lesson->starts_at,'UTC')->setTimezone($teacher->timezone)->format('H:i') }} – {{ \Carbon\Carbon::parse($lesson->ends_at,'UTC')->setTimezone($teacher->timezone)->format('H:i') }} <small>{{ $teacher->timezone }}</small></p>
+@if($lesson->attendance_id)<div class="teacher-recorded">{{ $lesson->actual_minutes }} minutes · {{ $lesson->attendance_status }}</div>
+@elseif(in_array($lesson->status,['scheduled','completed']) && \Carbon\Carbon::parse($lesson->ends_at,'UTC')->isPast())
+@if($section==='attendance')<form class="teacher-attendance-form" method="post" action="{{ route('erp.teacher.submit') }}">@csrf<input type="hidden" name="lesson_id" value="{{ $lesson->id }}"><label for="minutes-{{ $lesson->id }}">Actual delivered minutes<input id="minutes-{{ $lesson->id }}" type="number" name="actual_minutes" min="1" max="480" inputmode="numeric" required aria-label="Actual minutes for lesson {{ $lesson->id }}" value="{{ (string)old('lesson_id')===(string)$lesson->id ? old('actual_minutes') : '' }}"></label><button type="submit" data-label="Submit attendance">Submit attendance</button></form>@else<a href="{{ route('erp.teacher.index',['section'=>'attendance']) }}">Attendance needs submitting →</a>@endif
+@else<p class="teacher-hint">{{ in_array($lesson->status,['scheduled','completed']) ? 'Attendance opens when this lesson ends.' : 'Attendance unavailable for this lesson.' }}</p>@endif
+</article>@empty<div class="teacher-empty"><h2>No lessons in this date range.</h2><p>Try another date range, or ask your administrator to publish your timetable.</p></div>@endforelse</div>
+@endif
+@if($section==='results')
+<section class="teacher-result-form"><h2>Record an assessment</h2><p>Choose one of your assigned students. Results appear in your history as soon as you save.</p>
+@if($assignments->isNotEmpty())<form method="post" action="{{ route('erp.teacher.result') }}">@csrf<input type="hidden" name="submission_key" value="{{ old('submission_key',(string)\Illuminate\Support\Str::uuid()) }}"><label for="result-enrollment_id">Student & subject<select id="result-enrollment_id" name="enrollment_id" required><option value="">Choose an assignment</option>@foreach($assignments as $assignment)<option value="{{ $assignment->id }}" @selected((string)old('enrollment_id',request('assignment'))===(string)$assignment->id)>{{ $assignment->name }} · {{ $assignment->subject_name }} ({{ $assignment->code }})</option>@endforeach</select></label><label for="result-assessment">Assessment / topic<input id="result-assessment" name="assessment" maxlength="255" required value="{{ old('assessment') }}"></label><label for="result-assessed_on">Assessment date<input id="result-assessed_on" type="date" name="assessed_on" max="{{ \Carbon\CarbonImmutable::now($teacher->timezone)->toDateString() }}" required value="{{ old('assessed_on',\Carbon\CarbonImmutable::now($teacher->timezone)->toDateString()) }}"></label><label for="result-score">Score<input id="result-score" type="number" inputmode="numeric" name="score" min="0" step="1" required value="{{ old('score') }}"></label><label for="result-maximum">Out of<input id="result-maximum" type="number" inputmode="numeric" name="maximum" min="1" max="1000000000" step="1" required value="{{ old('maximum') }}"></label><label class="teacher-wide" for="result-notes">Notes (optional)<textarea id="result-notes" name="notes" maxlength="4000">{{ old('notes') }}</textarea></label><button type="submit" data-label="Save result">Save result</button></form>@else<p class="notice">An active student assignment is needed before you can record a result.</p>@endif</section>
+@endif
+@if(in_array($section,['results','reports']))<h2>Assessment history <small>{{ $results->total() }} results</small></h2><div class="teacher-cards">@forelse($results as $result)<article class="teacher-card"><span class="eyebrow">{{ $result->assessed_on }}</span><h2>{{ $result->student_name }}</h2><p>{{ $result->subject_name }} · {{ $result->assessment }}</p><div class="teacher-score">{{ $result->score }} <span>/ {{ $result->maximum }}</span><small>{{ number_format(100*$result->score/max(1,$result->maximum),1) }}%</small></div>@if($result->notes)<p>{{ $result->notes }}</p>@endif</article>@empty<div class="teacher-empty"><h3>No results in this date range</h3><p>Saved assessments will appear here.</p></div>@endforelse</div>{{ $results->links('pagination::simple-bootstrap-4') }}@endif
 @endsection

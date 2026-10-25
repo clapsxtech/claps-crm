@@ -1,67 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mark Upload Form</title>
-  <link rel="stylesheet" href="{{asset('frontent_form/bootstrap.min.css')}}">
-  <link rel="stylesheet" href="{{asset('adminlte/select2.min.css')}}">
-  <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@extends('erp.portal-layout')
+@section('content')
 
-  <style>
-    /* Add your custom styles here */
-    .gradient-custom {
-      background: #c6c8c8;
-      background: -webkit-linear-gradient(to bottom right, rgba(6, 52, 54, 1), rgba(198, 200, 200, 1));
-      background: linear-gradient(to bottom right, rgba(6, 52, 54, 1), rgba(198, 200, 200, 1));
-    }
-    /* Additional styles for card and form */
-    .card-registration {
-      border-radius: 15px;
-    }
-    .card-registration .card-body {
-      padding: 4rem 2rem;
-    }
-    .select-input.form-control[readonly]:not([disabled]) {
-      font-size: 1rem;
-      line-height: 2.15;
-      padding-left: .75em;
-      padding-right: .75em;
-    }
-    .radio-inline {
-    display: inline-block;
-    margin-right: 10px;
-}
-.radio-label {
-    cursor: pointer; /* Show pointer cursor on label for better interaction */
-}
-    .select-arrow {
-      top: 13px;
-    }
-    .modal-dialog.modal-dialog-centered {
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     min-height: calc(100% - 1rem);
-   }
-   #error-alert,
-    #successModal .modal-content {
-        text-align: center;
-    }
-  </style>
-</head>
-<body class="public-page">
-  <section class="h-100 gradient-custom">
-    <div class="container py-5 h-100">
-      <div class="row justify-content-center align-items-center h-100">
-        <div class="col-lg-8 col-xl-6">
-          <div class="card shadow-3 card-registration">
-            <div class="card-body p-4 p-md-4">
-              <div style="display: flex; align-items: center;">
-                <h3 class="mb-0" style="flex: 1;">
-                  <span style="font-weight: bold; color: #1c484a;">Mark Upload</span> </h3>
-                <img src="{{'img/claps-log.jpg'}}" alt="Logo"  style="max-width: 35%;">
-              </div>
+  <section class="portal-form-panel">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-registration">
+            <div class="card-body">
+
               <div class="modal fade" id="successModal"  aria-labelledby="successModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                   <div class="modal-content">
@@ -72,7 +18,7 @@
                       </button>
                     </div>
                     <div class="modal-body">
-                      Mark Added Successfully!
+                      Assessment result saved.
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-success" data-dismiss="modal">OK</button>
@@ -169,18 +115,18 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="name">Mark Scored:*</label>
-                      <input class="form-control" required="" placeholder="Mark Scored" autocomplete="off" name="mark_scored" type="text" onkeyup="this.value=this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')"  maxlength="15">
+                      <input class="form-control" required="" placeholder="Mark Scored" autocomplete="off" name="mark_scored" inputmode="decimal" type="text" onkeyup="this.value=this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')"  maxlength="15">
                   </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="name" class="control-label">Out of:*</label>
-                      <input class="form-control" required="" placeholder="Out of" autocomplete="off" name="total_mark" type="text" onkeyup="this.value=this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')" maxlength="15">
+                      <input class="form-control" required="" placeholder="Out of" autocomplete="off" name="total_mark" inputmode="decimal" type="text" onkeyup="this.value=this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')" maxlength="15">
                   </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label for="name" class="control-label">Remarks:*</label>
+                      <label for="name" class="control-label">Remarks (optional):</label>
                       <textarea class="form-control"  placeholder="Remarks" autocomplete="off" name="remark" type="text" maxlength="130"></textarea>
                     </div>
                   </div>
@@ -192,7 +138,7 @@
                     </button>
                 </div>
                 </div>
-                <button type="submit" class="btn btn-success btn-lg mb-1">Submit</button>
+                <button type="submit" class="btn btn-success btn-lg mb-1">Save result</button>
               </form>
             </div>
           </div>
@@ -200,18 +146,19 @@
       </div>
     </div>
   </section>
-</body>
-</html>
 
-<script src="{{ asset('browser-vendor/jquery.min.js') }}"></script>
-<script src="{{ asset('browser-vendor/bootstrap.bundle.min.js') }}"></script>
+@endsection
+@section('scripts')
 
-<script src="{{ asset('browser-vendor/select2.min.js') }}"></script>
+
+
+
 <script>
 $(function () {
     $('.select2').select2();
     var form = $('#markUploadForm');
     var pendingLookup = null;
+    var saving = false;
 
     function showError(message) {
         $('#error-alert').text(message).show();
@@ -265,6 +212,8 @@ $(function () {
 
     form.on('submit', function (event) {
         event.preventDefault();
+        if (saving) return;
+        saving = true;
         var submitButton = form.find('button[type="submit"]').prop('disabled', true);
         $.ajax({
             url: '{{ route("upload-result") }}',
@@ -284,8 +233,9 @@ $(function () {
             error: function (xhr) {
                 showError((xhr.responseJSON || {}).msg || (xhr.responseJSON || {}).message || 'The response was interrupted. Retry without changing the form to avoid a duplicate.');
             },
-            complete: function () { submitButton.prop('disabled', false); }
+            complete: function () { saving = false; submitButton.prop('disabled', false); }
         });
     });
 });
 </script>
+@endsection

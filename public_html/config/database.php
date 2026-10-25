@@ -34,6 +34,13 @@ return [
     */
 
     'connections' => [
+        'd1' => [
+            'driver' => 'd1',
+            'database' => storage_path('app/d1/working.sqlite'),
+            'gateway' => env('CLOUDFLARE_GATEWAY_URL', ''),
+            'token' => env('CLOUDFLARE_INTERNAL_TOKEN', ''),
+            'foreign_key_constraints' => true,
+        ],
 
         'sqlite' => [
             'driver' => 'sqlite',
@@ -59,7 +66,7 @@ return [
             'strict' => false,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                (PHP_VERSION_ID >= 80400 ? \Pdo\Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 

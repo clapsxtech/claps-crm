@@ -34,3 +34,17 @@ public_html/bootstrap/cache/*
 # Licensed, explicitly reviewed frontend distributions (not Composer vendor)
 !public_html/resources/vendor/
 !public_html/resources/vendor/**
+
+# Local deployment output, snapshots and screenshots
+.wrangler/
+.cloudflare-assets/
+artifacts/
+__pycache__/
+*.pyc
+*.sqlite
+*.sqlite-*
+*.db
+public_html/storage/app/*
+!public_html/storage/app/.gitignore
+public_html/storage/framework/testing/
+public_html/public/uploads/

@@ -1,4 +1,5 @@
-@include('admin.layouts.sidebar')
+@extends('erp.layout')
+@section('content')
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -82,7 +83,8 @@
 </div><!-- /.modal -->
 {{-- delete modal end here --}}
 <div class="modal fade modal_class" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
-@include('admin.layouts.footer')
+@endsection
+@section('scripts')
 <script >
     $(document).ready( function(){
         var roles_table = $('#roles_table').DataTable({
@@ -210,3 +212,4 @@
     $("#jobtypesNav").addClass('active');
    </script>
    @include('admin.layouts.scripts')
+@endsection

@@ -142,7 +142,11 @@ class StaffProvisioner
                 $directory = public_path('uploads/profile_photo');
                 File::ensureDirectoryExists($directory, 0755, true);
                 $filename = Str::uuid().'.'.$data['profile_photo']->extension();
-                $data['profile_photo']->move($directory, $filename);
+                if (\App\Infrastructure\Cloudflare\Uploads::enabled()) {
+                    \App\Infrastructure\Cloudflare\Uploads::put('profile_photo/'.$filename, $data['profile_photo']);
+                } else {
+                    $data['profile_photo']->move($directory, $filename);
+                }
                 $newPhoto = '/uploads/profile_photo/'.$filename;
             }
             DB::transaction(function () use ($user, $data, $newPhoto) {
@@ -167,7 +171,11 @@ class StaffProvisioner
                 $user->save();
             });
         } catch (\Throwable $exception) {
-            $this->deleteManagedPhoto($newPhoto);
+            // A lost D1 response can mean the profile was committed remotely.
+            // Retain the new object until the outcome is known, rather than breaking its photo.
+            if (!$exception instanceof \App\Infrastructure\Cloudflare\UnconfirmedCommit) {
+                $this->deleteManagedPhoto($newPhoto);
+            }
             throw $exception;
         }
         if ($newPhoto !== null && $newPhoto !== $oldPhoto) {
@@ -181,6 +189,10 @@ class StaffProvisioner
     {
         // Legacy database paths are untrusted. Only remove generated files inside this upload directory.
         if (!$path || !preg_match('#^/uploads/profile_photo/[a-f0-9-]{36}\.(jpe?g|png|gif|webp)$#D', $path)) {
+            return;
+        }
+        if (\App\Infrastructure\Cloudflare\Uploads::enabled()) {
+            \App\Infrastructure\Cloudflare\Uploads::delete(substr($path, strlen('/uploads/')));
             return;
         }
         $directory = realpath(public_path('uploads/profile_photo'));

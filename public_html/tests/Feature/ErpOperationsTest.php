@@ -25,7 +25,7 @@ class ErpOperationsTest extends TestCase
         $this->assertSame('paused',$row->status); $this->assertSame('Synthetic guardian',$row->guardian_contact);
         $audit=json_decode(DB::table('erp_audit')->where('action','student.updated')->value('payload'),true); $this->assertSame('active',$audit['changes']['status']['from']);
         $this->assertSame(1,DB::table('erp_students')->count());
-        $this->denied(fn()=> $this->service->updateStudent($this->other,$this->admin->id,['student_id'=>$this->student,'status'=>'stopped']));
+        $this->invalid(fn()=> $this->service->updateStudent($this->other,$this->admin->id,['student_id'=>$this->student,'status'=>'stopped']));
         DB::table('erp_memberships')->insert(['unit_id'=>$this->other,'user_id'=>$this->admin->id,'role'=>'admin']);
         $this->invalid(fn()=> $this->service->updateStudent($this->other,$this->admin->id,['student_id'=>$this->student,'status'=>'stopped']));
         $this->invalid(fn()=> $this->service->updateStudent($this->unit,$this->admin->id,['student_id'=>$this->student,'meeting_url'=>'javascript:alert(1)']));

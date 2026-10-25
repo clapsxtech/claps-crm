@@ -63,7 +63,7 @@ class ErpStudentProfileTest extends TestCase
             DB::table('erp_memberships')->updateOrInsert(['unit_id'=>$this->unit,'user_id'=>$member->id],['role'=>$role]);
             $this->actingAs($member)->get($this->url())->assertForbidden();
         }
-        $this->actingAs($this->admin)->get(route('erp.student-profile',[$this->other,$this->student]))->assertForbidden();
+        $this->actingAs($this->admin)->get(route('erp.student-profile',[$this->other,$this->student]))->assertNotFound();
         DB::table('erp_memberships')->insert(['unit_id'=>$this->other,'user_id'=>$this->admin->id,'role'=>'admin']);
         $this->get(route('erp.student-profile',[$this->other,$this->student]))->assertNotFound();
         $this->get(route('erp.student-profile',[$this->unit,999999]))->assertNotFound();
@@ -124,7 +124,8 @@ class ErpStudentProfileTest extends TestCase
         $response = $this->get($this->url())->assertOk()->assertSee('<script>alert(1)</script>')->assertDontSee('<script>alert(1)</script>',false)->assertDontSee('href="javascript:',false)->assertSee('No follow-ups recorded.')->assertSee('No student tasks recorded.')->assertSee('No payment requests recorded.');
         $dom = new \DOMDocument();
         @$dom->loadHTML($response->getContent());
-        $this->assertSame(0, $dom->getElementsByTagName('form')->length);
+        // The shared shell offers sign-out; the student profile itself remains read-only.
+        $this->assertSame(0, (new \DOMXPath($dom))->query('//main//form')->length);
     }
 
     public function test_task_assignee_names_require_membership_in_the_profile_unit(): void

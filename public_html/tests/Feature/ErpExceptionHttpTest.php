@@ -81,7 +81,7 @@ class ErpExceptionHttpTest extends TestCase
     public function test_exception_http_scope_rejects_other_unit_people_and_non_admin_mutation(): void
     {
         $url='/erp/units/'.$this->unit.'/exception';
-        $this->postJson('/erp/units/'.$this->otherUnit.'/exception',$this->payload())->assertForbidden();
+        $this->postJson('/erp/units/'.$this->otherUnit.'/exception',$this->payload())->assertUnprocessable();
         $this->postJson($url,$this->payload(['student_id'=>$this->otherStudent]))->assertUnprocessable();
         $this->postJson($url,$this->payload(['student_id'=>'','teacher_id'=>$this->otherTeacher]))->assertUnprocessable();
         $this->postJson($url,$this->payload(['teacher_id'=>$this->teacher]))->assertUnprocessable();

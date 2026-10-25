@@ -1,19 +1,4 @@
-      <footer class="main-footer">
-        <div class="float-right d-none d-sm-block">
-          <b>Clapslearn</b> Admin
-        </div>
-        <span>© {{date('Y')}} Clapslearn. All rights reserved.</span>
-      </footer>
-    
-      <!-- Control Sidebar -->
-      <aside class="control-sidebar control-sidebar-dark">
-        <!-- Control sidebar content goes here -->
-      </aside>
-      <!-- /.control-sidebar -->
-    </div>
-    <!-- ./wrapper -->
-    
-    <script src="{{asset('js/app.js')}}"></script>
+    <script src="{{mix('js/app.js')}}"></script>
     <!-- Custom JS Plugins -->
 
 
@@ -79,3 +64,23 @@
       $('[data-toggle="tooltip"]').tooltip();
     </script>
 
+<script>
+// Associate inherited form labels with their controls, including fetched dialogs.
+(function () {
+    let nextId = 0;
+    function labelFields(root) {
+        root.querySelectorAll('label').forEach(function (label) {
+            if (label.querySelector('input,select,textarea')) return;
+            let control = label.nextElementSibling;
+            if (!control || !control.matches('input,select,textarea')) return;
+            if (!control.id) control.id = 'tool-field-' + (++nextId);
+            label.htmlFor = control.id;
+        });
+        root.querySelectorAll('input[type="search"]').forEach(function(input) {
+            if (!input.getAttribute('aria-label')) input.setAttribute('aria-label','Search records');
+        });
+    }
+    labelFields(document);
+    $(document).on('shown.bs.modal draw.dt', function () { labelFields(document); });
+})();
+</script>

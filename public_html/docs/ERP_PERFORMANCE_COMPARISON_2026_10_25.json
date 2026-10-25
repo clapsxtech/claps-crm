@@ -1,0 +1,102 @@
+{
+  "before": {
+    "timestamp": "2026-10-25T09:17:49.150295+00:00",
+    "concurrent_sessions": 3,
+    "measured_requests": 54,
+    "results": {
+      "/health": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1587.07,
+        "p95_ms": 3727.75,
+        "max_ms": 3727.75
+      },
+      "/": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1879.34,
+        "p95_ms": 3160.4,
+        "max_ms": 3160.4
+      },
+      "/tools": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 2345.06,
+        "p95_ms": 3199.37,
+        "max_ms": 3199.37
+      },
+      "/erp/units/1/business/dashboard": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 2272.79,
+        "p95_ms": 3455.08,
+        "max_ms": 3455.08
+      },
+      "/css/erp.css": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1441.32,
+        "p95_ms": 2942.71,
+        "max_ms": 2942.71
+      },
+      "/js/erp-shell.js": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1076.75,
+        "p95_ms": 2266.63,
+        "max_ms": 2266.63
+      }
+    },
+    "scope": "Small warm read-only production sample, not a capacity certification. Login/logout create and delete sessions; no business records are changed."
+  },
+  "after": {
+    "timestamp": "2026-10-25T09:29:37.285637+00:00",
+    "concurrent_sessions": 3,
+    "measured_requests": 54,
+    "results": {
+      "/health": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1586.09,
+        "p95_ms": 2744.32,
+        "max_ms": 2744.32
+      },
+      "/": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 1840.78,
+        "p95_ms": 2916.59,
+        "max_ms": 2916.59
+      },
+      "/tools": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 2141.93,
+        "p95_ms": 2499.84,
+        "max_ms": 2499.84
+      },
+      "/erp/units/1/business/dashboard": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 2029.83,
+        "p95_ms": 2824.18,
+        "max_ms": 2824.18
+      },
+      "/css/erp.css": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 278.11,
+        "p95_ms": 1284.0,
+        "max_ms": 1284.0
+      },
+      "/js/erp-shell.js": {
+        "requests": 9,
+        "failures": 0,
+        "p50_ms": 280.67,
+        "p95_ms": 1312.81,
+        "max_ms": 1312.81
+      }
+    },
+    "scope": "Small warm read-only production sample, not a capacity certification. Login/logout create and delete sessions; no business records are changed."
+  }
+}

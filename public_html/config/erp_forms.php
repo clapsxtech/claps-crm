@@ -672,13 +672,19 @@ return json_decode(<<<'JSON'
           "type": "select",
           "required": true,
           "options": [
+            "team_manager",
+            "academics",
+            "finance",
+            "sales_followups",
+            "read_only",
+            "staff",
             "admin",
             "sales",
             "teacher"
           ]
         }
       ],
-      "help": "Existing active site accounts only. Administrator grants are limited to this unit; no external account access is created."
+      "help": "Choose an active account and the staff role to assign access to this team. Only superadmins can change team assignments."
     },
     {
       "title": "Remove unit membership",

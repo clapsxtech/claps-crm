@@ -18,6 +18,27 @@ abstract class TestCase extends \Illuminate\Foundation\Testing\TestCase
     {
         parent::setUp();
         config(['erp.business_id' => 1, 'integrations.sheets.enabled' => false]);
+        if (getenv('D1_COMPAT_TEST') === '1') {
+            $remote = new \Tests\Support\SqliteD1Gateway(\Illuminate\Support\Facades\DB::connection()->getPdo());
+            $path = sys_get_temp_dir().'/claps-d1-suite-'.bin2hex(random_bytes(10));
+            $this->app['db']->extend('d1_compat', function ($config, $name) use ($remote, $path) {
+                return new \App\Infrastructure\Cloudflare\D1Connection(new \App\Infrastructure\Cloudflare\D1Pdo($remote, $path), $path, '', ['driver'=>'sqlite','name'=>$name]);
+            });
+            config(['database.connections.d1_compat'=>['driver'=>'d1_compat']]);
+            $this->app['db']->setDefaultConnection('d1_compat');
+            $this->beforeApplicationDestroyed(function () use ($path) {
+                foreach (glob($path.'*') as $file) if (is_file($file)) unlink($file);
+            });
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        if (getenv('D1_COMPAT_TEST') === '1' && $this->app) {
+            // RefreshDatabase owns the original SQLite fixture transaction.
+            $this->app['db']->setDefaultConnection('sqlite');
+        }
+        parent::tearDown();
     }
 
     protected function createAdmin(array $attributes = []): User

@@ -54,7 +54,7 @@ class ProxyOriginTest extends TestCase
         config(['proxy.public_origin' => 'https://logs.example.test']);
         $this->get('http://logs.example.test/login')->assertOk()
             ->assertSee('action="https://logs.example.test/login"', false)
-            ->assertSee('https://logs.example.test/css/app.css', false)
+            ->assertSee('https://logs.example.test/css/erp.css', false)
             ->assertDontSee('http://container', false);
         $this->get('http://logs.example.test/_proxy-redirect-test')
             ->assertRedirect('https://logs.example.test/login');

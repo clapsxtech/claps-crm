@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\DB;
 class BusinessController extends Controller
 {
     public function __construct() {}
-    private function pages(){return ['dashboard'=>'Overview','people'=>'Students & teachers','timetable'=>'Timetable','attendance'=>'Attendance','money'=>'Money & receipts','followups'=>'Follow-ups','staff'=>'Team access','migration'=>'Migration & exports'];}
+    private function pages(){return ['dashboard'=>'Overview','people'=>'Students & teachers','academics'=>'Academics','timetable'=>'Timetable','attendance'=>'Attendance','money'=>'Money & receipts','followups'=>'Follow-ups','staff'=>'Team access','migration'=>'Migration & exports'];}
     public function page(Request $request,int $unit,string $page='dashboard')
     {
         (new Access())->unit($request->user(),$unit,false);abort_unless(isset($this->pages()[$page]),404);
+        if ($page === 'staff') (new \App\Modules\IdentityAccess\Services\SiteAccessPolicy())->assertAdministrator($request->user());
+        if ($page === 'academics') return app(AcademicsController::class)->index($request, $unit);
         $business=DB::table('erp_units')->find($unit);$pages=$this->pages();$data=[];$money=new MoneyOperations();
         $request->validate(['q'=>'nullable|string|max:100']);$search=trim((string)$request->query('q',''));
         if(in_array($page,['dashboard','people','money','followups'])){
@@ -43,7 +45,9 @@ class BusinessController extends Controller
         }
         $queues=in_array($page,['dashboard','attendance'])?(new \App\Modules\Erp\Services\WorkQueues())->attendance($unit):null;
         $labels=(new \App\Modules\Erp\Services\RecordLabels())->forPages($unit,$data);
-        $forms=config('erp_forms.'.$page,[]);
+        $permissions=new \App\Modules\Erp\Services\TeamPermissions();
+        $forms=array_filter($business->archived_at?[]:config('erp_forms.'.$page,[]),fn($form)=>$permissions->allows($request->user(),$unit,'action',$form['action']));
+        $pages=array_filter($pages,fn($label,$key)=>$permissions->allows($request->user(),$unit,'page',$key),ARRAY_FILTER_USE_BOTH);
         return view('erp.business',compact('business','page','pages','data','metrics','forms','reconciliation','timetable','queues','labels'));
     }
     public function mutate(Request $request,int $unit,string $action)
@@ -62,6 +66,7 @@ class BusinessController extends Controller
     public function lookup(Request $request,int $unit)
     {
         (new Access())->unit($request->user(),$unit,false);$v=$request->validate(['type'=>'required|string','q'=>'nullable|string|max:100']);$q=trim($v['q']??'');$type=$v['type'];
+        if (in_array($type,['users','revocable_members'])) (new \App\Modules\IdentityAccess\Services\SiteAccessPolicy())->assertAdministrator($request->user());
         if($type==='students')$query=DB::table('erp_students')->where('unit_id',$unit)->select('id','name','code');
         elseif($type==='teachers')$query=DB::table('erp_teachers')->whereIn('id',DB::table('erp_teacher_units')->where('unit_id',$unit)->select('teacher_id'))->select('id','name','code');
         elseif($type==='users')$query=DB::table('users')->where('business_id',config('erp.business_id'))->where('status',1)->whereNull('deleted_at')->select('id','name',DB::raw("'Existing site account' AS code"));

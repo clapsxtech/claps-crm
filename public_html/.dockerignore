@@ -5,6 +5,14 @@
 .git
 .gitignore
 node_modules
+.wrangler
+storage/app/d1
+src
+tests
+docs
+wrangler.jsonc
+worker-configuration.d.ts
+CLOUDFLARE.md
 storage/credentials.json
 storage/logs/*
 vendor
@@ -21,3 +29,5 @@ public/uploads/*
 # Reviewed frontend distributions are source, not Composer dependencies.
 !resources/vendor/
 !resources/vendor/**
+
+.cloudflare-assets

@@ -71,9 +71,13 @@ class WorkHourController extends Controller
         if (!empty($request->get('status'))) {
             $status = $request->get('status');
             if ($status === 'true') {
-                $query->whereRaw('YEAR(date_submitted) = YEAR(date) AND MONTH(date_submitted) = MONTH(date)');
+                $query->whereRaw(DB::connection()->getDriverName() === 'sqlite'
+                    ? "strftime('%Y-%m', date_submitted) = strftime('%Y-%m', date)"
+                    : 'YEAR(date_submitted) = YEAR(date) AND MONTH(date_submitted) = MONTH(date)');
             } elseif ($status === 'false') {
-                $query->whereRaw('(YEAR(date_submitted) != YEAR(date) OR MONTH(date_submitted) != MONTH(date))');
+                $query->whereRaw(DB::connection()->getDriverName() === 'sqlite'
+                    ? "strftime('%Y-%m', date_submitted) != strftime('%Y-%m', date)"
+                    : '(YEAR(date_submitted) != YEAR(date) OR MONTH(date_submitted) != MONTH(date))');
             }
         }
     

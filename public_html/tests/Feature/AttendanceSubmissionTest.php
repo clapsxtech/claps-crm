@@ -99,9 +99,9 @@ class AttendanceSubmissionTest extends TestCase
     {
         $payload = $this->payload(); $this->postJson('/upload-workhour', $payload)->assertOk();
         WorkHour::create(['teacher_name' => 'Another', 'teacher_code' => 'T-PRIVATE', 'student_name' => 'Private student', 'dob' => 'private-credential']);
-        $this->actingAs($this->createMember());
+        $this->actingAs($this->createAdmin());
         foreach (['/attendanceReport', '/student-attendance-report'] as $path) {
-            $this->postJson($path)->assertStatus(422);
+            $this->postJson($path)->assertOk()->assertJsonPath('recordsTotal', 2);
             $this->postJson($path, ['teacher_name' => 'QA Teacher', 'dob' => '01/01/1990'])->assertOk()->assertJsonPath('recordsTotal', 1)->assertDontSee('Private student')->assertDontSee('01/01/1990')->assertDontSee('"dob"');
             $this->getJson($path, ['X-Requested-With' => 'XMLHttpRequest'])->assertStatus(405);
         }

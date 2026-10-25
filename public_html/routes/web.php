@@ -21,16 +21,18 @@ use App\Http\Controllers\MarklistReportController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\TimeTableController;
 
-Auth::routes();
+Auth::routes(['register' => false]);
+Route::get('/superadmin/login', [\App\Http\Controllers\Auth\LoginController::class, 'showSuperadminLogin'])->name('superadmin.login');
+Route::get('/staff/login', [\App\Http\Controllers\Auth\LoginController::class, 'showStaffLogin'])->name('staff.login');
 Route::get('/health', function () {
     return response()->json(['status' => 'ok']);
-});
+})->withoutMiddleware('web');
 Route::get('/timetableReport', [TimeTableController::class, 'timetableReport'])->name('timetableReport'); 
 Route::get('/timetable', [TimeTableController::class, 'timetableReport'])->name('timetable'); 
 
 Route::post('/get-teacher-dob', [TimeTableController::class, 'getTeacherDOB'])->name('get-teacher-dob')->middleware('throttle:teacher-credentials');
 
-Route::middleware(['auth:web', 'throttle:teacher-credentials'])->group(function () {
+Route::middleware(['auth:web', 'admin', 'throttle:teacher-credentials'])->group(function () {
     Route::match(['get', 'post'], '/student-attendance-report', [WorkHourController::class, 'studentsAttendanceReport'])->name('student-attendance-report');
     Route::post('/get-teachers', [WorkHourController::class, 'getTeachersData'])->name('get-teachers');
     Route::post('/get-teacher', [WorkHourController::class, 'getTeachers'])->name('get-teacher');
@@ -55,7 +57,11 @@ Route::post('/performnce-upload', [PerformanceController::class, 'store'])->name
 
 
 Route::post('/submit-application', [MarkListFrontentController::class, 'store'])->name('submit-application')->middleware(['web', 'throttle:teacher-credentials']);
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/', [App\Http\Controllers\Erp\WorkspaceController::class, 'index'])->middleware('auth')->name('erp.index');
+Route::permanentRedirect('/home', '/')->name('home');
+Route::permanentRedirect('/legacy', '/tools')->name('legacy.index');
+Route::get('/tools', [App\Http\Controllers\Erp\LegacyToolsController::class, 'index'])->middleware('auth')->name('tools.index');
+Route::get('/legacy/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('legacy.dashboard');
 Route::get('backend', 'App\Http\Controllers\Auth\LoginController@showLoginForm');
 Route::prefix('admin')->group(function () {
 Route::group(['middleware' => ['auth:web', 'admin']], function () {
@@ -99,4 +105,13 @@ Route::group(['middleware' => ['auth:web', 'admin']], function () {
 
         
     });
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/two-factor', [\App\Http\Controllers\Auth\TwoFactorController::class,'challenge'])->name('two-factor.challenge');
+    Route::post('/two-factor', [\App\Http\Controllers\Auth\TwoFactorController::class,'verify'])->middleware('throttle:6,1')->name('two-factor.verify');
+});
+Route::middleware('auth')->group(function () {
+    Route::get('/account/security', [\App\Http\Controllers\Auth\TwoFactorController::class,'settings'])->name('account.security');
+    foreach (['setup','enable','disable'] as $action) Route::post('/account/two-factor/'.$action, [\App\Http\Controllers\Auth\TwoFactorController::class,$action])->middleware('throttle:6,1')->name('two-factor.'.$action);
 });

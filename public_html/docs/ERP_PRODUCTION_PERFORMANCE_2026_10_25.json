@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-10-25T08:31:08.988709+00:00",
+  "concurrent_sessions": 3,
+  "measured_requests": 27,
+  "results": {
+    "/health": {
+      "requests": 9,
+      "failures": 0,
+      "p50_ms": 1690.74,
+      "p95_ms": 2700.46,
+      "max_ms": 2700.46
+    },
+    "/": {
+      "requests": 9,
+      "failures": 0,
+      "p50_ms": 2316.3,
+      "p95_ms": 3471.77,
+      "max_ms": 3471.77
+    },
+    "/erp/units/1/business/dashboard": {
+      "requests": 9,
+      "failures": 0,
+      "p50_ms": 2274.36,
+      "p95_ms": 3642.99,
+      "max_ms": 3642.99
+    }
+  },
+  "scope": "Small warm read-only production sample, not a capacity certification. Login/logout create and delete sessions; no business records are changed."
+}

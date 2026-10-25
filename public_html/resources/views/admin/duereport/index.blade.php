@@ -1,4 +1,5 @@
-@include('admin.layouts.sidebar')
+@extends('erp.layout')
+@section('content')
 <link rel="stylesheet" type="text/css" href="{{ asset('frontent_form/daterangepicker.css') }}">
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -124,7 +125,8 @@
     </section>
 </div>
 <div class="modal fade modal_class" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
-@include('admin.layouts.footer')
+@endsection
+@section('scripts')
 @include('admin.layouts.scripts')
 <script>
     $(document).ready(function() {
@@ -260,3 +262,5 @@
         $("#BankServiceCommissionGroupsNav").addClass('active');
     });
 </script>
+
+@endsection

@@ -19,7 +19,7 @@ class ErpMigrationImporterTest extends TestCase
     {
         parent::setUp();
         config(['erp.migration_import_enabled' => true]);
-        $this->actor = $this->createAdmin();
+        $this->actor = $this->createMember();
         $this->unit = DB::table('erp_units')->insertGetId(['code'=>'SYN-AA','name'=>'Synthetic import unit','timezone'=>'UTC']);
         $this->subject = DB::table('erp_subjects')->insertGetId(['name'=>'Synthetic Import Mathematics']);
         DB::table('erp_memberships')->insert(['user_id'=>$this->actor->id,'unit_id'=>$this->unit,'role'=>'admin']);

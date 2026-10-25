@@ -1,0 +1,10 @@
+@extends('erp.layout')
+@section('content')
+<div class="page-heading"><div><div class="eyebrow">SUPERADMIN</div><h1>Operations & audit</h1><p>Current health indicators and an account/team activity trail.</p></div><a href="{{ route('erp.administration') }}">Teams & accounts</a></div>
+<section><h2>Health: {{ ucfirst($health['status']) }}</h2><p>Reload to refresh. A healthy response does not certify backups or a completed recovery drill.</p>
+@foreach($health['checks'] as $name=>$check)<details open><summary>{{ ucwords(str_replace('_',' ',$name)) }} · {{ $check['status'] }}</summary><dl>@foreach($check as $key=>$value)@if($key!=='status')<dt>{{ str_replace('_',' ',$key) }}</dt><dd>{{ is_bool($value)?($value?'Yes':'No'):($value??'None') }}</dd>@endif
+@endforeach</dl></details>@endforeach</section>
+<section><h2>Migration</h2><p>Validate a normalized source file before importing. The preview does not create records.</p><a class="button" href="{{ route('erp.migration.center') }}">Open migration center</a></section>
+<section><h2>Backup & recovery</h2><p>Use the deployment operator's backup tool to export D1, verify the checksum and restore the export into a disposable local database. Production recovery remains an explicit operator action. Uploads in R2 require a separate backup policy.</p><p>The operator runbook is <code>docs/ERP_OPERATIONS_RUNBOOK.md</code>. Recovery drill reports must be retained with the backup manifest.</p></section>
+<section><h2>Recent activity</h2><div class="scroll"><table><thead><tr><th>Time (UTC)</th><th>Actor ID</th><th>Team ID</th><th>Action</th><th>Record</th></tr></thead><tbody>@forelse($events as $event)<tr><td>{{ $event->created_at }}</td><td>{{ $event->actor_id??'System' }}</td><td>{{ $event->unit_id??'Site' }}</td><td>{{ $event->action }}</td><td>{{ $event->entity_type }} #{{ $event->entity_id }}</td></tr>@empty<tr><td colspan="5">No activity yet.</td></tr>@endforelse</tbody></table></div>{{ $events->links('pagination::simple-bootstrap-4') }}</section>
+@endsection

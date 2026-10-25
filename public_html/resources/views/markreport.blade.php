@@ -1,17 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="referrer" content="no-referrer">
-    <title>Mark report</title>
-    <link rel="stylesheet" href="{{ asset('frontent_form/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-    <style>body{background:#063436;color:#fff}main{max-width:1100px;margin:auto;padding:3rem 1rem}.report{background:#fff;color:#173333;padding:1.25rem;border-radius:12px;margin:1.25rem 0}label{display:block}.status{min-height:1.5rem;margin:1rem 0}</style>
-</head>
-<body class="public-page">
-<main>
+@extends('erp.portal-layout')
+@section('content')
+
+<section class="report-panel">
     <h1>Mark report</h1>
     <p>{{ $isAdministrator ? "Your administrator account can view all results." : "Verify your teacher details to view your students’ results." }}</p>
     <form id="report-access" autocomplete="off">
@@ -53,7 +43,10 @@
             <button type="button" class="btn btn-outline-secondary" id="next-page">Next</button>
         </div>
     </div>
-</main>
+</section>
+
+@endsection
+@section('scripts')
 <script>
 (function () {
     const form = document.getElementById('report-access');
@@ -135,5 +128,5 @@
     window.addEventListener('pagehide', clearReport);
 })();
 </script>
-</body>
-</html>
+
+@endsection

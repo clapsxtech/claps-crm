@@ -25,6 +25,8 @@ class Handler extends ExceptionHandler
         'password',
         'password_confirmation',
         'confirm_password',
+        'current_password',
+        'code',
         'dob',
         'teacher_dob',
     ];

@@ -1,6 +1,8 @@
+import { checkOperations } from "./monitoring";
 import { DurableObject } from "cloudflare:workers";
+import { storageRequest, isStorageAuthorized, type StorageEnv } from "./storage";
 
-interface Env {
+interface Env extends StorageEnv {
     LARAVEL_CONTAINER: DurableObjectNamespace<LaravelContainer>;
     APP_KEY: string;
     APP_URL: string;
@@ -9,17 +11,8 @@ interface Env {
     SHEETS_SYNC_ENABLED?: string;
     GOOGLE_SPREADSHEET_ID?: string;
     GOOGLE_SERVICE_ENABLED?: string;
-    DB_HOST: string;
-    DB_PORT: string;
-    DB_DATABASE: string;
-    DB_USERNAME: string;
-    DB_PASSWORD: string;
-    GOOGLE_CREDENTIALS_BASE64: string;
-    MYSQL_SSL_CA_BASE64?: string;
-    AWS_ACCESS_KEY_ID: string;
-    AWS_SECRET_ACCESS_KEY: string;
-    R2_ACCOUNT_ID: string;
-    R2_BUCKET_NAME: string;
+    GOOGLE_CREDENTIALS_BASE64?: string;
+
 }
 
 const PORT = 8080;
@@ -27,6 +20,14 @@ const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
 
 export class LaravelContainer extends DurableObject<Env> {
     private starting: Promise<void> | undefined;
+    private ready = false;
+
+    async restart(): Promise<void> {
+        if (this.starting) await this.starting;
+        this.ready = false;
+        await this.ctx.container!.destroy();
+        this.starting = undefined;
+    }
 
     constructor(ctx: DurableObjectState, env: Env) {
         super(ctx, env);
@@ -39,10 +40,15 @@ export class LaravelContainer extends DurableObject<Env> {
     }
 
     async fetch(request: Request): Promise<Response> {
-        this.starting ??= this.startAndWaitForPort().finally(() => {
-            this.starting = undefined;
-        });
-        await this.starting;
+        // Probe once per boot, not once per HTTP request. A stopped container
+        // must pass readiness again. Never replay a failed mutation request.
+        if (!this.ready || !this.ctx.container!.running) {
+            this.ready = false;
+            this.starting ??= this.startAndWaitForPort().then(() => {
+                this.ready = true;
+            }).finally(() => { this.starting = undefined; });
+            await this.starting;
+        }
 
         const original = new URL(request.url);
         const target = new URL(request.url);
@@ -65,9 +71,14 @@ export class LaravelContainer extends DurableObject<Env> {
         headers.set("x-forwarded-proto", original.protocol.slice(0, -1));
         headers.set("x-forwarded-port", original.port || (original.protocol === "https:" ? "443" : "80"));
 
-        return this.ctx.container!.getTcpPort(PORT).fetch(
-            new Request(target, { method: request.method, headers, body: request.body, redirect: "manual" }),
-        );
+        try {
+            return await this.ctx.container!.getTcpPort(PORT).fetch(
+                new Request(target, { method: request.method, headers, body: request.body, redirect: "manual" }),
+            );
+        } catch (error) {
+            this.ready = false;
+            throw error;
+        }
     }
 
     private async startAndWaitForPort(): Promise<void> {
@@ -78,7 +89,10 @@ export class LaravelContainer extends DurableObject<Env> {
             const secureOrigin = publicUrl.protocol === "https:";
             container.start({
                 image: container.images.base,
-                instance: "basic",
+                // Apache reopens its log descriptors. Give it a regular file and
+                // forward that file to the platform log stream from a separate process.
+                entrypoint: ['/bin/sh', '-c', 'touch /tmp/erp-runtime.log; tail --pid=$$ -n +1 -F /tmp/erp-runtime.log & exec /usr/local/bin/start-container >> /tmp/erp-runtime.log 2>&1'],
+                instance: "standard-1",
                 enableInternet: true,
                 env: {
                     APP_NAME: "Claps Learn Logs",
@@ -95,22 +109,15 @@ export class LaravelContainer extends DurableObject<Env> {
                     GOOGLE_SPREADSHEET_ID: this.env.GOOGLE_SPREADSHEET_ID ?? "",
                     GOOGLE_SERVICE_ENABLED: this.env.GOOGLE_SERVICE_ENABLED ?? "false",
                     LOG_CHANNEL: "stderr",
-                    DB_CONNECTION: "mysql",
-                    DB_HOST: this.env.DB_HOST,
-                    DB_PORT: this.env.DB_PORT,
-                    DB_DATABASE: this.env.DB_DATABASE,
-                    DB_USERNAME: this.env.DB_USERNAME,
-                    DB_PASSWORD: this.env.DB_PASSWORD,
+                    DB_CONNECTION: "d1",
+                    CLOUDFLARE_GATEWAY_URL: this.env.APP_URL,
+                    CLOUDFLARE_INTERNAL_TOKEN: this.env.INTERNAL_TOKEN,
                     SESSION_DRIVER: "database",
                     SESSION_SECURE_COOKIE: secureOrigin ? "true" : "false",
                     CACHE_DRIVER: "file",
                     QUEUE_CONNECTION: "sync",
-                    GOOGLE_CREDENTIALS_BASE64: this.env.GOOGLE_CREDENTIALS_BASE64,
-                    MYSQL_SSL_CA_BASE64: this.env.MYSQL_SSL_CA_BASE64 ?? "",
-                    AWS_ACCESS_KEY_ID: this.env.AWS_ACCESS_KEY_ID,
-                    AWS_SECRET_ACCESS_KEY: this.env.AWS_SECRET_ACCESS_KEY,
-                    R2_ACCOUNT_ID: this.env.R2_ACCOUNT_ID,
-                    R2_BUCKET_NAME: this.env.R2_BUCKET_NAME,
+                    GOOGLE_CREDENTIALS_BASE64: this.env.GOOGLE_CREDENTIALS_BASE64 ?? "",
+
                 },
             });
         }
@@ -119,10 +126,13 @@ export class LaravelContainer extends DurableObject<Env> {
         const port = container.getTcpPort(PORT);
         let lastError: unknown;
 
-        for (let attempt = 0; attempt < 100; attempt++) {
+        // Connection refusals can return immediately while a cold image boots.
+        // Bound readiness by elapsed time, not a small number of fast failures.
+        const readyDeadline = Date.now() + 120_000;
+        while (Date.now() < readyDeadline) {
             try {
                 const response = await port.fetch("http://container/health", {
-                    signal: AbortSignal.timeout(1000),
+                    signal: AbortSignal.timeout(5000),
                 });
                 await response.body?.cancel();
                 if (response.ok) return;
@@ -130,7 +140,7 @@ export class LaravelContainer extends DurableObject<Env> {
             } catch (error) {
                 lastError = error;
             }
-            await scheduler.wait(200);
+            await scheduler.wait(500);
         }
 
         throw new Error("Laravel container did not become ready", { cause: lastError });
@@ -138,7 +148,28 @@ export class LaravelContainer extends DurableObject<Env> {
 }
 
 export default {
-    fetch(request: Request, env: Env): Promise<Response> {
+    async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+        try {
+            const report = await checkOperations(env.DB, () => env.LARAVEL_CONTAINER.getByName('production').fetch(new Request(new URL('/health', env.APP_URL))));
+            const message = JSON.stringify({ event: 'erp.operational_health', ...report });
+            if (report.status === 'ok') console.log(message);
+            else console.error(message);
+            if (report.status === 'error') throw new Error('ERP readiness failed');
+        } catch {
+            console.error(JSON.stringify({ event: 'erp.operational_health', status: 'error', code: 'check_failed' }));
+            throw new Error('ERP operational health check failed');
+        }
+    },
+    async fetch(request: Request, env: Env): Promise<Response> {
+        if (new URL(request.url).pathname === '/__cloudflare/restart') {
+            if (request.method !== 'POST' || !await isStorageAuthorized(request, env)) {
+                return new Response('Unauthorized', { status: 401 });
+            }
+            await env.LARAVEL_CONTAINER.getByName('production').restart();
+            return Response.json({ restarted: true }, { headers: { 'Cache-Control': 'no-store' } });
+        }
+        const storage = await storageRequest(request, env);
+        if (storage) return storage;
         return env.LARAVEL_CONTAINER.getByName("production").fetch(request);
     },
 } satisfies ExportedHandler<Env>;

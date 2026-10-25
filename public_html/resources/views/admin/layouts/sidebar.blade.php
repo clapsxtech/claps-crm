@@ -1,17 +1,18 @@
 @include('admin.layouts.navbar')
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-  <a href="{{route('home')}}" class="brand-link">
+  <a href="{{route('erp.index')}}" class="brand-link">
     <span class="brand-mark">C</span>
     <span class="brand-text">Clapslearn</span>
   </a>
   <div class="sidebar">
     <div class="sidebar-intro">
-      <span>Workspace</span>
-      <strong>Learning operations</strong>
+      <span>Legacy tools</span>
+      <strong>Existing records</strong>
     </div>
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+      <li class="nav-item"><a href="{{ route('legacy.index') }}" class="nav-link"><i class="fas fa-arrow-left nav-icon"></i><p>Legacy tools directory</p></a></li>
       <li class="nav-header">ACADEMICS</li>
       <li class="nav-item"><a href="{{route('marklist.index')}}" class="nav-link"><i class="fas fa-clipboard-check nav-icon"></i>
         <p>Mark List</p>

@@ -1,125 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('erp.portal-layout')
+@section('content')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Attendance Report Form</title>
-    <link rel="stylesheet" href="{{ asset('frontent_form/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('adminlte/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('frontent_form/daterangepicker.css') }}">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(to bottom right, rgba(6, 52, 54, 1), rgba(6, 52, 54, 1));
-            font-family: Arial, sans-serif;
-        }
- 
-        .gradient-custom {
-            background: #c6c8c8;
-            background: -webkit-linear-gradient(to bottom right, rgba(6, 52, 54, 1), rgba(6, 52, 54, 1));
-            background: linear-gradient(to bottom right, rgba(6, 52, 54, 1), rgba(6, 52, 54, 1));
-        }
-
-        .card-registration {
-            border-radius: 15px;
-        }
-
-        .card-registration .card-body {
-            padding: 4rem 2rem;
-        }
-
-        .select-input.form-control[readonly]:not([disabled]) {
-            font-size: 1rem;
-            line-height: 2.15;
-            padding-left: .75em;
-            padding-right: .75em;
-        }
-
-        .radio-inline {
-            display: inline-block;
-            margin-right: 10px;
-        }
-
-        .radio-label {
-            cursor: pointer;
-        }
-
-        .select-arrow {
-            top: 13px;
-        }
-
-        .modal-dialog.modal-dialog-centered {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100% - 1rem);
-        }
-
-        .table-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-
-        .table th,
-        .table td {
-            padding: 12px 15px;
-            vertical-align: middle;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .table thead th {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .table tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        .data-table {
-            width: 100%;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 10px;
-            text-align: center;
-        }
-
-        /* Style even rows differently for better readability */
-        .data-table tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        /* Style DataTable's search input */
-        .dataTables_filter input {
-            width: 200px;
-            padding: 5px;
-        }
-
-        .dataTables_paginate {
-            display: none;
-        }
-    </style>
-</head>
-
-<body class="public-page">
-    <section class="h-100 gradient-custom">
-        <div class="container py-5 h-100">
+    <section class="report-panel">
+        <div class="container ">
             <div class="row">
                 <!-- Filter Section -->
                 <div class="col-md-3 mb-4">
@@ -144,8 +27,8 @@
                 </div>
                 <div class="col-md-3 mb-4">
                     <div class="filter-box">
-                        <input class="form-control filter" required
-                            placeholder="Today" autocomplete="off"
+                        <label for="daterange">Date range</label><input class="form-control filter" required
+                            placeholder="Choose dates" autocomplete="off"
                             name="daterange" id="daterange" type="text">
                     </div>
                </div>
@@ -162,7 +45,7 @@
             </div>
             <!-- Table Section -->
             <div class="table-container">
-              <span id="attendanceMessage" style="color: red; display: show;">NB:-Fill data for attendance view</span>
+              <span id="attendanceMessage" class="portal-status" role="status">Choose a teacher and enter your password to view attendance.</span>
                 <div class="table-responsive">
                     <table class="data-table table table-bordered table-striped mg-b-0">
                         <thead>
@@ -190,15 +73,14 @@
         </div>
     </section>
     <!-- ... (scripts and jQuery code) ... -->
-</body>
 
-</html>
-<script src="{{ asset('browser-vendor/jquery.min.js') }}"></script>
-<script src="{{ asset('browser-vendor/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ asset('browser-vendor/moment.min.js') }}"></script>
-<script src="{{ asset('browser-vendor/select2.min.js') }}"></script>
-<script src="{{ asset('browser-vendor/daterangepicker.js') }}"></script>
+@endsection
+@section('scripts')
+
+
+
+
+<script src="{{ mix('js/report-dates.js') }}"></script>
 <script>
          $(document).ready(function() {
         $('.select2').select2();
@@ -334,3 +216,5 @@
     });
 });
 </script>
+
+@endsection

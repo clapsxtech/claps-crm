@@ -83,28 +83,28 @@ class AccessPrivacyTest extends TestCase
         $this->postJson('/get-students-mark')->assertStatus(401);
     }
 
-    public function test_authenticated_user_cannot_fetch_all_marks_without_verification(): void
+    public function test_staff_cannot_fetch_legacy_reports_even_with_teacher_credentials(): void
     {
         $this->actingAs($this->createMember()); $this->createMaster(); $this->mark();
-        $this->postJson('/markreport')->assertStatus(422)->assertDontSee('QA Student');
-        $this->postJson('/get-students-mark')->assertStatus(422)->assertDontSee('QA Student');
-        $this->postJson('/markreport', ['teacher_name' => 'QA Teacher', 'dob' => 'wrong'])->assertStatus(403);
+        $this->postJson('/markreport')->assertForbidden()->assertDontSee('QA Student');
+        $this->postJson('/get-students-mark')->assertForbidden()->assertDontSee('QA Student');
+        $this->postJson('/markreport', ['teacher_name' => 'QA Teacher', 'dob' => '01/01/1990'])->assertForbidden();
     }
 
-    public function test_verified_report_scope_and_counts_do_not_expose_other_teachers(): void
+    public function test_superadmin_teacher_name_filter_includes_matching_names_and_hides_credentials(): void
     {
-        $this->actingAs($this->createMember()); $this->createMaster(); $this->mark();
+        $this->actingAs($this->createAdmin()); $this->createMaster(); $this->mark();
         $this->mark(['teacher_name' => 'Another Teacher', 'teacher_code' => 'T-OTHER', 'student_name' => 'Private Student']);
         $this->mark(['teacher_code' => 'T-DUPLICATE', 'student_name' => 'Same Name Different Teacher']);
         $this->postJson('/markreport', ['teacher_name' => 'QA Teacher', 'dob' => '01/01/1990', 'student_name' => 'all'])
-            ->assertOk()->assertJsonPath('recordsTotal', 1)->assertJsonCount(1, 'data')
+            ->assertOk()->assertJsonPath('recordsTotal', 2)->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.student_name', 'QA Student')->assertDontSee('Private Student')
-            ->assertDontSee('Same Name Different Teacher')->assertDontSee('01/01/1990')->assertDontSee('"dob"');
+            ->assertSee('Same Name Different Teacher')->assertDontSee('01/01/1990')->assertDontSee('"dob"');
     }
 
     public function test_student_filter_is_intersected_with_verified_teacher_scope(): void
     {
-        $this->actingAs($this->createMember()); $this->createMaster(); $this->mark();
+        $this->actingAs($this->createAdmin()); $this->createMaster(); $this->mark();
         $this->mark(['teacher_name' => 'Another Teacher', 'teacher_code' => 'T-OTHER', 'student_name' => 'Private Student']);
         $this->postJson('/markreport', ['teacher_name' => 'QA Teacher', 'dob' => '01/01/1990', 'student_name' => 'Private Student'])
             ->assertOk()->assertJsonPath('recordsTotal', 0)->assertJsonCount(0, 'data');
@@ -145,10 +145,10 @@ class AccessPrivacyTest extends TestCase
             ->assertOk()->assertJsonCount(1, 'data')->assertDontSee('subjects/')->assertDontSee('"action"');
     }
 
-    public function test_markreport_page_has_no_embedded_results_and_uses_post_verification(): void
+    public function test_superadmin_markreport_page_has_no_embedded_results_or_password_prompt(): void
     {
-        $this->actingAs($this->createMember()); $this->createMaster(); $this->mark();
-        $this->get('/markreport')->assertOk()->assertDontSee('QA Student')->assertSee('type="password"', false)
+        $this->actingAs($this->createAdmin()); $this->createMaster(); $this->mark();
+        $this->get('/markreport')->assertOk()->assertDontSee('QA Student')->assertDontSee('type="password"', false)
             ->assertSee("method: 'POST'", false)->assertDontSee('01/01/1990');
     }
 

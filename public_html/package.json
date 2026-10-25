@@ -9,12 +9,13 @@
     "prod": "npm run production",
     "production": "node scripts/build-assets.mjs --production",
     "cf:dev": "wrangler dev",
-    "cf:deploy": "wrangler deploy",
+    "cf:deploy": "npm run cf:assets && wrangler deploy",
     "cf:types": "wrangler types",
     "test:deployment": "node --test tests/Deployment/*.test.cjs",
     "build": "npm run production",
     "test:assets": "node --test tests/Assets/*.test.cjs",
-    "test": "node --test tests/Assets/*.test.cjs tests/Deployment/*.test.cjs"
+    "test": "node --test tests/Assets/*.test.cjs tests/Deployment/*.test.cjs",
+    "cf:assets": "npm run production && node scripts/stage-cloudflare-assets.mjs"
   },
   "engines": {
     "node": ">=22 <23"

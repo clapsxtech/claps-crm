@@ -20,7 +20,7 @@ class Operations
         if (!$unit) $this->invalid('Unknown business unit.');
         $user=User::where('id',$actorId)->lockForUpdate()->first();
         (new SiteAccessPolicy())->assertSiteMember($user);
-        if (!DB::table('erp_memberships')->where('unit_id',$unitId)->where('user_id',$actorId)->where('role','admin')->lockForUpdate()->first()) throw new AuthorizationException('Current unit administrator membership required.');
+        (new Access())->unit($user,$unitId);
         return $unit;
     }
     private function target(int $userId): User {
@@ -109,7 +109,8 @@ class Operations
         if ($role!==null && $others->contains('role','teacher')) $this->invalid('This account already belongs to another teacher unit pool.');
     }
     public function grantMembership(int $unitId,int $actorId,array $payload) {
-        $v=Validator::make($payload,['user_id'=>'required|integer|min:1','role'=>'required|in:admin,sales,teacher'])->validate();
+        (new SiteAccessPolicy())->assertAdministrator(User::find($actorId));
+        $v=Validator::make($payload,['user_id'=>'required|integer|min:1','role'=>'required|in:staff,admin,sales,teacher,team_manager,academics,finance,sales_followups,read_only'])->validate();
         return DB::transaction(function() use ($unitId,$actorId,$v) {
             $this->actor($unitId,$actorId); $user=$this->target((int)$v['user_id']);
             $existing=DB::table('erp_memberships')->where('unit_id',$unitId)->where('user_id',$user->id)->lockForUpdate()->first();
@@ -124,6 +125,7 @@ class Operations
         });
     }
     public function linkTeacherUser(int $unitId,int $actorId,array $payload) {
+        (new SiteAccessPolicy())->assertAdministrator(User::find($actorId));
         $v=Validator::make($payload,['teacher_id'=>'required|integer|min:1','user_id'=>'required|integer|min:1'])->validate();
         return DB::transaction(function() use ($unitId,$actorId,$v) {
             $this->actor($unitId,$actorId); $user=$this->target((int)$v['user_id']);
@@ -142,6 +144,7 @@ class Operations
         });
     }
     public function unlinkTeacherUser(int $unitId,int $actorId,array $payload) {
+        (new SiteAccessPolicy())->assertAdministrator(User::find($actorId));
         $v=Validator::make($payload,['teacher_id'=>'required|integer|min:1','reason'=>'required|string|max:2000'])->validate();
         return DB::transaction(function() use ($unitId,$actorId,$v) {
             $this->actor($unitId,$actorId);
@@ -159,10 +162,14 @@ class Operations
     }
     private function ownedTask(int $actorId,int $taskId) {
         $snapshot=DB::table('erp_tasks')->where('id',$taskId)->first();
+        if ($snapshot) {
+            abort_if(DB::table('erp_units')->where('id',$snapshot->unit_id)->whereNotNull('archived_at')->exists(),403);
+            abort_if(DB::table('erp_memberships')->where('unit_id',$snapshot->unit_id)->where('user_id',$actorId)->where('role','read_only')->exists(),403);
+        }
         if (!$snapshot) throw new AuthorizationException('Task access denied.');
         DB::table('erp_units')->where('id',$snapshot->unit_id)->lockForUpdate()->first();
         $user=User::where('id',$actorId)->lockForUpdate()->first(); (new SiteAccessPolicy())->assertSiteMember($user);
-        $membership=DB::table('erp_memberships')->where('unit_id',$snapshot->unit_id)->where('user_id',$actorId)->whereIn('role',['admin','sales','teacher'])->lockForUpdate()->first();
+        $membership=DB::table('erp_memberships')->where('unit_id',$snapshot->unit_id)->where('user_id',$actorId)->whereIn('role',array_merge(['admin','staff','sales','teacher'],TeamPermissions::ROLES))->lockForUpdate()->first();
         $task=DB::table('erp_tasks')->where('id',$taskId)->where('unit_id',$snapshot->unit_id)->lockForUpdate()->first();
         if (!$membership || !$task || (int)$task->assigned_to!==$actorId) throw new AuthorizationException('Only your own assigned tasks in a current staff unit are available.');
         return $task;
@@ -185,6 +192,7 @@ class Operations
         });
     }
     public function revokeMembership(int $unitId,int $actorId,array $payload) {
+        (new SiteAccessPolicy())->assertAdministrator(User::find($actorId));
         $v=Validator::make($payload,['user_id'=>'required|integer|min:1'])->validate();
         return DB::transaction(function() use ($unitId,$actorId,$v) {
             $this->actor($unitId,$actorId);

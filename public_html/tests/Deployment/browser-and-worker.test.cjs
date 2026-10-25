@@ -103,8 +103,9 @@ test('reopening the modal never registers duplicate submit handlers and load err
     assert.ok(!failing.events.some(([kind]) => kind === 'modal'));
 });
 
-function workerHarness(appUrl = 'https://logs.example.test', environment = {}) {
+function workerHarness(appUrl = 'https://logs.example.test', environment = {}, unavailableProbes = 0) {
     const exports = {};
+    let clock = 0, probes = 0;
     // Node requires duplex for a streamed request body; Workers does not.
     class WorkerRequest extends Request {
         constructor(input, init) {
@@ -117,8 +118,11 @@ function workerHarness(appUrl = 'https://logs.example.test', environment = {}) {
     }).outputText;
     vm.runInNewContext(source, {
         exports, URL, Headers, Request: WorkerRequest, Response, AbortSignal,
-        scheduler: { wait: async () => {} },
+        Date: class extends Date { static now() { return clock; } },
+        scheduler: { wait: async (ms) => { clock += ms; } },
         require(name) {
+            if (name === './monitoring') return { checkOperations: async () => ({ status: 'ok' }) };
+            if (name === './storage') return { storageRequest: async () => null };
             assert.equal(name, 'cloudflare:workers');
             return { DurableObject: class { constructor(ctx, env) { this.ctx = ctx; this.env = env; } } };
         },
@@ -126,18 +130,38 @@ function workerHarness(appUrl = 'https://logs.example.test', environment = {}) {
     const forwarded = [];
     let startOptions;
     const port = { async fetch(request) {
-        if (typeof request === 'string') return new Response('ready');
+        if (typeof request === 'string') {
+            if (probes++ < unavailableProbes) throw new Error('Container is still booting');
+            return new Response('ready');
+        }
         forwarded.push(request); return new Response('application response');
     } };
     const container = {
         running: false, images: { base: 'test-image' },
-        start(options) { startOptions = options; this.running = true; },
+        start(options) {
+            // Reject obsolete instance names just as the Containers API does.
+            assert.ok(['lite', 'standard-1', 'standard-2', 'standard-3', 'standard-4'].includes(options.instance));
+            startOptions = options;
+            this.running = true;
+        },
         setInactivityTimeout: async () => {},
         getTcpPort(number) { assert.equal(number, 8080); return port; },
     };
     const worker = new exports.LaravelContainer({ container, blockConcurrencyWhile: (cb) => cb() }, { APP_URL: appUrl, ...environment });
-    return { worker, forwarded, get startOptions() { return startOptions; } };
+    return { worker, forwarded, container, get probes() { return probes; }, get startOptions() { return startOptions; } };
 }
+
+test('cold startup tolerates fast connection refusals for more than twenty probes', async () => {
+    const h = workerHarness('https://logs.example.test', {}, 50);
+    assert.equal((await h.worker.fetch(new Request('https://logs.example.test/erp'))).status, 200);
+    assert.equal(h.forwarded.length, 1);
+});
+
+test('an unavailable container reaches a bounded readiness deadline without forwarding', async () => {
+    const h = workerHarness('https://logs.example.test', {}, Infinity);
+    await assert.rejects(h.worker.fetch(new Request('https://logs.example.test/erp')), /did not become ready/);
+    assert.equal(h.forwarded.length, 0);
+});
 
 test('Worker preserves public Host, query, body and authentication headers over TCP HTTP', async () => {
     const h = workerHarness();
@@ -201,4 +225,29 @@ test('Worker module configuration is explicit and Sheets remains disabled by def
     assert.equal(configured.startOptions.env.GOOGLE_SERVICE_ENABLED, 'true');
     assert.equal(configured.startOptions.env.GOOGLE_SPREADSHEET_ID, 'test-sheet-not-a-real-account');
     assert.equal(configured.startOptions.env.ERP_BUSINESS_ID, '7');
+});
+
+
+test('warm requests skip readiness probes, but a stopped container is probed again', async () => {
+    const h = workerHarness();
+    await h.worker.fetch(new Request('https://logs.example.test/tools'));
+    assert.equal(h.probes, 1);
+    await h.worker.fetch(new Request('https://logs.example.test/tools'));
+    assert.equal(h.probes, 1);
+    h.container.running = false;
+    await h.worker.fetch(new Request('https://logs.example.test/tools'));
+    assert.equal(h.probes, 2);
+});
+
+test('a failed forwarded mutation is not replayed and invalidates readiness', async () => {
+    const h = workerHarness();
+    await h.worker.fetch(new Request('https://logs.example.test/tools'));
+    const original = h.container.getTcpPort;
+    let attempts = 0;
+    h.container.getTcpPort = () => ({ fetch: async () => { attempts++; throw new Error('Disconnected'); } });
+    await assert.rejects(h.worker.fetch(new Request('https://logs.example.test/save', { method: 'POST', body: 'x=1' })), /Disconnected/);
+    assert.equal(attempts, 1);
+    h.container.getTcpPort = original;
+    await h.worker.fetch(new Request('https://logs.example.test/tools'));
+    assert.equal(h.probes, 2);
 });

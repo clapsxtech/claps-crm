@@ -35,9 +35,9 @@ class SiteAccessPolicy
             return false;
         }
 
-        // Retain only the application's existing administrator checks.
+        // Existing site administrators retain full superadmin privileges.
         return (int) $user->getKey() === 1
-            || strtolower((string) $user->user_type) === 'admin'
+            || in_array(strtolower((string) $user->user_type), ['admin', 'superadmin'], true)
             || $user->hasRole('Admin')
             || $user->can('administration');
     }

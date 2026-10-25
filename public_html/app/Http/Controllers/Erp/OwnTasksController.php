@@ -14,9 +14,9 @@ class OwnTasksController extends Controller
     public function __construct() {}
     public function index(Request $request) {
         $user=$request->user(); (new SiteAccessPolicy())->assertSiteMember($user);
-        if (!DB::table('erp_memberships')->where('user_id',$user->id)->whereIn('role',['admin','sales','teacher'])->exists()) throw new AuthorizationException('Current staff membership is required.');
+        if (!DB::table('erp_memberships')->where('user_id',$user->id)->whereIn('role',array_merge(['admin','staff','sales','teacher'],\App\Modules\Erp\Services\TeamPermissions::ROLES))->exists()) throw new AuthorizationException('Current staff membership is required.');
         $tasks=DB::table('erp_tasks as t')->join('erp_memberships as m',function($j) { $j->on('m.unit_id','=','t.unit_id')->on('m.user_id','=','t.assigned_to'); })
-            ->where('t.assigned_to',$user->id)->where('m.user_id',$user->id)->whereIn('m.role',['admin','sales','teacher'])->orderBy('t.due_on')->orderBy('t.id')
+            ->whereIn('t.unit_id',DB::table('erp_units')->whereNull('archived_at')->select('id'))->where('t.assigned_to',$user->id)->where('m.user_id',$user->id)->whereIn('m.role',array_merge(['admin','staff','sales','teacher'],\App\Modules\Erp\Services\TeamPermissions::ROLES))->orderBy('t.due_on')->orderBy('t.id')
             ->paginate(25,['t.id','t.unit_id','t.title','t.notes','t.due_on','t.status']);
         $items=DB::table('erp_task_items')->whereIn('task_id',$tasks->pluck('id'))->orderBy('id')->get(['id','unit_id','task_id','title','completed_at']);
         // Guard corrupted cross-unit item rows as well as normal task scoping.

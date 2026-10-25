@@ -1,9 +1,18 @@
 {
     "$schema": "./node_modules/wrangler/config-schema.json",
     "name": "clapslearn-logs",
+    "account_id": "74ad8d10da1568cedacdd379a246cefc",
+    "routes": [
+        {
+            "pattern": "erp.clapslearn.in",
+            "custom_domain": true
+        }
+    ],
     "main": "src/index.ts",
+    "assets": { "directory": "./.cloudflare-assets", "not_found_handling": "none" },
     "compatibility_date": "2026-10-23",
     "upload_source_maps": true,
+    "triggers": { "crons": ["*/5 * * * *"] },
     "observability": {
         "enabled": true
     },
@@ -11,6 +20,7 @@
         {
             "class_name": "LaravelContainer",
             "scheduling_policy": "durable_object",
+            "observability": { "enabled": true },
             "images": {
                 "base": {
                     "dockerfile": "./Dockerfile.cloudflare"
@@ -33,21 +43,26 @@
         }
     },
     "vars": {
-        "DB_PORT": "3306"
+        "APP_URL": "https://erp.clapslearn.in"
     },
     "secrets": {
         "required": [
             "APP_KEY",
-            "APP_URL",
-            "DB_HOST",
-            "DB_DATABASE",
-            "DB_USERNAME",
-            "DB_PASSWORD",
-            "GOOGLE_CREDENTIALS_BASE64",
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "R2_ACCOUNT_ID",
-            "R2_BUCKET_NAME"
+            "INTERNAL_TOKEN"
         ]
-    }
+    },
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "clapslearn-erp",
+            "database_id": "6056c8ae-89d3-4cea-a075-0d3bb8d79200",
+            "migrations_dir": "cloudflare/migrations"
+        }
+    ],
+    "r2_buckets": [
+        {
+            "binding": "UPLOADS",
+            "bucket_name": "clapslearn-erp-uploads"
+        }
+    ]
 }

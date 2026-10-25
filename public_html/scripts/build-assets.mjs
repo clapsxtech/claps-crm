@@ -13,6 +13,9 @@ async function buildAssets() {
     await mkdir('public/js', { recursive: true });
     await mkdir('public/css', { recursive: true });
     await build({ ...options, entryPoints: ['resources/js/app.js'], bundle: true, platform: 'browser', outfile: 'public/js/app.js' });
+    await build({ ...options, entryPoints: ['resources/js/report-dates.js'], bundle: true, platform: 'browser', outfile: 'public/js/report-dates.js' });
+    await build({ ...options, entryPoints: ['resources/js/erp-shell.js'], bundle: true, platform: 'browser', outfile: 'public/js/erp-shell.js' });
+    await build({ ...options, entryPoints: ['resources/css/erp.css'], bundle: true, outfile: 'public/css/erp.css' });
     for (const name of ['app', 'toastr']) {
         const compiled = compile(`resources/sass/${name}.scss`, {
             loadPaths: ['node_modules'], quietDeps: true,
@@ -64,7 +67,7 @@ async function buildAssets() {
     ]) await rm(`public/${asset}`, { force: true });
     // Keep the Laravel mix() contract for older templates without depending on Mix.
     const manifest = {};
-    for (const asset of ['js/app.js', 'css/app.css', 'css/toastr.css']) {
+    for (const asset of ['js/app.js', 'css/app.css', 'css/toastr.css', 'js/erp-shell.js', 'css/erp.css', 'js/report-dates.js']) {
         const content = await readFile(`public/${asset}`);
         manifest[`/${asset}`] = `/${asset}?id=${createHash('sha256').update(content).digest('hex').slice(0, 20)}`;
     }

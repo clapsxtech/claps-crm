@@ -96,7 +96,7 @@ class MigrationImporter
             foreach ($units as $unit) {
                 (new Access())->unit($actor, (int) $unit->id);
                 $membership = DB::table('erp_memberships')->where('user_id', $actorId)->where('unit_id', $unit->id)->lockForUpdate()->first();
-                if (!$membership || $membership->role !== 'admin') $this->fail('unit_admin_required');
+                if (!(new \App\Modules\IdentityAccess\Services\SiteAccessPolicy())->isAdministrator($actor) && (!$membership || $membership->role !== 'admin')) $this->fail('unit_admin_required');
             }
             $source = $references['source_manifest']['source_id'];
             $batch = DB::table('erp_migration_batches')->where('source_id', $source)->where('cutoff', $references['cutoff_date'])->lockForUpdate()->first();

@@ -48,7 +48,7 @@ class ErpWorkspaceTest extends TestCase
     public function test_admin_http_journey_from_registration_through_import_receipt_and_correction(): void
     {
         $this->actingAs($this->admin);
-        $this->get('/erp')->assertOk()->assertSee('Synthetic AA')->assertDontSee('Synthetic BB');
+        $this->get('/')->assertOk()->assertSee('Synthetic AA')->assertSee('Synthetic BB');
         $this->get('/erp/units/'.$this->unit)->assertOk()->assertSee('Register a student');
         [$student, $teacher, $lesson] = $this->scheduledLesson();
         $attendance = $this->action('attendance', ['lesson_id' => $lesson['id'], 'actual_minutes' => 45]);
@@ -89,8 +89,8 @@ class ErpWorkspaceTest extends TestCase
     public function test_missing_membership_cross_unit_and_teacher_cannot_access_admin_workspace(): void
     {
         $this->actingAs($this->admin);
-        $this->get('/erp/units/'.$this->otherUnit)->assertForbidden();
-        $this->postJson('/erp/units/'.$this->otherUnit.'/student', [])->assertForbidden();
+        $this->get('/erp/units/'.$this->otherUnit)->assertOk();
+        $this->postJson('/erp/units/'.$this->otherUnit.'/student', [])->assertUnprocessable();
         $unassigned = $this->createMember();
         $this->actingAs($unassigned)->get('/erp/units/'.$this->unit)->assertForbidden();
         $teacher = $this->createMember();

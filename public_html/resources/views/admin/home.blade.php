@@ -1,4 +1,5 @@
-@include('admin.layouts.sidebar')
+@extends('erp.layout')
+@section('content')
 
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper">
@@ -25,4 +26,7 @@
           </div>
         </section>
       </div>
-      @include('admin.layouts.footer')
+      @endsection
+@section('scripts')
+
+@endsection

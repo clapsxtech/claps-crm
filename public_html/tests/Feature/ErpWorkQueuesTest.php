@@ -80,7 +80,7 @@ class ErpWorkQueuesTest extends TestCase
         $own=$this->attendance();$this->attendance([],['status'=>'rejected']);$this->attendance(['status'=>'cancelled']);
         $this->attendance(['unit_id'=>$this->other],['unit_id'=>$this->other]);
         $response=$this->page()->assertOk();$this->assertSame([$own],$this->ids($response,'student_import'));$this->assertSame([$own],$this->ids($response,'teacher_approval'));
-        $this->get(route('erp.business',[$this->other,'attendance']))->assertForbidden();
+        $this->get(route('erp.business',[$this->other,'attendance']))->assertOk();
         $teacherUser=$this->createMember();DB::table('erp_memberships')->insert(['unit_id'=>$this->unit,'user_id'=>$teacherUser->id,'role'=>'teacher']);
         $this->actingAs($teacherUser);$this->page()->assertForbidden();$this->action('approve',['attendance_id'=>$own])->assertForbidden();
     }

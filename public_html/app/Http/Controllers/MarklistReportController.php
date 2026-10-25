@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MarklistReport;
+use App\Modules\Academics\Services\AssessmentHistory;
 use App\Models\Master;
 use App\Support\TableSearch;
 use App\Modules\IdentityAccess\Services\ReportAccess;
@@ -21,7 +22,7 @@ class MarklistReportController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = MarklistReport::select('id', 'student_name', 'student_code', 'teacher_name', 'teacher_code', 'subject', 'chapter', 'mark_scored', 'total_mark', 'mode_of_exam', 'examination_date', 'remark', 'date_submitted')->orderBy('date_submitted', 'desc');
+            $data = app(AssessmentHistory::class)->query()->select('id', 'student_name', 'student_code', 'teacher_name', 'teacher_code', 'subject', 'chapter', 'mark_scored', 'total_mark', 'mode_of_exam', 'examination_date', 'remark', 'date_submitted')->orderBy('date_submitted', 'desc');
             return DataTables::of($data)->addIndexColumn()
                 ->filter(function ($query) use ($request) {
                     $search = TableSearch::term($request);
@@ -69,7 +70,7 @@ class MarklistReportController extends Controller
         if ($request->ajax() || $request->isMethod('post')) {
             abort_unless($request->isMethod('post'), 405);
             // Credentials are checked before even a count of report rows is returned.
-            $data = $access->scopeTeacherReport(MarklistReport::query(), $request)
+            $data = $access->scopeTeacherReport(app(AssessmentHistory::class)->query(), $request)
                 ->select('id', 'teacher_name', 'student_name', 'subject', 'chapter', 'examination_date', 'mark_scored', 'total_mark', 'date_submitted')
                 ->orderBy('date_submitted', 'desc');
             $request->validate([
@@ -93,7 +94,7 @@ class MarklistReportController extends Controller
     public function getStudentData(Request $request, ReportAccess $access)
     {
         abort_unless($request->isMethod('post'), 405);
-        $students = $access->scopeTeacherReport(MarklistReport::query(), $request)
+        $students = $access->scopeTeacherReport(app(AssessmentHistory::class)->query(), $request)
             ->select('student_name')->distinct()->orderBy('student_name')->get();
         return response()->json(['students' => $students])->header('Cache-Control', 'no-store, private');
     }

@@ -264,7 +264,7 @@ class ErpTimetableTest extends TestCase
             ->assertDontSee('WEEK-SECRET')->assertDontSee('PRIVATE-GUARDIAN-CONTACT')
             ->assertDontSee('https://example.invalid/private-meeting');
         $this->assertSame([$own], $this->ids($response->viewData('timetable')));
-        $this->get($this->url([], $this->other))->assertForbidden();
+        $this->get($this->url([], $this->other))->assertOk();
 
         DB::table('erp_memberships')->insert(['unit_id' => $this->other, 'user_id' => $this->admin->id, 'role' => 'admin']);
         $response = $this->get($this->url(['student' => 'WEEK-SECRET']))->assertOk()->assertDontSee('Private Foreign');
