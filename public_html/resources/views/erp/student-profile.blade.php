@@ -3,6 +3,7 @@
 <p><a href="{{ route('erp.business', [$business->id, 'people']) }}">{{ $business->name }} · Students &amp; teachers</a></p>
 <h2>{{ $student->name }}</h2>
 <p>{{ $student->code }} · {{ $student->status }} · Grade {{ $student->grade }} · {{ $student->syllabus }}</p>
+@if((new \App\Modules\Erp\Services\TeamPermissions())->allows(auth()->user(),$business->id,'page','allocation'))<p><a href="{{ route('erp.business',[$business->id,'allocation','student_id'=>$student->id]) }}">Find a teacher / allocate classes</a></p>@endif
 <p class="notice">Read-only student profile. Viewing this page does not import attendance, charge a student, accrue salary, send a message or move money.</p>
 <nav class="tabs" aria-label="Student profile sections">
 @foreach(['details'=>'Details','assignments'=>'Assignments','timetable'=>'Timetable','attendance'=>'Attendance','balance'=>'Balance & receipts','followups'=>'Follow-ups','tasks'=>'Tasks'] as $anchor=>$label)
@@ -11,9 +12,20 @@
 </nav>
 <section id="details" aria-labelledby="details-heading">
 <h3 id="details-heading">Student details</h3>
+@foreach($admissionHandoffs as $handoff)<details><summary>Admission handoff · enquiry #{{ $handoff->id }}</summary><p>Source: {{ $handoff->source ?: 'Not recorded' }} · Joined: {{ $handoff->joined_on }}</p>
+@foreach(['learning_requirement'=>'Learning needs','concern'=>'Parent concerns','about_student'=>'About the student','about_parent'=>'Parent communication preferences'] as $field=>$label)<p><strong>{{ $label }}:</strong> {{ $handoff->$field ?: 'Not recorded' }}</p>@endforeach
+</details>@endforeach
 <p>Registered {{ $student->registered_on }} · Student timezone: {{ $student->timezone }}</p>
 <p>Guardian contact: {{ $student->guardian_contact ?: 'Not recorded' }}</p>
 <p>Meeting address: {{ $student->meeting_url ?: 'Not recorded' }}</p>
+@if($sheetProfile)
+<h4>Registration profile</h4>
+<p>Section: {{ $sheetProfile->section ?: 'Not recorded' }} · Country: {{ $sheetProfile->country ?: 'Not recorded' }} · Hour rate: {{ $sheetProfile->hour_rate_paise !== null ? \App\Modules\Erp\Services\MoneyDisplay::inr((int)$sheetProfile->hour_rate_paise) : 'Not recorded' }}</p>
+<p>WhatsApp: {{ $sheetProfile->whatsapp_number ?: 'Not recorded' }} · Student contact: {{ $sheetProfile->student_contact ?: 'Not recorded' }} · Email: {{ $sheetProfile->email ?: 'Not recorded' }}</p>
+<p>Father: {{ $sheetProfile->father_name ?: 'Not recorded' }} · Mother: {{ $sheetProfile->mother_name ?: 'Not recorded' }}</p>
+<p>School: {{ $sheetProfile->school ?: 'Not recorded' }} · Preferred medium: {{ $sheetProfile->preferred_medium ?: 'Not recorded' }} · Preferred time: {{ $sheetProfile->preferred_time ?: 'Not recorded' }}</p>
+<p>Network: {{ $sheetProfile->network_connectivity ?: 'Not recorded' }} · Source: {{ $sheetProfile->source ?: 'Not recorded' }} · Imported source id: {{ $sheetProfile->source_external_id ?: 'Not recorded' }}</p>
+@endif
 </section>
 <section id="assignments" aria-labelledby="assignments-heading">
 <h3 id="assignments-heading">Named assignments</h3>

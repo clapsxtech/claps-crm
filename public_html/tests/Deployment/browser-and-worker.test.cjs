@@ -220,15 +220,22 @@ test('Worker module configuration is explicit and Sheets remains disabled by def
     assert.equal(defaults.startOptions.env.GOOGLE_SERVICE_ENABLED, 'false');
     assert.equal(defaults.startOptions.env.GOOGLE_SPREADSHEET_ID, '');
     assert.equal(defaults.startOptions.env.ERP_BUSINESS_ID, '1');
+    assert.equal(defaults.startOptions.env.ERP_SHEETS_TRANSITION_ENABLED, 'false');
+    assert.equal(defaults.startOptions.env.ERP_DATA_AUTHORITY, 'application');
+    assert.equal(defaults.startOptions.env.ERP_SHEETS_BAND_UNITS, '{}');
     const configured = workerHarness('https://logs.example.test', {
         SHEETS_SYNC_ENABLED: 'true', GOOGLE_SERVICE_ENABLED: 'true',
         GOOGLE_SPREADSHEET_ID: 'test-sheet-not-a-real-account', ERP_BUSINESS_ID: '7',
+        ERP_SHEETS_TRANSITION_ENABLED: 'true', ERP_DATA_AUTHORITY: 'sheets', ERP_SHEETS_BAND_UNITS: '{"AA":42}',
     });
     await configured.worker.fetch(new Request('https://logs.example.test/health'));
     assert.equal(configured.startOptions.env.SHEETS_SYNC_ENABLED, 'true');
     assert.equal(configured.startOptions.env.GOOGLE_SERVICE_ENABLED, 'true');
     assert.equal(configured.startOptions.env.GOOGLE_SPREADSHEET_ID, 'test-sheet-not-a-real-account');
     assert.equal(configured.startOptions.env.ERP_BUSINESS_ID, '7');
+    assert.equal(configured.startOptions.env.ERP_SHEETS_TRANSITION_ENABLED, 'true');
+    assert.equal(configured.startOptions.env.ERP_DATA_AUTHORITY, 'sheets');
+    assert.equal(configured.startOptions.env.ERP_SHEETS_BAND_UNITS, '{"AA":42}');
 });
 
 

@@ -47,22 +47,34 @@ class D1Pdo extends PDO
                 $db->beginTransaction();
                 foreach ($snapshot['schema'] as $object) if ($object['type'] === 'table') $db->exec($object['sql']);
                 $tables = array_values(array_filter($snapshot['schema'], fn($object) => $object['type'] === 'table'));
-                foreach (array_chunk($tables, 8) as $group) {
-                    $initial = $this->gateway->call('rows_batch', ['tables' => array_column($group, 'name')])['pages'];
-                    foreach ($group as $object) {
-                    $cursor = null;
-                    do {
-                        $page = $cursor === null ? $initial[$object['name']] : $this->gateway->call('rows', ['table' => $object['name'], 'cursor' => $cursor]);
-                        foreach ($page['rows'] as $row) {
-                            $cursor = $row['_erp_d1_rowid'];
-                            unset($row['_erp_d1_rowid']);
-                            $columns = implode(',', array_map(self::identifier(...), array_keys($row)));
-                            $insert = $db->prepare('INSERT INTO '.self::identifier($object['name']).' ('.$columns.') VALUES ('.implode(',', array_fill(0, count($row), '?')).')');
-                            $insert->execute(array_values($row));
+                $pending = array_fill_keys(array_column($tables, 'name'), -1);
+                $inserts = [];
+                // Batch continuation pages too: fetching each 200-row page over
+                // a separate HTTP call made imported databases miss readiness.
+                while ($pending) {
+                    foreach (array_chunk(array_keys($pending), 8) as $names) {
+                        $cursors = array_intersect_key($pending, array_flip($names));
+                        $pages = $this->gateway->call('rows_batch', ['tables'=>$names, 'cursors'=>$cursors, 'limit'=>2000])['pages'];
+                        foreach ($names as $name) {
+                            $page = $pages[$name];
+                            $previous = $pending[$name];
+                            foreach ($page['rows'] as $row) {
+                                $cursor = (int)$row['_erp_d1_rowid'];
+                                if ($cursor <= $pending[$name]) throw new RuntimeException('D1 snapshot cursor did not advance.');
+                                $pending[$name] = $cursor;
+                                unset($row['_erp_d1_rowid']);
+                                if (!isset($inserts[$name])) {
+                                    $columns = implode(',', array_map(self::identifier(...), array_keys($row)));
+                                    $inserts[$name] = $db->prepare('INSERT INTO '.self::identifier($name).' ('.$columns.') VALUES ('.implode(',', array_fill(0, count($row), '?')).')');
+                                }
+                                $inserts[$name]->execute(array_values($row));
+                            }
+                            if (!$page['more']) unset($pending[$name]);
+                            elseif ($pending[$name] === $previous) throw new RuntimeException('D1 snapshot returned an empty continuation page.');
                         }
-                    } while ($page['more']);
                     }
                 }
+                $inserts = [];
                 if (isset($snapshot['sequences'])) {
                     $db->exec('DELETE FROM sqlite_sequence');
                     $insert = $db->prepare('INSERT INTO sqlite_sequence(name,seq) VALUES (?,?)');

@@ -1,0 +1,166 @@
+erDiagram
+  %% Logical references only. D1 schema declares zero ERP foreign keys.
+  erp_attendance {
+    integer id PK
+    integer unit_id
+    integer actual_minutes
+    varchar status
+  }
+  erp_attendance_batches {
+    integer id PK
+    integer unit_id "logical reference"
+    varchar reference
+  }
+  erp_audit {
+    integer id PK
+    integer unit_id
+    integer actor_id "logical reference"
+  }
+  erp_enrollments {
+    integer id PK
+    integer unit_id
+    date starts_on
+    date ends_on
+    integer student_rate_paise
+    integer teacher_rate_paise
+    varchar currency
+    varchar status
+    varchar source_external_id
+  }
+  erp_followups {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+  }
+  erp_invoice_lines {
+    integer id PK
+    integer unit_id
+    integer invoice_id "logical reference"
+    numeric quantity
+    integer unit_rate_paise
+    integer amount_paise
+  }
+  erp_invoices {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    varchar invoice_number
+    varchar status
+    varchar currency
+    integer total_paise
+  }
+  erp_ledger {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    integer teacher_id "logical reference"
+    integer attendance_id "logical reference"
+    varchar kind
+    integer amount_paise
+    varchar currency
+    varchar reference
+    varchar event_key
+    integer reverses_id "logical reference"
+    integer invoice_id "logical reference"
+  }
+  erp_migration_batches {
+    integer id PK
+    date cutoff
+    varchar digest
+  }
+  erp_migration_history {
+    integer id PK
+    integer batch_id "logical reference"
+    integer unit_id
+    integer enrollment_id "logical reference"
+    datetime starts_at
+    integer actual_minutes
+    varchar status
+    varchar financial_effect
+  }
+  erp_migration_mappings {
+    integer id PK
+    varchar target_type
+    integer target_id
+    integer batch_id "logical reference"
+  }
+  erp_payment_requests {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    varchar reference
+    integer amount_paise
+    varchar status
+  }
+  erp_request_allocations {
+    integer id PK
+    integer unit_id
+    integer request_id "logical reference"
+    integer payment_id "logical reference"
+    integer amount_paise
+  }
+  erp_students {
+    integer id PK
+    integer unit_id
+    varchar code
+    varchar name
+    varchar timezone
+    varchar status
+  }
+  erp_task_items {
+    integer id PK
+    integer unit_id
+    integer task_id "logical reference"
+    numeric points
+    varchar source_external_id
+  }
+  erp_task_templates {
+    integer id PK
+    integer unit_id "logical reference"
+    varchar name
+  }
+  erp_tasks {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    integer assigned_to "logical reference"
+    varchar status
+    numeric points
+    varchar source_external_id
+  }
+  erp_teachers {
+    integer id PK
+    varchar code
+    varchar name
+    varchar timezone
+    varchar status
+  }
+  erp_units {
+    integer id PK
+    varchar code
+    varchar name
+    varchar timezone
+  }
+  users {
+    integer id PK
+  }
+  erp_students |o..o{ erp_ledger : "student_id"
+  erp_teachers |o..o{ erp_ledger : "teacher_id"
+  erp_attendance |o..o{ erp_ledger : "attendance_id"
+  erp_ledger |o..o| erp_ledger : "reverses_id"
+  erp_invoices |o..o{ erp_ledger : "invoice_id"
+  erp_students ||..o{ erp_invoices : "student_id"
+  erp_invoices ||..o{ erp_invoice_lines : "invoice_id"
+  erp_students ||..o{ erp_payment_requests : "student_id"
+  erp_payment_requests ||..o{ erp_request_allocations : "request_id"
+  erp_ledger ||..o{ erp_request_allocations : "payment_id"
+  erp_students |o..o{ erp_tasks : "student_id"
+  users |o..o{ erp_tasks : "assigned_to"
+  erp_tasks ||..o{ erp_task_items : "task_id"
+  erp_units ||..o{ erp_task_templates : "unit_id"
+  erp_students ||..o{ erp_followups : "student_id"
+  erp_units ||..o{ erp_attendance_batches : "unit_id"
+  users |o..o{ erp_audit : "actor_id"
+  erp_migration_batches ||..o{ erp_migration_mappings : "batch_id"
+  erp_migration_batches ||..o{ erp_migration_history : "batch_id"
+  erp_enrollments ||..o{ erp_migration_history : "enrollment_id"

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teacher matching · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .match { display: grid; grid-template-columns: 24px 44px minmax(0, 1fr) auto; gap: var(--s-4); align-items: start; }
+    .match .rank { font: var(--t-sm); font-weight: var(--w-semibold); color: var(--fg-subtle); padding-top: var(--s-3); text-align: center; }
+    .match.top { border-color: color-mix(in srgb, var(--accent) 45%, transparent); box-shadow: var(--e-1), 0 0 0 3px var(--accent-subtle); }
+    .fit { display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-3); }
+    .avail-grid { display: grid; grid-template-columns: 40px repeat(6, minmax(0, 1fr)); gap: var(--s-1); font: var(--t-xs); }
+    .avail-grid .h { color: var(--fg-muted); text-align: center; }
+    .avail-grid .t { color: var(--fg-subtle); align-self: center; }
+    .field > .segmented { align-self: flex-start; }
+    .slot { height: 24px; border-radius: var(--r-xs); background: var(--n-100); }
+    .slot.on { background: var(--g-300); }
+    .slot.pref { background: var(--accent); }
+    [data-theme="dark"] .slot { background: var(--bg-hover); }
+  </style>
+</head>
+<body data-page="matching" data-crumbs="People/Teacher matching">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Teacher matching</span>
+      <h1 class="t-title">Meera Krishnan · Maths</h1>
+      <p class="muted">Grade 10 · CBSE · English + Malayalam · from enquiry #4802</p>
+    </div>
+    <div class="actions">
+      <button class="btn"><span data-icon="message"></span>Message parent</button>
+    </div>
+  </header>
+
+  <nav class="stepper" aria-label="Matching progress" style="margin-top: calc(var(--gap-section) * -0.5)">
+    <span class="step" data-state="done">Availability</span><span class="step-line" data-state="done"></span>
+    <span class="step" data-state="current">Matches</span><span class="step-line"></span>
+    <span class="step">Demo</span><span class="step-line"></span>
+    <span class="step">Confirm</span>
+  </nav>
+
+  <section class="grid">
+    <aside class="span-4 stack-lg">
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Student availability</h2><span class="badge success dot">Confirmed</span></div>
+        <div class="card-body stack">
+          <div class="avail-grid" role="img" aria-label="Availability grid, weekday evenings">
+            <span></span><span class="h">M</span><span class="h">T</span><span class="h">W</span><span class="h">T</span><span class="h">F</span><span class="h">S</span>
+            <span class="t">16:00</span><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot"></i><i class="slot on"></i>
+            <span class="t">17:00</span><i class="slot pref"></i><i class="slot on"></i><i class="slot pref"></i><i class="slot on"></i><i class="slot pref"></i><i class="slot on"></i>
+            <span class="t">18:00</span><i class="slot on"></i><i class="slot on"></i><i class="slot on"></i><i class="slot on"></i><i class="slot on"></i><i class="slot"></i>
+            <span class="t">19:00</span><i class="slot"></i><i class="slot on"></i><i class="slot"></i><i class="slot on"></i><i class="slot"></i><i class="slot"></i>
+          </div>
+          <div class="row-lg t-caption"><span class="row-sm"><i class="slot pref" style="width:12px;height:12px"></i>Preferred</span><span class="row-sm"><i class="slot on" style="width:12px;height:12px"></i>Available</span></div>
+          <hr class="divider" />
+          <dl class="dl">
+            <dt>Sessions / week</dt><dd>3 × 60 min</dd>
+            <dt>Budget</dt><dd class="money">₹450 / hour</dd>
+            <dt>Confirmed via</dt><dd>WhatsApp · 28 Oct</dd>
+          </dl>
+        </div>
+      </article>
+    </aside>
+
+    <section class="span-8 stack" aria-label="Teacher matches">
+      <div class="row between"><h2 class="t-subhead">Teacher matches</h2><span class="t-caption">Ranked by slot overlap, subject eligibility, medium and load</span></div>
+
+      <article class="card card-body match top">
+        <span class="rank">1</span>
+        <span class="avatar lg" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)" data-presence="online">SP</span>
+        <div class="stack-sm">
+          <div class="row wrap"><span class="t-subhead">Sneha P.</span><span class="badge success">Best fit</span></div>
+          <span class="t-caption">Maths, Physics · English · 4.8 demo rating · load 72%</span>
+          <div class="row-sm wrap"><span class="chip" aria-pressed="true">Mon 17:00</span><span class="chip" aria-pressed="true">Wed 17:00</span><span class="chip" aria-pressed="true">Fri 17:00</span><span class="chip" aria-pressed="false">Tue 18:00</span></div>
+        </div>
+        <div class="fit"><div class="ring" style="--p:94;--ring-size:52px" data-label="94"></div><button class="btn btn-primary btn-sm" data-async data-done="Reserved" data-toast="Demo reserved · Thu 30 Oct 17:00 with Sneha P.">Reserve demo slot</button></div>
+      </article>
+
+      <article class="card card-body match">
+        <span class="rank">2</span>
+        <span class="avatar lg" data-presence="online">RK</span>
+        <div class="stack-sm">
+          <div class="row wrap"><span class="t-subhead">Rahul K.</span><span class="badge warning">High load</span></div>
+          <span class="t-caption">Maths, Physics · English + Malayalam · 4.9 demo rating · load 86%</span>
+          <div class="row-sm wrap"><span class="chip" aria-pressed="true">Tue 18:00</span><span class="chip" aria-pressed="true">Thu 18:00</span><span class="chip" aria-pressed="false">Sat 16:00</span></div>
+        </div>
+        <div class="fit"><div class="ring" style="--p:81;--ring-size:52px" data-label="81"></div><button class="btn btn-sm" data-async data-done="Reserved" data-toast="Demo reserved with Rahul K.">Reserve demo slot</button></div>
+      </article>
+
+      <article class="card card-body match">
+        <span class="rank">3</span>
+        <span class="avatar lg" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">DM</span>
+        <div class="stack-sm">
+          <div class="row wrap"><span class="t-subhead">Divya M.</span></div>
+          <span class="t-caption">Maths (Grade ≤ 8 eligible) · English + Malayalam · load 38%</span>
+          <div class="row-sm wrap"><span class="chip" aria-pressed="false">Sat 17:00</span></div>
+          <div class="callout warning" style="padding: var(--s-2) var(--s-3)"><span data-icon="alert"></span>Not yet eligible for Grade 10 Maths</div>
+        </div>
+        <div class="fit"><div class="ring" style="--p:52;--ring-size:52px" data-label="52"></div><button class="btn btn-sm" disabled>Reserve demo slot</button></div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Demo feedback and handoff</h2><span class="badge special dot">Demo today 17:00</span></div>
+        <div class="card-body stack">
+          <div class="field"><span class="field-label">Feedback after demo</span>
+            <div class="segmented" role="group" aria-label="Demo feedback"><button aria-pressed="true">Awaiting feedback</button><button aria-pressed="false">Continue with this teacher</button><button aria-pressed="false">Try another teacher</button></div>
+          </div>
+          <div class="field"><label class="field-label">Learner handoff notes <span class="opt">Shared with teacher</span></label><textarea class="textarea" placeholder="Strengths, gaps, exam dates…"></textarea></div>
+          <div class="row end">
+            <button class="btn" data-toast="Feedback saved">Record feedback</button>
+            <button class="btn btn-primary" data-async data-done="Confirmed" data-toast="Assignment confirmed · 12 lessons generated">Confirm assignment &amp; generate lessons</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </section>
+</main>
+</body>
+</html>

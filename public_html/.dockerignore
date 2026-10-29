@@ -7,6 +7,9 @@
 node_modules
 .wrangler
 storage/app/d1
+storage/app/teacher-imports
+storage/app/teacher-release-backups
+storage/app/erp-imports
 src
 tests
 docs

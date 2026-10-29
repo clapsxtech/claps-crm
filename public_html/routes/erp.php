@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Erp\WorkspaceController;
+Route::get('/erp/from-sheets', [\App\Http\Controllers\Erp\SheetTransitionController::class,'index'])->middleware('auth')->name('erp.sheets');
 Route::get('/teacher',[\App\Http\Controllers\Erp\TeacherController::class,'entry'])->middleware('auth')->name('teacher.portal');
 Route::permanentRedirect('/erp', '/')->name('erp.compatibility');
 Route::middleware(['auth', \App\Http\Middleware\TeamAuthorization::class])->prefix('erp')->name('erp.')->group(function () {
@@ -37,4 +38,11 @@ Route::middleware(['auth','admin'])->prefix('erp/migration-center')->name('erp.m
     Route::get('/',[\App\Http\Controllers\Erp\MigrationCenterController::class,'index'])->name('center');
     Route::post('/preview',[\App\Http\Controllers\Erp\MigrationCenterController::class,'preview'])->middleware('throttle:10,1')->name('preview');
     Route::post('/execute',[\App\Http\Controllers\Erp\MigrationCenterController::class,'execute'])->middleware('throttle:5,1')->name('execute');
+});
+
+// Private records have their own explicit role check and must never enter teacher exports.
+Route::middleware('auth')->prefix('erp/units/{unit}/tuition')->whereNumber('unit')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Erp\TuitionController::class,'index'])->name('erp.tuition');
+    Route::get('/statement', [\App\Http\Controllers\Erp\TuitionController::class,'statement'])->name('erp.tuition.statement');
+    Route::post('/{operation}', [\App\Http\Controllers\Erp\TuitionController::class,'mutate'])->name('erp.tuition.mutate');
 });

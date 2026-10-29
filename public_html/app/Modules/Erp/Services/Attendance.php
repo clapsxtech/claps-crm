@@ -18,20 +18,29 @@ class Attendance
             $student = DB::table('erp_students')->where('unit_id', $unitId)->where('id', $lesson->student_id)->lockForUpdate()->first();
             $lesson = $this->lesson($unitId, $lesson->id, true);
             (new Finance())->assertAfterMigrationCutoff($unitId, $lesson);
+            $actualStart = isset($payload['actual_starts_at']) && $payload['actual_starts_at'] !== ''
+                ? Carbon::parse(\Illuminate\Support\Facades\Validator::make($payload, ['actual_starts_at'=>'required|date_format:Y-m-d H:i:s'])->validate()['actual_starts_at'], 'UTC')
+                : Carbon::parse($lesson->starts_at, 'UTC');
+            (new Finance())->assertAfterMigrationCutoff($unitId, (object) array_merge((array) $lesson, ['starts_at'=>$actualStart->format('Y-m-d H:i:s')]));
+            $reason = trim((string) ($payload['change_reason'] ?? ''));
+            if (strlen($reason) > 4000) $this->fail('change_reason', 'Use at most 4000 characters.');
+            $changed = !$actualStart->equalTo(Carbon::parse($lesson->starts_at, 'UTC'));
+            if (($changed || $minutes != Carbon::parse($lesson->starts_at)->diffInMinutes(Carbon::parse($lesson->ends_at))) && !$reason && array_key_exists('actual_starts_at', $payload)) $this->fail('change_reason', 'Explain the changed time or duration.');
+            if ($actualStart->copy()->addMinutes($minutes)->isFuture()) $this->fail('actual_starts_at', 'Actual teaching must have finished before submission.');
             $existing = DB::table('erp_attendance')->where('unit_id', $unitId)->where('lesson_id', $lesson->id)->lockForUpdate()->first();
             if ($existing) {
-                if ((int) $existing->actual_minutes !== $minutes) $this->fail('actual_minutes', 'Attendance exists. Use an audited correction instead.');
+                if ((int) $existing->actual_minutes !== $minutes || ($existing->actual_starts_at && $existing->actual_starts_at !== $actualStart->format('Y-m-d H:i:s')) || ($reason !== '' && $existing->change_reason !== $reason)) $this->fail('actual_minutes', 'Attendance exists. Use an audited correction instead.');
                 return $existing;
             }
-            if (Carbon::parse($lesson->ends_at, 'UTC')->isFuture()) $this->fail('lesson_id', 'Attendance can only be submitted after the lesson has ended.');
+            if (!$changed && Carbon::parse($lesson->ends_at, 'UTC')->isFuture()) $this->fail('lesson_id', 'Attendance can only be submitted after the lesson has ended.');
             if (!in_array($lesson->status, ['scheduled', 'completed'], true)) $this->fail('lesson_id', 'Only delivered lessons can receive attendance; cancellation and no-show billing is not configured.');
             $now = now()->format('Y-m-d H:i:s');
-            $id = DB::table('erp_attendance')->insertGetId(['unit_id' => $unitId, 'lesson_id' => $lesson->id, 'actual_minutes' => $minutes, 'status' => 'submitted', 'submitted_by' => $actorId, 'created_at' => $now, 'updated_at' => $now]);
+            $id = DB::table('erp_attendance')->insertGetId(['unit_id' => $unitId, 'lesson_id' => $lesson->id, 'actual_minutes' => $minutes, 'actual_starts_at' => $actualStart->format('Y-m-d H:i:s'), 'change_reason' => $reason ?: null, 'submitted_late' => now()->gt($actualStart->copy()->addMinutes($minutes)->setTimezone($student->timezone)->endOfDay()), 'status' => 'submitted', 'submitted_by' => $actorId, 'created_at' => $now, 'updated_at' => $now]);
             DB::table('erp_lessons')->where('unit_id', $unitId)->where('id', $lesson->id)->update(['status' => 'completed', 'updated_at' => $now]);
-            $date = Carbon::parse($lesson->starts_at, 'UTC')->setTimezone($student->timezone)->toDateString();
-            $others = DB::table('erp_attendance as a')->join('erp_lessons as l', 'l.id', '=', 'a.lesson_id')->where('a.unit_id', $unitId)->where('l.unit_id', $unitId)->where('l.student_id', $lesson->student_id)->where('l.teacher_id', $lesson->teacher_id)->where('a.id', '!=', $id)->where('a.status', '!=', 'rejected')->select('a.id', 'l.starts_at')->lockForUpdate()->get();
+            $date = $actualStart->copy()->setTimezone($student->timezone)->toDateString();
+            $others = DB::table('erp_attendance as a')->join('erp_lessons as l', 'l.id', '=', 'a.lesson_id')->where('a.unit_id', $unitId)->where('l.unit_id', $unitId)->where('l.student_id', $lesson->student_id)->where('l.teacher_id', $lesson->teacher_id)->where('a.id', '!=', $id)->where('a.status', '!=', 'rejected')->select('a.id', 'l.starts_at', 'a.actual_starts_at')->lockForUpdate()->get();
             foreach ($others as $other) {
-                if (Carbon::parse($other->starts_at, 'UTC')->setTimezone($student->timezone)->toDateString() === $date) {
+                if (Carbon::parse($other->actual_starts_at ?? $other->starts_at, 'UTC')->setTimezone($student->timezone)->toDateString() === $date) {
                     DB::table('erp_duplicate_reviews')->insert(['unit_id' => $unitId, 'attendance_id' => $id, 'other_attendance_id' => $other->id, 'status' => 'pending', 'channel' => 'gallabox', 'created_at' => $now, 'updated_at' => $now]);
                 }
             }
@@ -46,6 +55,7 @@ class Attendance
             $attendance = $this->locked($unitId, $attendanceId);
             if ($attendance->status === 'rejected') $this->fail('attendance', 'Rejected attendance cannot be approved.');
             if (DB::table('erp_duplicate_reviews')->where('unit_id', $unitId)->where('status', 'pending')->where(function ($q) use ($attendanceId) { $q->where('attendance_id', $attendanceId)->orWhere('other_attendance_id', $attendanceId); })->lockForUpdate()->first()) $this->fail('attendance', 'Record the Gallabox teacher reply and resolve the duplicate candidate first.');
+            (new TuitionWorkflows())->assertParentReviewed($attendance);
             $now = now()->format('Y-m-d H:i:s');
             if ($attendance->status !== 'approved') {
                 DB::table('erp_attendance')->where('id', $attendanceId)->where('unit_id', $unitId)->update(['status' => 'approved', 'reviewed_by' => $actorId, 'reviewed_at' => $now, 'updated_at' => $now]);
@@ -149,7 +159,7 @@ class Attendance
             if ($attendance->status === 'rejected') $this->fail('attendance', 'Rejected attendance cannot be corrected into a charge.');
             if ((int) $attendance->actual_minutes === $minutes) return $attendance;
             (new Finance())->reverseAttendance($unitId, $actorId, $attendanceId, $reason);
-            DB::table('erp_attendance')->where('id', $attendanceId)->where('unit_id', $unitId)->update(['actual_minutes' => $minutes, 'status' => 'submitted', 'reviewed_by' => null, 'reviewed_at' => null, 'updated_at' => now()->format('Y-m-d H:i:s')]);
+            DB::table('erp_attendance')->where('id', $attendanceId)->where('unit_id', $unitId)->update(['actual_minutes' => $minutes, 'status' => 'submitted', 'reviewed_by' => null, 'reviewed_at' => null, 'parent_review_status' => 'unshared', 'parent_shared_at' => null, 'parent_deadline_at' => null, 'parent_review_note' => null, 'updated_at' => now()->format('Y-m-d H:i:s')]);
             Audit::record($unitId, $actorId, 'attendance.corrected', 'attendance', $attendanceId, ['old_minutes' => $attendance->actual_minutes, 'actual_minutes' => $minutes, 'reason' => $reason, 'requires_reimport' => true]);
             return DB::table('erp_attendance')->find($attendanceId);
         });

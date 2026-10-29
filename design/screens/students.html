@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Students · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+</head>
+<body data-page="students" data-crumbs="People/Students">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Students &amp; teachers</span>
+      <h1 class="t-title">Students</h1>
+      <p class="muted">248 active · 12 onboarding · ₹1,84,300 outstanding across 41 families.</p>
+    </div>
+    <div class="actions">
+      <button class="btn" data-toast="Student list exported as CSV"><span data-icon="download"></span>Export</button>
+      <button class="btn btn-primary" data-toast="Tip: students are created by converting a lead in Pipeline"><span data-icon="plus"></span>Add student</button>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="toolbar">
+      <div class="input-group"><span data-icon="search"></span><input class="input input-sm" placeholder="Name, code or phone…" aria-label="Search students" /></div>
+      <button class="chip" aria-pressed="true">Active</button>
+      <button class="chip" aria-pressed="false">Onboarding</button>
+      <button class="chip" aria-pressed="false"><span data-icon="wallet"></span>Has balance due</button>
+      <button class="chip" aria-pressed="false"><span data-icon="plus"></span>Grade</button>
+      <button class="chip" aria-pressed="false"><span data-icon="plus"></span>Teacher</button>
+      <span class="spacer"></span>
+      <button class="btn btn-ghost btn-sm" data-action="density" data-tip="Toggle density" data-kbd="D"><span data-icon="rows"></span>Density</button>
+      <button class="btn btn-ghost btn-sm"><span data-icon="sliders"></span>Columns</button>
+    </div>
+    <div class="table-wrap">
+      <table class="table" data-bulk="bulk">
+        <thead><tr>
+          <th class="sel"><label class="check"><input type="checkbox" aria-label="Select all" /></label></th>
+          <th><button class="th-sort" aria-sort="ascending">Student<span data-icon="arrowUp"></span></button></th>
+          <th><button class="th-sort">Grade<span data-icon="arrowUp"></span></button></th>
+          <th>Syllabus</th>
+          <th>Teacher(s)</th>
+          <th class="num"><button class="th-sort">Balance<span data-icon="arrowUp"></span></button></th>
+          <th><button class="th-sort">Status<span data-icon="arrowUp"></span></button></th>
+          <th></th>
+        </tr></thead>
+        <tbody>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Fathima Rahman" /></label></td><td data-v="Fathima Rahman"><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="">FR</span><span class="stack-xs" style="gap:0"><span class="name">Fathima Rahman</span><span class="meta mono">CL-1042</span></span></a></td><td data-v="9">Grade 9</td><td>CBSE</td><td>Rahul K.</td><td class="num" data-v="-12500"><span class="money neg">−₹12,500</span></td><td data-v="Active"><span class="badge success dot">Active</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Aarav Nair" /></label></td><td data-v="Aarav Nair"><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">AN</span><span class="stack-xs" style="gap:0"><span class="name">Aarav Nair</span><span class="meta mono">CL-1031</span></span></a></td><td data-v="7">Grade 7</td><td>ICSE</td><td>Sneha P.</td><td class="num" data-v="4200"><span class="money pos">₹4,200</span></td><td data-v="Active"><span class="badge success dot">Active</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Zainab Ali" /></label></td><td data-v="Zainab Ali"><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">ZA</span><span class="stack-xs" style="gap:0"><span class="name">Zainab Ali</span><span class="meta mono">CL-0987</span></span></a></td><td data-v="11">Grade 11</td><td>State</td><td>Rahul K., Anjali S.</td><td class="num" data-v="0"><span class="money muted">₹0</span></td><td data-v="Active"><span class="badge success dot">Active</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Ibrahim M." /></label></td><td data-v="Ibrahim M."><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">IM</span><span class="stack-xs" style="gap:0"><span class="name">Ibrahim M.</span><span class="meta mono">CL-1008</span></span></a></td><td data-v="5">Grade 5</td><td>CBSE</td><td>Anjali S.</td><td class="num" data-v="-3600"><span class="money neg">−₹3,600</span></td><td data-v="Paused"><span class="badge warning dot">Paused</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Meera Krishnan" /></label></td><td data-v="Meera Krishnan"><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="">MK</span><span class="stack-xs" style="gap:0"><span class="name">Meera Krishnan</span><span class="meta mono">CL-1044</span></span></a></td><td data-v="10">Grade 10</td><td>CBSE</td><td><span class="muted">Unassigned</span></td><td class="num" data-v="0"><span class="money muted">₹0</span></td><td data-v="Onboarding"><span class="badge info dot">Onboarding</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Adwaith Raj" /></label></td><td data-v="Adwaith Raj"><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">AR</span><span class="stack-xs" style="gap:0"><span class="name">Adwaith Raj</span><span class="meta mono">CL-1045</span></span></a></td><td data-v="4">Grade 4</td><td>State</td><td>Divya M.</td><td class="num" data-v="8000"><span class="money pos">₹8,000</span></td><td data-v="Active"><span class="badge success dot">Active</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Hiba Shereef" /></label></td><td data-v="Hiba Shereef"><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">HS</span><span class="stack-xs" style="gap:0"><span class="name">Hiba Shereef</span><span class="meta mono">CL-0954</span></span></a></td><td data-v="12">Grade 12</td><td>CBSE</td><td>Sneha P.</td><td class="num" data-v="-24000"><span class="money neg">−₹24,000</span></td><td data-v="Active"><span class="badge success dot">Active</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select Karthik Unni" /></label></td><td data-v="Karthik Unni"><a class="cell-primary" href="student.html" style="text-decoration:none"><span class="avatar" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">KU</span><span class="stack-xs" style="gap:0"><span class="name">Karthik Unni</span><span class="meta mono">CL-0912</span></span></a></td><td data-v="8">Grade 8</td><td>ICSE</td><td>Rahul K.</td><td class="num" data-v="0"><span class="money muted">₹0</span></td><td data-v="Left"><span class="badge  dot">Left</span></td><td class="num"><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="student.html" aria-label="Open" data-tip="Open"><span data-icon="eye"></span></a><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-foot">
+      <span>Showing <b class="num" style="color:var(--fg-default)">1–8</b> of 260</span>
+      <div class="pagination">
+        <button class="btn btn-ghost btn-icon btn-sm" disabled aria-label="Previous page"><span data-icon="chevronLeft"></span></button>
+        <button class="btn btn-sm" aria-current="page">1</button>
+        <button class="btn btn-ghost btn-sm">2</button>
+        <button class="btn btn-ghost btn-sm">3</button>
+        <span class="subtle">…</span>
+        <button class="btn btn-ghost btn-sm">33</button>
+        <button class="btn btn-ghost btn-icon btn-sm" aria-label="Next page"><span data-icon="chevronRight"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <div class="bulk-bar" id="bulk" role="toolbar" aria-label="Bulk actions">
+    <span class="t-small"><b data-selected-count>0</b> selected</span>
+    <button class="btn btn-sm" data-toast="Payment requests drafted for selected families"><span data-icon="send"></span>Request payment</button>
+    <button class="btn btn-sm" data-toast="Statements queued for sharing"><span data-icon="file"></span>Share statement</button>
+    <button class="btn btn-sm" data-toast="Follow-up tasks created"><span data-icon="inbox"></span>Create follow-up</button>
+    <button class="btn btn-sm btn-icon" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button>
+  </div>
+</main>
+</body>
+</html>

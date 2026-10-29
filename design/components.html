@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Components · ClapsLearn Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="system/tokens.css" />
+  <link rel="stylesheet" href="system/components.css" />
+  <script src="system/app.js" defer></script>
+  <script src="system/charts.js" defer></script>
+  <style>
+    .ds { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    .ds-nav { position: sticky; top: 0; height: 100vh; overflow: auto; padding: var(--s-6) var(--s-4); border-right: 1px solid var(--border-default); background: var(--bg-surface); display: flex; flex-direction: column; gap: 2px; }
+    .ds-nav a { color: var(--fg-muted); padding: 6px var(--s-3); border-radius: var(--r-sm); font: var(--t-sm); }
+    .ds-nav a:hover { background: var(--bg-hover); color: var(--fg-default); text-decoration: none; }
+    .ds-main { padding: var(--s-10) var(--s-10) var(--s-16); max-width: 1180px; display: flex; flex-direction: column; gap: var(--s-12); }
+    .spec { display: flex; flex-direction: column; gap: var(--s-4); scroll-margin-top: var(--s-6); }
+    .spec-head { display: flex; flex-direction: column; gap: var(--s-1); }
+    .stage { padding: var(--s-6); border: 1px solid var(--border-default); border-radius: var(--r-lg); background: var(--bg-surface); display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; }
+    .stage.col { flex-direction: column; align-items: stretch; }
+    .stage.canvas { background: var(--bg-canvas); }
+    .anatomy { font: var(--t-xs); color: var(--fg-muted); display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
+    .anatomy code { font-family: var(--font-mono); color: var(--fg-default); background: var(--bg-sunken); border: 1px solid var(--border-subtle); padding: 1px 6px; border-radius: var(--r-xs); }
+    .state-label { font: var(--t-xs); color: var(--fg-subtle); width: 100%; margin-top: calc(var(--s-2) * -1); }
+    @media (max-width: 900px) { .ds { grid-template-columns: 1fr; } .ds-nav { display: none; } .ds-main { padding: var(--s-6) var(--s-4); } }
+  </style>
+</head>
+<body data-shell="none">
+<div class="ds">
+  <nav class="ds-nav" aria-label="Components">
+    <a href="index.html" class="strong" style="color:var(--fg-default)">← ClapsLearn DS</a>
+    <div class="t-overline" style="padding:var(--s-4) var(--s-3) var(--s-2)">Primitives</div>
+    <a href="#button">Button</a><a href="#inputs">Inputs</a><a href="#selection">Selection</a><a href="#badge">Badge &amp; status</a><a href="#avatar">Avatar</a><a href="#progress">Progress</a>
+    <div class="t-overline" style="padding:var(--s-4) var(--s-3) var(--s-2)">Composites</div>
+    <a href="#card">Card &amp; KPI</a><a href="#table">Data table</a><a href="#list">List</a><a href="#tabs">Tabs &amp; stepper</a><a href="#feedback">Feedback</a><a href="#charts">Charts</a><a href="#overlays">Overlays</a>
+    <div class="t-overline" style="padding:var(--s-4) var(--s-3) var(--s-2)">Domain</div>
+    <a href="#attendance">Attendance marker</a><a href="#money">Money</a><a href="#kanban">Kanban</a><a href="#timeline">Timeline</a><a href="#timetable">Timetable event</a>
+  </nav>
+
+  <main class="ds-main">
+    <header class="stack-sm">
+      <span class="t-overline">ClapsLearn ERP · Design system v2</span>
+      <h1 class="t-display">Components</h1>
+      <p class="muted t-md" style="max-width:62ch">Every component is shown in each of its states. Hover, press, focus with <span class="kbd">Tab</span>, and toggle <button class="btn btn-sm" data-action="theme" style="vertical-align:middle">theme</button> or press <span class="kbd">D</span> for density.</p>
+    </header>
+
+    <!-- ============ Button ============ -->
+    <section class="spec" id="button">
+      <div class="spec-head"><h2 class="t-heading">Button</h2><p class="muted">One primary action per view. Destructive actions are confirmed in a dialog, never inline.</p></div>
+      <div class="stage">
+        <button class="btn btn-primary"><span data-icon="plus"></span>Primary</button>
+        <button class="btn">Secondary</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-danger">Danger</button>
+        <button class="btn btn-link">Link</button>
+        <button class="btn btn-icon" aria-label="More" data-tip="More actions"><span data-icon="more"></span></button>
+        <span class="state-label">Variants</span>
+      </div>
+      <div class="stage">
+        <button class="btn btn-primary btn-sm">Small · 32</button>
+        <button class="btn btn-primary">Medium · 36</button>
+        <button class="btn btn-primary btn-lg">Large · 44</button>
+        <button class="btn btn-primary" disabled>Disabled</button>
+        <button class="btn btn-primary" data-async data-done="Saved" data-toast="Changes saved">Click: async → success</button>
+        <div class="btn-group"><button class="btn">Day</button><button class="btn">Week</button><button class="btn">Month</button></div>
+        <span class="state-label">Sizes &amp; states — press scales to .98, async shows spinner then a success confirmation</span>
+      </div>
+      <div class="anatomy"><span><code>height</code> 32 / 36 / 44</span><span><code>padding-x</code> 12 / 16 / 20</span><span><code>gap</code> 8</span><span><code>radius</code> 8</span><span><code>icon</code> 18</span><span><code>press</code> scale .98 · 80ms</span></div>
+    </section>
+
+    <!-- ============ Inputs ============ -->
+    <section class="spec" id="inputs">
+      <div class="spec-head"><h2 class="t-heading">Inputs</h2><p class="muted">Labels sit above, hints below, both 6px from the control. Two-column grids collapse to one under 640px.</p></div>
+      <div class="stage col">
+        <div class="form-grid">
+          <div class="field"><label class="field-label">Student name</label><input class="input" placeholder="e.g. Fathima Rahman" /></div>
+          <div class="field"><label class="field-label">Syllabus</label><select class="select"><option>CBSE</option><option>ICSE</option></select></div>
+          <div class="field"><label class="field-label">Amount</label><div class="input-group"><span class="affix">₹</span><input class="input num" value="12,500" /></div><span class="field-hint">Shown in INR · stored in paise</span></div>
+          <div class="field"><label class="field-label">Search</label><div class="input-group"><span data-icon="search"></span><input class="input" placeholder="Name, code or phone" /></div></div>
+          <div class="field" data-invalid="true"><label class="field-label">Parent phone</label><div class="input-group"><span class="affix">+91</span><input class="input" value="98470" /></div><span class="field-hint">Enter a 10-digit mobile number.</span></div>
+          <div class="field"><label class="field-label">Disabled</label><input class="input" value="CL-1042" disabled /></div>
+          <div class="field full"><label class="field-label">Notes <span class="opt">Optional</span></label><textarea class="textarea" placeholder="Anything the teacher should know"></textarea></div>
+        </div>
+      </div>
+      <div class="anatomy"><span><code>height</code> 36</span><span><code>label→control</code> 6</span><span><code>field→field</code> --gap-stack (16)</span><span><code>focus</code> accent border + 3px 18% halo</span><span><code>error</code> hint shakes once</span></div>
+    </section>
+
+    <!-- ============ Selection ============ -->
+    <section class="spec" id="selection">
+      <div class="spec-head"><h2 class="t-heading">Selection controls</h2><p class="muted">Use a switch for settings that apply immediately, a checkbox when the change is submitted with a form, and a segmented control to switch views.</p></div>
+      <div class="stage">
+        <label class="check"><input type="checkbox" checked /><span>Checked</span></label>
+        <label class="check"><input type="checkbox" /><span>Unchecked</span></label>
+        <label class="check"><input type="checkbox" id="indet" /><span>Indeterminate</span></label>
+        <label class="check"><input type="radio" name="r" checked /><span>Radio</span></label>
+        <label class="check"><input type="radio" name="r" /><span>Radio</span></label>
+        <label class="switch"><input type="checkbox" checked /><span>Switch on</span></label>
+        <label class="switch"><input type="checkbox" /><span>Switch off</span></label>
+      </div>
+      <div class="stage">
+        <div class="segmented" role="group" aria-label="View"><button aria-pressed="true"><span data-icon="grid" class="icon-sm"></span>Board</button><button aria-pressed="false"><span data-icon="rows" class="icon-sm"></span>List</button><button aria-pressed="false"><span data-icon="calendar" class="icon-sm"></span>Calendar</button></div>
+        <button class="chip" aria-pressed="true"><span data-icon="flame"></span>Hot</button>
+        <button class="chip" aria-pressed="false"><span data-icon="clock"></span>Overdue</button>
+        <button class="chip" aria-pressed="false"><span data-icon="plus"></span>Add filter</button>
+        <span class="state-label">The segmented thumb slides between options; filter chips turn from dashed to solid when they’re on</span>
+      </div>
+    </section>
+
+    <!-- ============ Badge ============ -->
+    <section class="spec" id="badge">
+      <div class="spec-head"><h2 class="t-heading">Badge &amp; status</h2><p class="muted">Each status string maps to one tone, and the mapping is fixed across modules so colour carries meaning.</p></div>
+      <div class="stage">
+        <span class="badge">Scheduled</span>
+        <span class="badge success dot">Completed</span>
+        <span class="badge info dot live">In progress</span>
+        <span class="badge warning dot">Rescheduled</span>
+        <span class="badge danger dot">Cancelled</span>
+        <span class="badge special dot">Demo</span>
+        <span class="count">12</span><span class="count accent">7</span>
+        <span class="kbd">⌘</span><span class="kbd">K</span>
+      </div>
+      <table class="table card" style="overflow:hidden">
+        <thead><tr><th>Tone</th><th>Lessons</th><th>Leads</th><th>Attendance</th><th>Money</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge success dot">success</span></td><td>completed</td><td>Registered</td><td>approved</td><td>Paid</td></tr>
+          <tr><td><span class="badge info dot">info</span></td><td>in progress</td><td>Contacted</td><td>submitted</td><td>Sent</td></tr>
+          <tr><td><span class="badge warning dot">warning</span></td><td>rescheduled</td><td>Overdue follow-up</td><td>duplicate</td><td>Partially paid</td></tr>
+          <tr><td><span class="badge danger dot">danger</span></td><td>cancelled</td><td>Lost</td><td>rejected</td><td>Reversed</td></tr>
+          <tr><td><span class="badge special dot">special</span></td><td>demo</td><td>Demo scheduled</td><td>—</td><td>—</td></tr>
+          <tr><td><span class="badge">neutral</span></td><td>scheduled</td><td>New</td><td>—</td><td>Draft</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ Avatar ============ -->
+    <section class="spec" id="avatar">
+      <div class="spec-head"><h2 class="t-heading">Avatar</h2><p class="muted">Initials sit on a deterministic tint. A presence dot is shown for staff only, never for students.</p></div>
+      <div class="stage">
+        <span class="avatar sm">FR</span><span class="avatar">AN</span><span class="avatar lg" data-presence="online" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">RK</span><span class="avatar xl" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">ZA</span>
+        <span class="avatar" data-presence="busy" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">SP</span>
+        <div class="avatar-stack"><span class="avatar sm">FR</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">AN</span><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">ZA</span><span class="avatar sm" style="--av-bg:var(--n-100);--av-fg:var(--n-600)">+4</span></div>
+        <span class="state-label">The stack fans out on hover</span>
+      </div>
+    </section>
+
+    <!-- ============ Progress ============ -->
+    <section class="spec" id="progress">
+      <div class="spec-head"><h2 class="t-heading">Progress, ring &amp; skeleton</h2></div>
+      <div class="stage">
+        <div class="stack-sm" style="width:240px"><div class="progress"><span style="width:72%"></span></div><div class="progress warning"><span style="width:45%"></span></div><div class="progress danger"><span style="width:18%"></span></div></div>
+        <div class="ring" style="--p:72" data-label="72%"></div>
+        <div class="ring" style="--p:30;--ring-size:56px" data-label="3/10"></div>
+        <div class="stack-sm" style="width:260px"><div class="skeleton" style="width:60%;height:16px"></div><div class="skeleton" style="height:12px"></div><div class="skeleton" style="width:80%;height:12px"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ Card ============ -->
+    <section class="spec" id="card">
+      <div class="spec-head"><h2 class="t-heading">Card &amp; KPI</h2><p class="muted">Cards share one padding token (<code class="mono">--pad-card</code>), so headers, bodies and table edges align vertically across a grid.</p></div>
+      <div class="stage canvas">
+        <div class="grid" style="width:100%">
+          <article class="card span-4 kpi"><div class="kpi-top"><span class="kpi-icon"><span data-icon="grad"></span></span>Active students</div><div class="kpi-value" data-count="248">0</div><div class="kpi-foot"><span class="row-sm"><span class="delta up">↑ 12</span>vs last month</span><svg class="spark" viewBox="0 0 88 28"><path class="area" d="M0 22 L15 18 L30 20 L45 12 L60 14 L75 6 L88 4 L88 28 L0 28Z"/><path d="M0 22 L15 18 L30 20 L45 12 L60 14 L75 6 L88 4"/></svg></div></article>
+          <article class="card span-4 kpi"><div class="kpi-top"><span class="kpi-icon" style="background:var(--danger-subtle);color:var(--danger-fg)"><span data-icon="wallet"></span></span>Outstanding</div><div class="kpi-value" data-count="138450" data-prefix="₹">₹0</div><div class="kpi-foot"><span class="row-sm"><span class="delta down">↑ 4.2%</span>vs Sep</span><span>31 students</span></div></article>
+          <a class="card span-4 card-interactive" href="#card" style="color:inherit;text-decoration:none"><div class="card-head"><span class="t-subhead">Interactive card</span><span data-icon="arrowRight" class="icon-sm"></span></div><div class="card-body muted t-small">Lifts 2px on hover with a deeper shadow, and settles back when pressed.</div></a>
+          <article class="card span-12"><div class="card-head"><h3 class="t-subhead">Card with header action</h3><button class="btn btn-ghost btn-sm">View all<span data-icon="arrowRight"></span></button></div><div class="card-body muted t-small">The ghost button is pulled 8px into the gutter so its label, not its hit area, lines up with the card padding.</div><div class="card-foot"><span class="t-caption grow">Updated 2m ago</span><button class="btn btn-sm">Cancel</button><button class="btn btn-primary btn-sm">Save</button></div></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Table ============ -->
+    <section class="spec" id="table">
+      <div class="spec-head"><h2 class="t-heading">Data table</h2><p class="muted">Sticky header, sortable columns, selectable rows with a floating bulk bar, row actions that appear on hover or focus, and right-aligned tabular numbers.</p></div>
+      <div class="card">
+        <div class="toolbar">
+          <div class="input-group"><span data-icon="search"></span><input class="input input-sm" placeholder="Search students" /></div>
+          <button class="chip" aria-pressed="true">Active</button><button class="chip" aria-pressed="false"><span data-icon="plus"></span>Grade</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm"><span data-icon="download"></span>Export</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table" data-bulk="ds-bulk">
+            <thead><tr><th class="sel"><label class="check"><input type="checkbox" aria-label="Select all" /></label></th><th><button class="th-sort" aria-sort="ascending">Student<span data-icon="arrowUp"></span></button></th><th><button class="th-sort">Grade<span data-icon="arrowUp"></span></button></th><th>Teacher</th><th class="num"><button class="th-sort">Balance<span data-icon="arrowUp"></span></button></th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td data-v="Aarav"><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">AN</span><div><div class="name">Aarav Nair</div><div class="meta mono">CL-1031</div></div></div></td><td data-v="7">Grade 7 · ICSE</td><td>Sneha P.</td><td class="num" data-v="0"><span class="money"><span class="cur">₹</span>0</span></td><td><span class="badge success dot">Active</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+              <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td data-v="Fathima"><div class="cell-primary"><span class="avatar sm">FR</span><div><div class="name">Fathima Rahman</div><div class="meta mono">CL-1042</div></div></div></td><td data-v="9">Grade 9 · CBSE</td><td>Rahul K.</td><td class="num" data-v="-4500"><span class="money neg">−<span class="cur">₹</span>4,500</span></td><td><span class="badge warning dot">Due</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+              <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td data-v="Zainab"><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">ZA</span><div><div class="name">Zainab Ali</div><div class="meta mono">CL-0987</div></div></div></td><td data-v="11">Grade 11 · State</td><td>Rahul K., Anjali S.</td><td class="num" data-v="2000"><span class="money pos">+<span class="cur">₹</span>2,000</span></td><td><span class="badge success dot">Active</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-foot"><span>1–3 of 248</span><div class="pagination"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Previous" disabled><span data-icon="chevronLeft"></span></button><button class="btn btn-sm">1</button><button class="btn btn-ghost btn-sm">2</button><button class="btn btn-ghost btn-sm">3</button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Next"><span data-icon="chevronRight"></span></button></div></div>
+      </div>
+      <div class="bulk-bar" id="ds-bulk"><span class="t-small"><b data-selected-count>0</b> selected</span><button class="btn btn-sm" data-toast="Payment request drafted"><span data-icon="send"></span>Request payment</button><button class="btn btn-sm" data-toast="Exported"><span data-icon="download"></span>Export</button></div>
+      <div class="anatomy"><span><code>header</code> 36</span><span><code>row</code> 52 / 40 compact</span><span><code>cell-x</code> 12 · first/last = --pad-card</span><span><code>numbers</code> right + tabular</span><span><code>sort icon</code> rotates 180°</span></div>
+    </section>
+
+    <!-- ============ List ============ -->
+    <section class="spec" id="list">
+      <div class="spec-head"><h2 class="t-heading">List</h2><p class="muted">Use a list for stacked rows that don’t need table columns. The chevron nudges 2px on hover to hint that the row navigates.</p></div>
+      <div class="card" style="max-width:480px">
+        <div class="list">
+          <a class="list-item" href="#list"><span class="tl-dot warning"><span data-icon="alert"></span></span><span class="grow"><span class="t-small strong" style="display:block">Review 3 duplicate attendance</span><span class="t-caption">Super · current month</span></span><span data-icon="chevronRight" class="chev"></span></a>
+          <a class="list-item" href="#list"><span class="tl-dot info"><span data-icon="phone"></span></span><span class="grow"><span class="t-small strong" style="display:block">Call back Arjun Menon</span><span class="t-caption">Hot lead · overdue 2h</span></span><span data-icon="chevronRight" class="chev"></span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Tabs & stepper ============ -->
+    <section class="spec" id="tabs">
+      <div class="spec-head"><h2 class="t-heading">Tabs &amp; stepper</h2></div>
+      <div class="stage col">
+        <div class="tabs" role="tablist"><button role="tab" aria-selected="true" aria-controls="p1">Overview</button><button role="tab" aria-selected="false" aria-controls="p2">Timetable <span class="count">4</span></button><button role="tab" aria-selected="false" aria-controls="p3">Money</button><button role="tab" aria-selected="false" aria-controls="p4">Follow-ups</button></div>
+        <div id="p1" class="tab-panel muted t-small">The underline slides and resizes to the selected tab, and the panel fades in.</div>
+        <div id="p2" class="tab-panel muted t-small" hidden>Timetable panel</div>
+        <div id="p3" class="tab-panel muted t-small" hidden>Money panel</div>
+        <div id="p4" class="tab-panel muted t-small" hidden>Follow-ups panel</div>
+        <div class="stepper"><span class="step" data-state="done">Prepare source</span><span class="step-line" data-state="done"></span><span class="step" data-state="current">Preview</span><span class="step-line"></span><span class="step">Approve snapshot</span></div>
+      </div>
+    </section>
+
+    <!-- ============ Feedback ============ -->
+    <section class="spec" id="feedback">
+      <div class="spec-head"><h2 class="t-heading">Feedback</h2><p class="muted">Toasts confirm what just happened and offer an undo; callouts explain the state of the page; empty states give the next step.</p></div>
+      <div class="stage">
+        <button class="btn" data-toast="Receipt CL-2291 recorded">Show toast</button>
+        <button class="btn" data-toast="Lesson cancelled without charge" data-undo>Toast with undo</button>
+      </div>
+      <div class="stage col">
+        <div class="callout"><span data-icon="info"></span><div>Sheets are the <strong>temporary source of truth</strong> until the migration snapshot is approved.</div></div>
+        <div class="callout warning"><span data-icon="alert"></span><div>3 lessons overlap Rahul K.’s unavailability on Friday.</div></div>
+        <div class="callout danger"><span data-icon="alert"></span><div><strong>There is a problem.</strong> Amount must be greater than ₹0.</div></div>
+        <div class="callout success"><span data-icon="checkCircle"></span><div>Snapshot approved · 1,204 records imported.</div></div>
+      </div>
+      <div class="card"><div class="empty"><svg class="illo" viewBox="0 0 160 112" aria-hidden="true"><ellipse class="a" cx="80" cy="100" rx="64" ry="8"/><rect class="b" x="28" y="22" width="104" height="72" rx="12"/><g class="float"><rect class="c" x="40" y="12" width="80" height="60" rx="8"/><rect class="f" x="50" y="24" width="36" height="6" rx="3"/><rect class="f" x="50" y="36" width="56" height="5" rx="2.5"/><rect class="f" x="50" y="46" width="44" height="5" rx="2.5"/><circle class="d" cx="104" cy="58" r="11"/><path d="m99 58 3.5 3.5 6.5-7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g><path class="e" d="M18 40c4-6 10-6 14 0M136 30c3-5 8-5 11 0"/></svg><div class="t-subhead">You’re all caught up</div><p class="t-small">No follow-ups are due. New tasks appear here as soon as they’re assigned to you.</p><div class="row"><button class="btn btn-primary btn-sm"><span data-icon="plus"></span>Create follow-up</button></div></div></div>
+    </section>
+
+    <!-- ============ Overlays ============ -->
+    <section class="spec" id="overlays">
+      <div class="spec-head"><h2 class="t-heading">Overlays</h2><p class="muted">Use a dialog to confirm, a drawer to edit a record without losing your place in the list, a menu for secondary actions, and ⌘K to jump anywhere.</p></div>
+      <div class="stage">
+        <button class="btn" data-action="confirm-delete">Dialog</button>
+        <button class="btn" data-open="tpl-drawer" data-kind="drawer">Drawer</button>
+        <button class="btn" data-menu="row-menu">Menu<span data-icon="chevronDown"></span></button>
+        <button class="btn" data-action="cmdk"><span data-icon="search"></span>Command palette <span class="kbd">⌘K</span></button>
+        <button class="btn" data-tip="Tooltips wait 400ms, then show instantly" data-kbd="?">Tooltip</button>
+      </div>
+      <div class="anatomy"><span><code>dialog</code> pops in with a spring · 280ms</span><span><code>drawer</code> slides in · 280ms, out · 200ms</span><span><code>menu</code> scales from its origin .96 → 1</span><span><code>focus</code> returns to the trigger on close</span></div>
+    </section>
+
+    <section class="spec" id="charts">
+      <div class="spec-head"><h2 class="t-heading">Charts</h2><p class="muted">2px lines, a ~10% area wash, 2px surface gaps between donut segments and heatmap cells, and solid hairline grids. Every chart has a hover/keyboard tooltip and a hidden data table. The categorical order (green, blue, orange, violet) is validated for colour-vision deficiency in both themes.</p></div>
+      <div class="grid">
+        <div class="card span-8 card-body"><div data-chart="area" data-format="inr" data-axis-format="inrCompact" data-height="200" aria-label="Monthly collections" data-series='[{"l":"May","v":320000},{"l":"Jun","v":460000},{"l":"Jul","v":500000},{"l":"Aug","v":470000},{"l":"Sep","v":445000},{"l":"Oct","v":482300}]'></div></div>
+        <div class="card span-4 card-body"><div style="display:flex;flex-direction:column;align-items:center;gap:var(--s-4)" data-chart="donut" data-size="140" data-center-label="students" aria-label="Students by syllabus" data-series='[{"l":"CBSE","v":112},{"l":"State board","v":61},{"l":"ICSE","v":54},{"l":"Other","v":21}]'></div></div>
+        <div class="card span-12 card-body"><div data-chart="heatmap" aria-label="Lessons by hour" data-series='{"rows":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"cols":["08","09","10","11","12","13","14","15","16","17","18","19","20"],"values":[[2,2,4,0,0,3,1,6,12,12,18,11,4],[0,4,4,0,1,0,5,7,8,16,14,11,8],[0,5,5,3,0,0,1,8,9,14,17,11,8],[0,5,3,4,1,0,5,8,9,14,14,14,4],[4,1,5,1,3,3,4,6,11,16,17,12,6],[7,11,12,9,9,4,7,8,8,7,4,4,0],[3,10,10,6,3,0,2,3,0,0,2,2,0]]}'></div></div>
+      </div>
+    </section>
+
+    <!-- ============ Domain ============ -->
+    <section class="spec" id="attendance">
+      <div class="spec-head"><h2 class="t-heading">Attendance marker</h2><p class="muted">One tap marks attendance, saved optimistically. The selected state bumps, and a toast offers undo for 3 seconds.</p></div>
+      <div class="stage">
+        <div class="row-lg" data-student="Fathima Rahman"><span class="t-small strong" style="width:140px">Fathima Rahman</span><div class="att" role="group" aria-label="Attendance"><button data-v="P" aria-pressed="true">P</button><button data-v="A" aria-pressed="false">A</button><button data-v="L" aria-pressed="false">L</button></div></div>
+        <div class="row-lg" data-student="Aarav Nair"><span class="t-small strong" style="width:140px">Aarav Nair</span><div class="att" role="group" aria-label="Attendance"><button data-v="P" aria-pressed="false">P</button><button data-v="A" aria-pressed="false">A</button><button data-v="L" aria-pressed="false">L</button></div></div>
+      </div>
+    </section>
+
+    <section class="spec" id="money">
+      <div class="spec-head"><h2 class="t-heading">Money</h2><p class="muted">Indian digit grouping (₹1,23,456), tabular figures, and a muted currency symbol. Sign and colour together mark direction; colour is never the only cue.</p></div>
+      <div class="stage">
+        <span class="t-title money"><span class="cur">₹</span>4,82,300</span>
+        <span class="money pos">+<span class="cur">₹</span>12,500.00</span>
+        <span class="money neg">−<span class="cur">₹</span>4,500.00</span>
+        <span class="money"><span class="cur">₹</span>48.2L</span>
+      </div>
+    </section>
+
+    <section class="spec" id="kanban">
+      <div class="spec-head"><h2 class="t-heading">Kanban</h2><p class="muted">Drag a card: the ghost tilts 2.5°, the target lane highlights, the card springs in on drop, and a toast offers undo.</p></div>
+      <div class="board" style="grid-auto-columns:minmax(240px,1fr)">
+        <div class="lane" style="--lane-color:var(--n-400)"><div class="lane-head"><span class="lane-dot"></span><span class="t-small">New</span><span class="count">2</span></div>
+          <div class="deal"><div class="row between"><span class="deal-title">Arjun Menon</span><span data-icon="flame" class="icon-sm" style="color:var(--danger)"></span></div><div class="deal-meta"><span>G10 · Maths</span><span>·</span><span>Instagram</span></div><div class="row between"><span class="badge warning">Today 4pm</span><span class="avatar sm">NS</span></div></div>
+          <div class="deal"><div class="row between"><span class="deal-title">Diya Thomas</span></div><div class="deal-meta"><span>G6 · English</span><span>·</span><span>Referral</span></div><div class="row between"><span class="badge">Tomorrow</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span></div></div>
+        </div>
+        <div class="lane" style="--lane-color:var(--info)"><div class="lane-head"><span class="lane-dot"></span><span class="t-small">Contacted</span><span class="count">1</span></div>
+          <div class="deal"><div class="row between"><span class="deal-title">Rehan Basheer</span></div><div class="deal-meta"><span>G8 · Science</span><span>·</span><span>Google</span></div><div class="row between"><span class="badge danger">Overdue 1d</span><span class="avatar sm">NS</span></div></div>
+        </div>
+        <div class="lane" style="--lane-color:var(--special)"><div class="lane-head"><span class="lane-dot"></span><span class="t-small">Demo scheduled</span><span class="count">0</span></div></div>
+      </div>
+    </section>
+
+    <section class="spec" id="timeline">
+      <div class="spec-head"><h2 class="t-heading">Timeline</h2></div>
+      <div class="stage col">
+        <div class="timeline">
+          <div class="tl-item"><span class="tl-dot success"><span data-icon="wallet"></span></span><div class="tl-body"><b>Shahana</b> recorded <b>₹12,500</b> · CL-2291<div class="t-caption">22 minutes ago</div></div></div>
+          <div class="tl-item"><span class="tl-dot info"><span data-icon="phone"></span></span><div class="tl-body">Follow-up call · <i>Interested, wants evening slot</i><div class="t-caption">Yesterday · by Nihal</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><span data-icon="plus"></span></span><div class="tl-body">Enquiry created from Instagram<div class="t-caption">12 Oct</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="spec" id="timetable">
+      <div class="spec-head"><h2 class="t-heading">Timetable event</h2><p class="muted">Bar colour shows the lesson type; strikethrough marks a cancellation. Events lift on hover.</p></div>
+      <div class="stage" style="position:relative;align-items:stretch">
+        <div style="position:relative;width:180px;height:64px"><div class="tt-event" style="top:0;height:64px"><b>Fathima R.</b>Maths · Rahul K.<span>09:00–10:00</span></div></div>
+        <div style="position:relative;width:180px;height:64px"><div class="tt-event special" style="top:0;height:64px"><b>Meera K. · Demo</b>Maths · Sneha P.<span>17:00–17:45</span></div></div>
+        <div style="position:relative;width:180px;height:64px"><div class="tt-event warning" style="top:0;height:64px"><b>Ibrahim M.</b>Moved from Wed<span>15:30–16:30</span></div></div>
+        <div style="position:relative;width:180px;height:64px"><div class="tt-event cancelled" style="top:0;height:64px"><b>Zainab A.</b>Chemistry<span>12:00–13:00</span></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<template id="tpl-drawer">
+  <div class="drawer" role="dialog" aria-label="Edit student">
+    <div class="drawer-head"><span class="avatar">FR</span><div class="grow stack-xs" style="gap:0"><span class="t-subhead">Fathima Rahman</span><span class="t-caption mono">CL-1042</span></div><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field full"><label class="field-label">Name</label><input class="input" value="Fathima Rahman" /></div>
+        <div class="field"><label class="field-label">Grade</label><select class="select"><option>Grade 9</option></select></div>
+        <div class="field"><label class="field-label">Hourly rate</label><div class="input-group"><span class="affix">₹</span><input class="input num" value="450" /></div></div>
+      </div>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-toast="Student updated">Save changes</button></div>
+  </div>
+</template>
+<script>document.addEventListener('app-ready', () => { document.getElementById('indet').indeterminate = true; });</script>
+</body>
+</html>

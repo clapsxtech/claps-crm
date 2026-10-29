@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My tasks · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    /* Completed rows strike through, then collapse via the 1fr → 0fr grid-row trick (no height measuring) */
+    .task { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--d-slow) var(--ease-standard), opacity var(--d-base) var(--ease-standard); }
+    .task > .task-inner { min-height: 0; overflow: hidden; }
+    .task.gone { grid-template-rows: 0fr; opacity: 0; }
+    .task-row { display: flex; align-items: flex-start; gap: var(--s-3); padding: var(--s-3) var(--pad-card); border-top: 1px solid var(--border-subtle); transition: background var(--d-fast); }
+    .task:first-child .task-row { border-top: 0; }
+    .task-row:hover { background: var(--bg-hover); }
+    .task-row .check input { margin-top: 2px; }
+    .task-title { font-weight: var(--w-medium); transition: color var(--d-base); background: linear-gradient(currentColor, currentColor) 0 55% / 0 1px no-repeat; }
+    .task.done .task-title { color: var(--fg-subtle); background-size: 100% 1px; transition: background-size var(--d-slow) var(--ease-standard), color var(--d-base); }
+    .task-side { display: flex; align-items: center; gap: var(--s-2); flex: none; }
+    .due { display: inline-flex; align-items: center; gap: var(--s-1); height: 22px; padding: 0 var(--s-2); border-radius: var(--r-full); font: var(--t-xs); font-weight: var(--w-medium); background: var(--n-100); color: var(--fg-muted); }
+    .due.overdue { background: var(--danger-subtle); color: var(--danger-fg); }
+    .due.today { background: var(--warning-subtle); color: var(--warning-fg); }
+    .due .icon { width: 12px; height: 12px; }
+    .checklist summary { list-style: none; display: inline-flex; align-items: center; gap: var(--s-1); font: var(--t-xs); color: var(--fg-muted); cursor: pointer; margin-top: var(--s-1); }
+    .checklist summary::-webkit-details-marker { display: none; }
+    .checklist summary .icon { width: 14px; height: 14px; transition: transform var(--d-base) var(--ease-standard); }
+    .checklist[open] summary .icon { transform: rotate(90deg); }
+    .checklist ul { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-2); animation: rise var(--d-base) var(--ease-enter); }
+    .checklist li .check { font: var(--t-sm); }
+    .checklist li input:checked + span { color: var(--fg-subtle); text-decoration: line-through; }
+    .group-head { display: flex; align-items: center; gap: var(--s-2); }
+    .summary-ring { display: flex; align-items: center; gap: var(--s-5); }
+    @media (max-width: 640px) { .task-row { flex-wrap: wrap; } .task-side { width: 100%; padding-left: var(--s-6); } }
+  </style>
+</head>
+<body data-page="tasks" data-crumbs="My tasks">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Assigned to you</span>
+      <h1 class="t-title">My tasks</h1>
+      <p class="muted">Ordered by priority: current month first, then older months.</p>
+    </div>
+    <div class="actions">
+      <div class="segmented" role="group" aria-label="Filter"><button aria-pressed="true">Open</button><button aria-pressed="false">Completed</button></div>
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="span-8 stack-lg">
+      <!-- Super -->
+      <article class="card">
+        <div class="card-head group-head"><span class="badge danger dot">Super</span><h2 class="t-subhead">Current month</h2><span class="count">3</span></div>
+        <div class="list" style="margin-top:var(--s-3)">
+          <div class="task"><div class="task-inner"><div class="task-row">
+            <label class="check"><input type="checkbox" aria-label="Complete task" /></label>
+            <div class="grow stack-xs"><span class="task-title">Review 3 duplicate attendance entries</span><span class="t-caption">Attendance · Aarav Nair, Riya Thomas</span></div>
+            <div class="task-side"><span class="due today"><span data-icon="clock"></span>Today</span><span class="avatar sm">AA</span></div>
+          </div></div></div>
+          <div class="task"><div class="task-inner"><div class="task-row">
+            <label class="check"><input type="checkbox" aria-label="Complete task" /></label>
+            <div class="grow stack-xs"><span class="task-title">Collect October fees · Fathima Rahman</span><span class="t-caption">Balance <span class="money">₹6,500</span> · payment request sent 21 Oct</span>
+              <details class="checklist"><summary><span data-icon="chevronRight"></span>Checklist · 1 of 3</summary>
+                <ul>
+                  <li><label class="check"><input type="checkbox" checked /><span>Send payment request link</span></label></li>
+                  <li><label class="check"><input type="checkbox" /><span>Follow up on WhatsApp</span></label></li>
+                  <li><label class="check"><input type="checkbox" /><span>Record receipt</span></label></li>
+                </ul>
+              </details>
+            </div>
+            <div class="task-side"><span class="due overdue"><span data-icon="alert"></span>2d overdue</span><span class="avatar sm">AA</span></div>
+          </div></div></div>
+          <div class="task"><div class="task-inner"><div class="task-row">
+            <label class="check"><input type="checkbox" aria-label="Complete task" /></label>
+            <div class="grow stack-xs"><span class="task-title">Find a new Friday slot for Zainab Ali &amp; Riya Thomas</span><span class="t-caption">Timetable · Rahul K. unavailable 14:00–18:00</span></div>
+            <div class="task-side"><span class="due"><span data-icon="calendar"></span>Fri 30</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span></div>
+          </div></div></div>
+        </div>
+      </article>
+
+      <!-- High -->
+      <article class="card">
+        <div class="card-head group-head"><span class="badge warning dot">High</span><h2 class="t-subhead">Previous month</h2><span class="count">2</span></div>
+        <div class="list" style="margin-top:var(--s-3)">
+          <div class="task"><div class="task-inner"><div class="task-row">
+            <label class="check"><input type="checkbox" aria-label="Complete task" /></label>
+            <div class="grow stack-xs"><span class="task-title">Share September statement with 4 parents</span><span class="t-caption">Parent statements · objection window 7 days</span>
+              <details class="checklist"><summary><span data-icon="chevronRight"></span>Checklist · 2 of 4</summary>
+                <ul>
+                  <li><label class="check"><input type="checkbox" checked /><span>Aarav Nair</span></label></li>
+                  <li><label class="check"><input type="checkbox" checked /><span>Ibrahim M.</span></label></li>
+                  <li><label class="check"><input type="checkbox" /><span>Meera Krishnan</span></label></li>
+                  <li><label class="check"><input type="checkbox" /><span>Nihal S.</span></label></li>
+                </ul>
+              </details>
+            </div>
+            <div class="task-side"><span class="due overdue"><span data-icon="alert"></span>29 Sep</span><span class="avatar sm">AA</span></div>
+          </div></div></div>
+          <div class="task"><div class="task-inner"><div class="task-row">
+            <label class="check"><input type="checkbox" aria-label="Complete task" /></label>
+            <div class="grow stack-xs"><span class="task-title">Schedule makeup time · 142 minutes across 5 classes</span><span class="t-caption">Shortened classes to check for makeup time</span></div>
+            <div class="task-side"><span class="due"><span data-icon="calendar"></span>No date</span><span class="avatar sm">AA</span></div>
+          </div></div></div>
+        </div>
+      </article>
+
+      <!-- Medium -->
+      <article class="card">
+        <div class="card-head group-head"><span class="badge dot">Medium</span><h2 class="t-subhead">All older</h2><span class="count">2</span></div>
+        <div class="list" style="margin-top:var(--s-3)">
+          <div class="task"><div class="task-inner"><div class="task-row">
+            <label class="check"><input type="checkbox" aria-label="Complete task" /></label>
+            <div class="grow stack-xs"><span class="task-title">Resolve teacher identity · two profiles for “Anjali S.”</span><span class="t-caption">Teacher recruitment · REVIEW</span></div>
+            <div class="task-side"><span class="due"><span data-icon="calendar"></span>Aug</span><span class="avatar sm">AA</span></div>
+          </div></div></div>
+          <div class="task"><div class="task-inner"><div class="task-row">
+            <label class="check"><input type="checkbox" aria-label="Complete task" /></label>
+            <div class="grow stack-xs"><span class="task-title">Reconcile opening balances from Sheets import</span><span class="t-caption">Migration &amp; exports · 3 records differ</span></div>
+            <div class="task-side"><span class="due"><span data-icon="calendar"></span>Jul</span><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">NH</span></div>
+          </div></div></div>
+        </div>
+      </article>
+    </div>
+
+    <aside class="span-4 stack-lg">
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">This month</h2></div>
+        <div class="card-body stack">
+          <div class="summary-ring">
+            <span class="ring" id="ring" style="--p:58;--ring-size:72px" data-label="58%"></span>
+            <div class="stack-xs"><span class="t-heading num"><span id="done-n">11</span> of <span id="total-n">19</span> done</span><span class="t-caption">2 completed today</span></div>
+          </div>
+          <hr class="divider" />
+          <dl class="dl">
+            <dt>Overdue</dt><dd class="num" style="color:var(--danger-fg)">2</dd>
+            <dt>Due this week</dt><dd class="num">3</dd>
+            <dt>Avg. time to close</dt><dd class="num">1.8 days</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Create admin follow-up</h2></div>
+        <div class="card-body stack">
+          <div class="field"><label class="field-label">Task</label><input class="input" placeholder="e.g. Call parent about October balance" /></div>
+          <div class="form-grid">
+            <div class="field"><label class="field-label">Assignee</label><select class="select"><option>Me</option><option>Shahana</option><option>Nihal</option></select></div>
+            <div class="field"><label class="field-label">Due</label><input class="input" type="date" /></div>
+          </div>
+          <div class="field"><label class="field-label">Linked record <span class="opt">Optional</span></label><div class="input-group"><span data-icon="search"></span><input class="input" placeholder="Student, lead or receipt" /></div></div>
+        </div>
+        <div class="card-foot end"><button class="btn btn-primary" data-async data-done="Created" data-toast="Follow-up created"><span data-icon="plus"></span>Create follow-up</button></div>
+      </article>
+    </aside>
+  </section>
+</main>
+<script>
+  // Strike through → collapse → toast with undo. Ring updates optimistically.
+  const counts = { done: 11, total: 19 };
+  function paintRing() {
+    const p = Math.round(counts.done / counts.total * 100);
+    const ring = document.getElementById('ring');
+    ring.style.setProperty('--p', p); ring.dataset.label = p + '%';
+    document.getElementById('done-n').textContent = counts.done;
+  }
+  document.addEventListener('change', e => {
+    const box = e.target.closest('.task-row > .check input');
+    if (!box || !box.checked) return;
+    const task = box.closest('.task');
+    task.classList.add('done');
+    counts.done++; paintRing();
+    const timer = setTimeout(() => task.classList.add('gone'), 650);
+    const title = task.querySelector('.task-title').textContent;
+    toast(`Completed <b>${title.length > 38 ? title.slice(0, 38) + '…' : title}</b>`, {
+      undo: () => { clearTimeout(timer); task.classList.remove('gone', 'done'); box.checked = false; counts.done--; paintRing(); }
+    });
+  });
+</script>
+</body>
+</html>

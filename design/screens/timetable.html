@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timetable · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    /* 56px = one hour; events are placed with top/height measured from 08:00 */
+    .tt-scroll { overflow: auto; max-height: calc(100vh - 280px); min-height: 480px; border-radius: 0 0 var(--r-lg) var(--r-lg); }
+    .tt { min-width: 820px; }
+    .tt-corner { position: sticky; top: 0; z-index: 2; background: var(--bg-surface); border-bottom: 1px solid var(--border-default); }
+    .tt-col { height: 672px; }
+    .tt-event { text-align: left; font: inherit; font-size: 12px; line-height: 16px; }
+    .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font: var(--t-xs); color: var(--fg-muted); }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 12px; height: 12px; border-radius: var(--r-xs); background: var(--sw); box-shadow: inset 3px 0 0 var(--bar); }
+  </style>
+</head>
+<body data-page="timetable" data-crumbs="Teaching/Timetable">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Weekly timetable</span>
+      <h1 class="t-title">26 – 31 October</h1>
+      <p class="muted">212 lessons across 14 teachers · 9 need attention after Rahul K.’s Friday unavailability.</p>
+    </div>
+    <div class="actions">
+      <div class="btn-group">
+        <button class="btn btn-icon" aria-label="Previous week" data-tip="Previous week"><span data-icon="chevronLeft"></span></button>
+        <button class="btn">Today</button>
+        <button class="btn btn-icon" aria-label="Next week" data-tip="Next week"><span data-icon="chevronRight"></span></button>
+      </div>
+      <div class="segmented" role="group" aria-label="View"><button aria-pressed="true">Week</button><button aria-pressed="false">Day</button></div>
+      <button class="btn btn-primary" data-menu="tt-create"><span data-icon="plus"></span>Schedule</button>
+    </div>
+  </header>
+  <template id="tt-create">
+    <div class="menu-label t-overline">Schedule</div>
+    <button class="menu-item"><span data-icon="refresh"></span>Propose recurring timetable</button>
+    <button class="menu-item"><span data-icon="layers"></span>Generate lessons from agreement</button>
+    <button class="menu-item"><span data-icon="video"></span>One-off demo or extra class</button>
+    <div class="menu-sep"></div>
+    <button class="menu-item"><span data-icon="clock"></span>Record unavailability</button>
+  </template>
+
+  <section class="card">
+    <div class="toolbar">
+      <select class="select select-sm" style="width:auto" aria-label="Teacher"><option>All teachers</option><option>Rahul K.</option><option>Sneha P.</option><option>Anjali S.</option></select>
+      <select class="select select-sm" style="width:auto" aria-label="Student"><option>All students</option><option>Fathima Rahman</option><option>Aarav Nair</option></select>
+      <select class="select select-sm" style="width:auto" aria-label="Lesson status"><option>Any lesson status</option><option>scheduled</option><option>completed</option><option>cancelled</option><option>rescheduled</option></select>
+      <span class="spacer"></span>
+      <div class="legend desktop-only">
+        <span><i style="--sw:var(--accent-subtle);--bar:var(--accent)"></i>Lesson</span>
+        <span><i style="--sw:var(--info-subtle);--bar:var(--info)"></i>Extra class</span>
+        <span><i style="--sw:var(--special-subtle);--bar:var(--special)"></i>Demo</span>
+        <span><i style="--sw:var(--warning-subtle);--bar:var(--warning)"></i>Rescheduled</span>
+      </div>
+    </div>
+    <div class="tt-scroll">
+      <div class="tt" style="--days:6">
+        <div class="tt-corner"></div>
+        <div class="tt-head"><span>Mon</span><span class="d">26</span></div>
+        <div class="tt-head"><span>Tue</span><span class="d">27</span></div>
+        <div class="tt-head"><span>Wed</span><span class="d">28</span></div>
+        <div class="tt-head" data-today="true"><span>Thu</span><span class="d">29</span></div>
+        <div class="tt-head"><span>Fri</span><span class="d">30</span></div>
+        <div class="tt-head"><span>Sat</span><span class="d">31</span></div>
+
+        <div class="tt-times">
+          <div class="tt-time">08:00</div><div class="tt-time">09:00</div><div class="tt-time">10:00</div><div class="tt-time">11:00</div>
+          <div class="tt-time">12:00</div><div class="tt-time">13:00</div><div class="tt-time">14:00</div><div class="tt-time">15:00</div>
+          <div class="tt-time">16:00</div><div class="tt-time">17:00</div><div class="tt-time">18:00</div><div class="tt-time">19:00</div>
+        </div>
+
+        <!-- Mon -->
+        <div class="tt-col">
+          <button class="tt-event" style="top:56px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Fathima R.</b>Maths · Rahul K.</button>
+          <button class="tt-event info" style="top:168px;height:84px" data-open="tpl-lesson" data-kind="drawer"><b>Zainab Ali</b>Chemistry extra · 90m</button>
+          <button class="tt-event" style="top:448px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Aarav Nair</b>Physics · Sneha P.</button>
+          <button class="tt-event" style="top:560px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Meera K.</b>Maths · Sneha P.</button>
+        </div>
+        <!-- Tue -->
+        <div class="tt-col">
+          <button class="tt-event" style="top:112px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Ibrahim M.</b>English · Anjali S.</button>
+          <button class="tt-event special" style="top:308px;height:42px" data-open="tpl-lesson" data-kind="drawer"><b>Demo · Arjun M.</b>Maths G8</button>
+          <button class="tt-event" style="top:504px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Fathima R.</b>Science · Rahul K.</button>
+        </div>
+        <!-- Wed -->
+        <div class="tt-col">
+          <button class="tt-event" style="top:56px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Fathima R.</b>Maths · Rahul K.</button>
+          <button class="tt-event cancelled" style="top:224px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Nihal S.</b>Accounts · cancelled</button>
+          <button class="tt-event" style="top:448px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Aarav Nair</b>Physics · Sneha P.</button>
+          <button class="tt-event info" style="top:532px;height:84px" data-open="tpl-lesson" data-kind="drawer"><b>Zainab Ali</b>Chemistry extra</button>
+        </div>
+        <!-- Thu (today) -->
+        <div class="tt-col" data-today="true">
+          <div class="tt-now" style="top:151px" aria-label="Now 10:42"></div>
+          <button class="tt-event" style="top:56px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Fathima R.</b>Maths · completed</button>
+          <button class="tt-event info" style="top:140px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Aarav Nair</b>Physics · live</button>
+          <button class="tt-event" style="top:224px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Zainab Ali</b>Chemistry · Rahul K.</button>
+          <button class="tt-event warning" style="top:420px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Ibrahim M.</b>English · moved</button>
+          <button class="tt-event special" style="top:504px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Demo · Meera K.</b>Maths G10</button>
+        </div>
+        <!-- Fri -->
+        <div class="tt-col">
+          <button class="tt-event" style="top:56px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Fathima R.</b>Maths · Rahul K.</button>
+          <button class="tt-event warning" style="top:336px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Zainab Ali</b>Needs new slot</button>
+          <button class="tt-event warning" style="top:448px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Riya Thomas</b>Needs new slot</button>
+          <button class="tt-event" style="top:560px;height:56px" data-open="tpl-lesson" data-kind="drawer"><b>Meera K.</b>Maths · Sneha P.</button>
+        </div>
+        <!-- Sat -->
+        <div class="tt-col">
+          <button class="tt-event" style="top:112px;height:112px" data-open="tpl-lesson" data-kind="drawer"><b>Weekend batch</b>Maths revision · 2h</button>
+          <button class="tt-event special" style="top:280px;height:42px" data-open="tpl-lesson" data-kind="drawer"><b>Demo · Adil K.</b>Physics G11</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<template id="tpl-lesson">
+  <div class="drawer" role="dialog" aria-label="Lesson details">
+    <div class="drawer-head">
+      <span class="kpi-icon"><span data-icon="calendar"></span></span>
+      <div class="grow stack-xs" style="gap:0"><span class="t-subhead">Chemistry · Zainab Ali</span><span class="t-caption">Thu 29 Oct · 12:00 – 13:00 IST</span></div>
+      <button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button>
+    </div>
+    <div class="drawer-body">
+      <div class="row wrap"><span class="badge">scheduled</span><span class="badge info">Recurring agreement · active</span></div>
+      <dl class="dl">
+        <dt>Student</dt><dd><a href="student.html">Zainab Ali</a> · Grade 11 State</dd>
+        <dt>Teacher</dt><dd>Rahul K.</dd>
+        <dt>Duration</dt><dd class="num">60 minutes</dd>
+        <dt>Class charge</dt><dd class="money"><span class="cur">₹</span>650</dd>
+        <dt>Teacher rate</dt><dd class="money"><span class="cur">₹</span>350</dd>
+        <dt>Agreement</dt><dd>Mon · Wed · Thu, from 2 Sep</dd>
+      </dl>
+      <hr class="divider" />
+      <div class="stack-sm">
+        <span class="t-overline">Attendance</span>
+        <div class="callout"><span data-icon="clock"></span><div>Not yet submitted. Rahul K. records attendance from the teacher portal after class.</div></div>
+      </div>
+      <div class="stack-sm">
+        <span class="t-overline">Reschedule</span>
+        <div class="form-grid">
+          <div class="field"><label class="field-label">New date</label><input class="input" type="date" value="2026-10-31" /></div>
+          <div class="field"><label class="field-label">Start time</label><input class="input" type="time" value="11:00" /></div>
+          <div class="field full"><label class="field-label">Reason</label><select class="select"><option>Teacher unavailable</option><option>Parent request</option><option>Public holiday</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn btn-ghost" style="margin-right:auto;color:var(--danger-fg)" data-action="close" data-toast="Lesson cancelled without charge" data-undo>Cancel without charge</button>
+      <button class="btn" data-action="close">Close</button>
+      <button class="btn btn-primary" data-async data-close data-done="Rescheduled" data-toast="Lesson moved to Sat 31 Oct, 11:00">Reschedule</button>
+    </div>
+  </div>
+</template>
+</body>
+</html>

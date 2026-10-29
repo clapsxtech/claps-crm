@@ -11,16 +11,16 @@ class TeamPermissions
     public const ROLES = ['team_manager','academics','finance','sales_followups','read_only'];
     public const LABELS = ['team_manager'=>'Team manager','academics'=>'Academics / attendance','finance'=>'Finance','sales_followups'=>'Sales / follow-ups','read_only'=>'Read-only'];
     private const PAGES = [
-        'team_manager'=>['dashboard','people','academics','timetable','attendance','money','followups','migration'],
-        'academics'=>['people','academics','timetable','attendance'],
+        'team_manager'=>['dashboard','admissions','teacher-recruitment','allocation','people','academics','timetable','attendance','money','followups','migration'],
+        'academics'=>['teacher-recruitment','allocation','people','academics','timetable','attendance'],
         'finance'=>['money'],
-        'sales_followups'=>['followups'],
-        'read_only'=>['dashboard','people','academics','timetable','attendance','money','followups','migration'],
+        'sales_followups'=>['admissions','teacher-recruitment','allocation','followups'],
+        'read_only'=>['dashboard','admissions','teacher-recruitment','allocation','people','academics','timetable','attendance','money','followups','migration'],
     ];
     private const ACTIONS = [
         'academics'=>['student','student-update','teacher','eligibility','mark','assign','end-assignment','availability','propose','confirm','materialize','reschedule','cancel','extra','exception','end-agreement','attendance','approve','correct','duplicate'],
         'finance'=>['payment','import-batch','salary-paid','salary-reverse','receipt-reverse','receipt-correct','request-create','request-cancel','request-allocate'],
-        'sales_followups'=>['task','complete-task','task-update','task-item','task-item-complete','followup'],
+        'sales_followups'=>['task','complete-task','task-update','task-item','task-item-complete','followup','admission-create-lead','admission-update-lead','admission-schedule-demo','admission-update-demo','admission-followup','admission-reminder','admission-complete-reminder','admission-transfer','admission-resolve-transfer','admission-convert'],
     ];
     public function role(User $user, int $unit): ?string
     {
@@ -38,6 +38,9 @@ class TeamPermissions
         if ($kind==='page') return in_array($value,self::PAGES[$role],true);
         if ($kind==='action') {
             if ($role==='read_only') return false;
+            if(in_array($value,['allocation-demo','allocation-feedback'],true))return in_array($role,['team_manager','academics','sales_followups'],true);
+            if(in_array($value,['allocation-qualify','allocation-window','allocation-regular'],true))return in_array($role,['team_manager','academics'],true);
+            if (str_starts_with($value,'teacher-candidate-')) return $role==='team_manager' && in_array($value,['teacher-candidate-create','teacher-candidate-update','teacher-candidate-contact','teacher-candidate-register','teacher-candidate-approve','teacher-candidate-resolve'],true);
             $actions=$role==='team_manager'?array_merge(...array_values(self::ACTIONS)):(self::ACTIONS[$role]??[]);
             return in_array($value,$actions,true);
         }
@@ -55,7 +58,7 @@ class TeamPermissions
     }
     public function landing(User $user,int $unit): string
     {
-        foreach (['dashboard','academics','money','followups'] as $page) if($this->allows($user,$unit,'page',$page)) return $page;
+        foreach (['dashboard','admissions','academics','money','followups'] as $page) if($this->allows($user,$unit,'page',$page)) return $page;
         return 'dashboard';
     }
 }

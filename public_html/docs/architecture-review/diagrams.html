@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClapsLearn — architecture review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f6f9;color:#182a3f}header{background:#172c46;color:white;padding:28px 32px}h1{font-size:29px;margin:4px 0 8px;letter-spacing:-.6px}.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a8cce8}.sub{margin:0;color:#c6d6e3;max-width:950px}main{padding:22px 32px}.status{border-left:4px solid #c57026;background:#fff4df;padding:12px 16px;margin-bottom:20px}.status strong{color:#854514}nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}button,a{font:inherit}button{border:1px solid #b9c8d6;background:white;color:#234262;border-radius:6px;padding:9px 14px;cursor:pointer}button[aria-pressed=true]{background:#214f76;color:white;border-color:#214f76}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #d49020;outline-offset:3px}.toolbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 16px;background:#fff;border:1px solid #d3dee8;border-radius:8px 8px 0 0}label{display:flex;align-items:center;gap:10px}a{color:#245d89}#description{margin:0 0 14px;min-height:45px;max-width:1100px}.viewport{height:68vh;min-height:420px;overflow:auto;background:white;border:1px solid #d3dee8;border-top:0;padding:20px}#diagram{display:block;max-width:none}footer{margin-top:14px;color:#566b7c;font-size:13px}output{min-width:42px}h2{font-size:21px;margin:0 0 7px}@media(max-width:600px){header,main{padding:20px}.viewport{padding:10px;min-height:350px}h1{font-size:25px}nav button{flex:1 1 140px}}
+</style>
+<header><div class="eyebrow">ClapsLearn / architecture review / 26 October 2026</div><h1>From operational sheets to a dependable ERP</h1><p class="sub">Source relationships, the reconstructed business model, and the current application's 45 ERP tables. Use the controls to fit or enlarge each diagram.</p></header>
+<main>
+<div class="status"><strong>Cutover status: not ready.</strong> The review identifies missing database constraints, incomplete invoice workflows, disconnected recruitment records and migration reconciliation gaps. A targeted cross-team import fix is included locally.</div>
+<nav aria-label="Choose diagram" id="tabs"></nav>
+<h2 id="title"></h2><p id="description"></p>
+<div class="toolbar"><button id="fit" type="button">Fit width</button><label>Zoom <input id="zoom" type="range" min="15" max="180" value="50"><output id="percent">50%</output></label><a id="download" download>Download SVG</a><a href="README.md">Full findings</a><a href="mapping.md">Sheet mapping</a><a href="formula-lineage.csv">Formula evidence</a></div>
+<div class="viewport" id="viewport" tabindex="0" aria-label="Scrollable ER diagram"><img id="diagram" alt=""></div>
+<footer>Application diagram lines describe logical references; they are not declared SQL foreign keys. Source sampling covers all 183 visible tabs, not every populated row. Nothing in this viewer sends data to an external service.</footer>
+</main>
+<script>
+const diagrams=[
+{file:'sheets-domain-erd',label:'Business ER model',title:'The business model reconstructed from the sheets',width:2225,description:'Proposed canonical entities and cardinalities. Rate versions, shared contact relationships and invoice allocations describe the target design; their presence here does not mean those features are implemented.'},
+{file:'sheet-dependencies',label:'Workbook connections',title:'Verified workbook dependencies',width:1820,description:'Arrows run from source workbook to consumer. Orange workbooks are the five additional upstream dependencies found in formulas. The 39 pairs reflect sampled literal IMPORTRANGE references; scripts and manual copying may add more.'},
+{file:'application-people-sales',label:'People, sales & HR',title:'Current application: people, sales and recruitment',width:4310,description:'Actual tables and columns. The shared teacher candidate model and the older unit candidate/interview model are disconnected. Teacher unit membership currently permits only one unit per teacher.'},
+{file:'application-delivery',label:'Scheduling & delivery',title:'Current application: scheduling, attendance and assessment',width:1996,description:'Enrollment connects a student, teacher and subject. Agreements produce dated lessons; attendance, duplicate reviews and assessments retain their own identities. Optional replacement references preserve rescheduling history.'},
+{file:'application-finance-operations',label:'Finance & operations',title:'Current application: finance, tasks and migration',width:4451,description:'Ledger events connect attendance, students and teachers. Payment requests have receipt allocations. Invoice and line tables exist, but a complete invoice lifecycle was not found. Task templates are not yet linked to task instances.'}
+];
+let current=0;
+const img=document.getElementById('diagram'),zoom=document.getElementById('zoom'),viewport=document.getElementById('viewport');
+function scale(value){zoom.value=value;document.getElementById('percent').textContent=value+'%';img.style.width=(diagrams[current].width*value/100)+'px'}
+function fit(){scale(Math.max(15,Math.min(180,Math.floor((viewport.clientWidth-42)/diagrams[current].width*100))))}
+function show(i){current=i;const d=diagrams[i];img.src=d.file+'.svg';img.alt=d.title;document.getElementById('title').textContent=d.title;document.getElementById('description').textContent=d.description;document.getElementById('download').href=d.file+'.svg';document.querySelectorAll('nav button').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));viewport.scrollTo(0,0);fit()}
+diagrams.forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.textContent=d.label;b.onclick=()=>show(i);document.getElementById('tabs').appendChild(b)});
+zoom.addEventListener('input',()=>scale(Number(zoom.value)));document.getElementById('fit').onclick=fit;show(0);
+</script>
+</html>

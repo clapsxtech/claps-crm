@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Migration &amp; exports · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .diff { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3); }
+    .diff > div { padding: var(--s-4); border-radius: var(--r-md); background: var(--bg-sunken); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: var(--s-1); }
+    .diff .v { font: var(--t-2xl); font-weight: var(--w-semibold); letter-spacing: var(--tracking-tight); font-variant-numeric: tabular-nums; }
+    .import-type { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3); border: 1px solid var(--border-default); border-radius: var(--r-md); transition: border-color var(--d-fast), background var(--d-fast); }
+    .import-type:has(input:checked) { border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-subtle); }
+    .import-type .check { flex: 1; min-width: 0; align-items: center; }
+    .import-type .count { flex: none; }
+    .import-type .check input { margin-top: 0; }
+    .types { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--s-2); }
+    .stepper { flex-wrap: wrap; }
+  </style>
+</head>
+<body data-page="migration" data-crumbs="Admin/Migration & exports">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <h1 class="t-title">Migration &amp; exports</h1>
+      <p class="muted">Bring records over from Sheets in three checked steps. Nothing is written until you approve the exact snapshot.</p>
+    </div>
+    <div class="actions"><button class="btn" data-async data-done="Exported" data-toast="reconciliation.json downloaded"><span data-icon="download"></span>Reconciliation JSON</button></div>
+  </header>
+
+  <section class="card card-body">
+    <div class="stepper" aria-label="Migration progress">
+      <span class="step" data-state="done">Prepare the source</span><span class="step-line" data-state="done"></span>
+      <span class="step" data-state="current">Preview without importing</span><span class="step-line"></span>
+      <span class="step">Approve this exact snapshot</span>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="span-8 stack-lg">
+      <article class="card">
+        <div class="card-head"><div class="stack-xs grow" style="gap:0"><h2 class="t-subhead">2 · Preview without importing</h2><span class="t-caption">Snapshot <span class="mono">snap_7f3a91</span> · taken 29 Oct, 13:58 UTC</span></div><button class="btn btn-ghost btn-sm" data-async data-done="Refreshed" data-toast="Preview regenerated"><span data-icon="refresh"></span>Re-run</button></div>
+        <div class="card-body stack">
+          <div class="field"><span class="field-label">Import types</span>
+            <div class="types">
+              <div class="import-type"><label class="check"><input type="checkbox" checked /><span class="t-small strong">student</span></label><span class="count">312</span></div>
+              <div class="import-type"><label class="check"><input type="checkbox" checked /><span class="t-small strong">teacher</span></label><span class="count">41</span></div>
+              <div class="import-type"><label class="check"><input type="checkbox" checked /><span class="t-small strong">assignment</span></label><span class="count">508</span></div>
+              <div class="import-type"><label class="check"><input type="checkbox" checked /><span class="t-small strong">opening_balance</span></label><span class="count">287</span></div>
+              <div class="import-type"><label class="check"><input type="checkbox" /><span class="t-small strong">historical_attendance</span></label><span class="count">14,920</span></div>
+            </div>
+          </div>
+          <div class="diff">
+            <div><span class="t-caption">New records</span><span class="v pos" style="color:var(--success-fg)" data-count="1021">0</span></div>
+            <div><span class="t-caption">Updated</span><span class="v" style="color:var(--info-fg)" data-count="118">0</span></div>
+            <div><span class="t-caption">Conflicts to resolve</span><span class="v" style="color:var(--danger-fg)" data-count="9">0</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Conflicts</h2><span class="count" style="background:var(--danger-subtle);color:var(--danger-fg)">9</span></div>
+        <div class="table-wrap" style="margin-top:var(--s-3)">
+          <table class="table">
+            <thead><tr><th>Type</th><th>Sheet row</th><th>Issue</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge">student</span></td><td class="mono">Students!42</td><td><div class="stack-xs" style="gap:0"><span>Same phone as existing student</span><span class="t-caption">Fathima Rahman · CL-1042</span></div></td><td class="num" style="white-space:nowrap"><div class="btn-group"><button class="btn btn-sm" data-toast="Merged into CL-1042">Merge</button><button class="btn btn-sm" data-toast="Kept as separate student">Keep both</button></div></td></tr>
+              <tr><td><span class="badge warning">opening_balance</span></td><td class="mono">Balances!118</td><td><div class="stack-xs" style="gap:0"><span>Amount differs: ₹3,250.00 vs ₹3,520.00</span><span class="t-caption">Aarav Nair · CL-1031</span></div></td><td class="num" style="white-space:nowrap"><div class="btn-group"><button class="btn btn-sm" data-toast="Sheet value used">Use sheet</button><button class="btn btn-sm" data-toast="ERP value kept">Keep ERP</button></div></td></tr>
+              <tr><td><span class="badge info">teacher</span></td><td class="mono">Teachers!7</td><td><div class="stack-xs" style="gap:0"><span>Missing teacher code</span><span class="t-caption">New teacher · no match</span></div></td><td class="num"><button class="btn btn-sm">Assign code</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-foot"><span>3 of 9 conflicts</span><a href="#">Show all</a></div>
+      </article>
+
+      <article class="card" style="opacity:.72">
+        <div class="card-head"><h2 class="t-subhead">3 · Approve this exact snapshot</h2><span class="badge">Locked until conflicts are 0</span></div>
+        <div class="card-body stack">
+          <div class="callout danger"><span data-icon="alert"></span><span><strong>This writes 1,139 records.</strong> Take a backup first and keep its reference. Approval is tied to <span class="mono">snap_7f3a91</span>; if the sheet changes, you’ll need a new preview.</span></div>
+          <div class="form-grid">
+            <div class="field"><label class="field-label">Cutoff</label><input class="input" type="datetime-local" value="2026-10-31T23:59" /></div>
+            <div class="field"><label class="field-label">Backup reference</label><input class="input mono" placeholder="bk_20261029_…" /></div>
+            <div class="field full"><label class="field-label">Confirm with your password</label><div class="input-group"><span data-icon="lock"></span><input class="input" type="password" placeholder="••••••••" /></div></div>
+          </div>
+          <div class="row end"><button class="btn btn-danger" disabled>Approve and import</button></div>
+        </div>
+      </article>
+    </div>
+
+    <aside class="span-4">
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Migration history</h2></div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="tl-item"><span class="tl-dot info"><span data-icon="eye"></span></span><div class="tl-body"><b>Preview</b> · snap_7f3a91<div class="t-caption">29 Oct, 13:58 · Amnas A.</div></div></div>
+            <div class="tl-item"><span class="tl-dot success"><span data-icon="check"></span></span><div class="tl-body"><b>Imported</b> students &amp; teachers · 353 rows<div class="t-caption">14 Oct, 09:20 · backup bk_20261014_0905</div></div></div>
+            <div class="tl-item"><span class="tl-dot warning"><span data-icon="x"></span></span><div class="tl-body"><b>Abandoned</b> preview · sheet changed<div class="t-caption">12 Oct, 17:41</div></div></div>
+            <div class="tl-item"><span class="tl-dot"><span data-icon="upload"></span></span><div class="tl-body"><b>Source prepared</b> · 5 tabs linked<div class="t-caption">10 Oct, 11:02</div></div></div>
+          </div>
+        </div>
+        <div class="card-foot"><button class="btn btn-ghost btn-sm" data-async data-done="Downloaded" data-toast="Exports zipped"><span data-icon="download"></span>Download all exports</button></div>
+      </article>
+    </aside>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,5 @@
+<form method="post" action="{{ route('erp.business.mutate',[$business->id,'allocation-window']) }}">@csrf
+@include('erp.allocation-return')
+<input type="hidden" name="{{ $teacherId ? 'teacher_id' : 'student_id' }}" value="{{ $teacherId ?: $studentId }}"><div class="form-grid">
+<label>Weekday<select name="weekday">@foreach([1=>'Monday',2=>'Tuesday',3=>'Wednesday',4=>'Thursday',5=>'Friday',6=>'Saturday',7=>'Sunday'] as $day=>$label)<option value="{{ $day }}">{{ $label }}</option>@endforeach</select></label>
+<label>From<input type="time" name="start_time" required></label><label>Until<input type="time" name="end_time" required></label><label>Timezone<input name="timezone" value="{{ $personTimezone }}" required></label><label>Valid from<input type="date" name="starts_on" required></label><label>Valid through<input type="date" name="ends_on" required></label><label>Who confirmed and when<textarea name="note" required maxlength="4000"></textarea></label></div><button>Record confirmed availability</button></form>

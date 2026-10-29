@@ -83,12 +83,16 @@ export async function storageRequest(request: Request, env: StorageEnv): Promise
         }
         if (action === 'rows_batch') {
             if (!Array.isArray(input.tables) || input.tables.length < 1 || input.tables.length > 8 || new Set(input.tables).size !== input.tables.length) return json({ error: 'Invalid tables' }, 400);
+            const limit = input.limit ?? 200;
+            if (!Number.isSafeInteger(limit) || limit < 1 || limit > 2000) return json({ error: 'Invalid page size' }, 400);
+            if (input.cursors !== undefined && (input.cursors === null || typeof input.cursors !== 'object' || Array.isArray(input.cursors))) return json({ error: 'Invalid cursors' }, 400);
+            if (input.tables.some((table: string) => input.cursors?.[table] !== undefined && (!Number.isSafeInteger(input.cursors[table]) || input.cursors[table] < -1))) return json({ error: 'Invalid cursor' }, 400);
             const catalog = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND substr(name,1,7) != 'erp_d1_' AND substr(name,1,4) != '_cf_' AND name != 'd1_migrations'").all<{ name: string }>();
             const allowed = new Set(catalog.results.map(row => row.name));
             if (input.tables.some((table: unknown) => typeof table !== 'string' || !allowed.has(table))) return json({ error: 'Unknown table' }, 400);
             const tables: string[] = input.tables;
-            const results = await db.batch(tables.map(table => db.prepare(`SELECT rowid AS _erp_d1_rowid,* FROM ${identifier(table)} WHERE rowid>-1 ORDER BY rowid LIMIT 200`)));
-            return json({ pages: Object.fromEntries(tables.map((table, index) => [table, { rows: results[index].results, more: results[index].results.length === 200 }])) });
+            const results = await db.batch(tables.map(table => db.prepare(`SELECT rowid AS _erp_d1_rowid,* FROM ${identifier(table)} WHERE rowid>? ORDER BY rowid LIMIT ${limit}`).bind(input.cursors?.[table] ?? -1)));
+            return json({ pages: Object.fromEntries(tables.map((table, index) => [table, { rows: results[index].results, more: results[index].results.length === limit }])) });
         }
         if (action === 'rows') {
             if (typeof input.table !== 'string' || /^(erp_d1_|_cf_|sqlite_)/.test(input.table) || input.table === 'd1_migrations') return json({ error: 'Invalid table' }, 400);

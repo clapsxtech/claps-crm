@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My lessons · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    /* Mobile-first: one column, 44px touch targets, primary action pinned to the thumb zone */
+    .lesson { display: flex; flex-direction: column; }
+    .lesson-main { display: grid; grid-template-columns: 56px 1fr; gap: var(--s-3) var(--s-4); padding: var(--s-4); align-items: center; }
+    .lesson-time { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 56px; border-radius: var(--r-md); background: var(--bg-sunken); border: 1px solid var(--border-subtle); }
+    .lesson-time b { font: var(--t-md); font-weight: var(--w-semibold); font-variant-numeric: tabular-nums; }
+    .lesson-time span { font: var(--t-xs); color: var(--fg-muted); }
+    .lesson .att { grid-column: 1 / -1; justify-self: stretch; display: grid; grid-template-columns: repeat(3, 1fr); }
+    .lesson .att button { width: auto; height: var(--control-lg); font: var(--t-sm); font-weight: var(--w-semibold); }
+    .lesson[data-done] .lesson-time { background: var(--success-subtle); border-color: transparent; color: var(--success-fg); }
+    .disclosure { border-top: 1px solid var(--border-subtle); }
+    .disclosure summary { list-style: none; display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-4); font: var(--t-sm); color: var(--fg-muted); cursor: pointer; min-height: var(--control-lg); transition: color var(--d-fast); }
+    .disclosure summary::-webkit-details-marker { display: none; }
+    .disclosure summary:hover { color: var(--fg-default); }
+    .disclosure summary .icon { transition: transform var(--d-base) var(--ease-standard); }
+    .disclosure[open] summary .icon { transform: rotate(180deg); }
+    .disclosure .form-grid { padding: 0 var(--s-4) var(--s-4); animation: rise var(--d-base) var(--ease-enter); }
+    .submit-dock { position: sticky; bottom: var(--s-4); z-index: var(--z-sticky); display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-3) var(--s-3) var(--s-4); border-radius: var(--r-lg); background: var(--bg-surface); border: 1px solid var(--border-default); box-shadow: var(--e-3); }
+    .submit-dock .count { transition: transform var(--d-base) var(--ease-spring); }
+    .submit-dock .count.bump { transform: scale(1.25); }
+    @media (min-width: 900px) {
+      .lesson-main { grid-template-columns: 56px 1fr auto; }
+      .lesson .att { grid-column: auto; display: inline-flex; }
+      .lesson .att button { width: auto; padding: 0 var(--s-3); height: var(--control-sm); }
+    }
+    @media (max-width: 640px) {
+      .page-header .actions { width: 100%; }
+      .page-header .actions .input { flex: 1; }
+    }
+  </style>
+</head>
+<body data-page="teacher" data-crumbs="Teaching/Teacher portal">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Rahul K. · Teacher</span>
+      <h1 class="t-title">Your lessons</h1>
+      <p class="muted">Mark each class right after it ends. Approved classes count towards this month’s accrual.</p>
+    </div>
+    <div class="actions"><input class="input" type="date" value="2026-10-29" aria-label="Lesson date" /></div>
+  </header>
+
+  <section class="grid">
+    <div class="span-7 stack">
+      <div class="row between"><h2 class="t-subhead">Thursday · 4 lessons</h2><span class="t-caption">IST · Asia/Kolkata</span></div>
+
+      <article class="card lesson" data-student="Fathima Rahman">
+        <div class="lesson-main">
+          <div class="lesson-time"><b>09:00</b><span>60m</span></div>
+          <div class="stack-xs" style="gap:0;min-width:0"><span class="strong truncate">Fathima Rahman</span><span class="t-small muted truncate">Maths · Grade 9 CBSE · Quadratics</span></div>
+          <div class="att" role="group" aria-label="Attendance for Fathima Rahman"><button data-v="P" aria-pressed="true">Present</button><button data-v="A" aria-pressed="false">Absent</button><button data-v="L" aria-pressed="false">Late</button></div>
+        </div>
+        <details class="disclosure"><summary>Different time or duration?<span data-icon="chevronDown" class="icon-sm" style="margin-left:auto"></span></summary>
+          <div class="form-grid"><div class="field"><label class="field-label">Actual minutes</label><input class="input num" type="number" value="60" inputmode="numeric" /></div><div class="field"><label class="field-label">Reason</label><select class="select"><option>Student joined late</option><option>Network issue</option><option>Ended early on request</option></select></div></div>
+        </details>
+      </article>
+
+      <article class="card lesson" data-student="Zainab Ali">
+        <div class="lesson-main">
+          <div class="lesson-time"><b>12:00</b><span>60m</span></div>
+          <div class="stack-xs" style="gap:0;min-width:0"><span class="strong truncate">Zainab Ali</span><span class="t-small muted truncate">Chemistry · Grade 11 State · Mole concept</span></div>
+          <div class="att" role="group" aria-label="Attendance for Zainab Ali"><button data-v="P" aria-pressed="false">Present</button><button data-v="A" aria-pressed="false">Absent</button><button data-v="L" aria-pressed="false">Late</button></div>
+        </div>
+        <details class="disclosure"><summary>Different time or duration?<span data-icon="chevronDown" class="icon-sm" style="margin-left:auto"></span></summary>
+          <div class="form-grid"><div class="field"><label class="field-label">Actual minutes</label><input class="input num" type="number" value="60" inputmode="numeric" /></div><div class="field"><label class="field-label">Reason</label><select class="select"><option>Student joined late</option><option>Network issue</option><option>Ended early on request</option></select></div></div>
+        </details>
+      </article>
+
+      <article class="card lesson" data-student="Adil Kareem">
+        <div class="lesson-main">
+          <div class="lesson-time"><b>15:30</b><span>45m</span></div>
+          <div class="stack-xs" style="gap:0;min-width:0"><span class="row-sm"><span class="strong truncate">Adil Kareem</span><span class="badge special">Demo</span></span><span class="t-small muted truncate">Physics · Grade 11 CBSE · free, teacher unpaid</span></div>
+          <div class="att" role="group" aria-label="Attendance for Adil Kareem"><button data-v="P" aria-pressed="false">Present</button><button data-v="A" aria-pressed="false">Absent</button><button data-v="L" aria-pressed="false">Late</button></div>
+        </div>
+        <details class="disclosure"><summary>Different time or duration?<span data-icon="chevronDown" class="icon-sm" style="margin-left:auto"></span></summary>
+          <div class="form-grid"><div class="field"><label class="field-label">Actual minutes</label><input class="input num" type="number" value="45" inputmode="numeric" /></div><div class="field"><label class="field-label">Reason</label><select class="select"><option>Student joined late</option><option>Network issue</option></select></div></div>
+        </details>
+      </article>
+
+      <article class="card lesson" data-student="Riya Thomas">
+        <div class="lesson-main">
+          <div class="lesson-time"><b>18:00</b><span>60m</span></div>
+          <div class="stack-xs" style="gap:0;min-width:0"><span class="strong truncate">Riya Thomas</span><span class="t-small muted truncate">Biology · Grade 10 ICSE · Photosynthesis</span></div>
+          <div class="att" role="group" aria-label="Attendance for Riya Thomas"><button data-v="P" aria-pressed="false">Present</button><button data-v="A" aria-pressed="false">Absent</button><button data-v="L" aria-pressed="false">Late</button></div>
+        </div>
+        <details class="disclosure"><summary>Different time or duration?<span data-icon="chevronDown" class="icon-sm" style="margin-left:auto"></span></summary>
+          <div class="form-grid"><div class="field"><label class="field-label">Actual minutes</label><input class="input num" type="number" value="60" inputmode="numeric" /></div><div class="field"><label class="field-label">Reason</label><select class="select"><option>Student joined late</option><option>Network issue</option></select></div></div>
+        </details>
+      </article>
+
+      <div class="submit-dock">
+        <span class="count accent" id="marked-count">1</span>
+        <span class="grow t-small"><span id="marked-label">1 of 4 lessons marked</span></span>
+        <button class="btn btn-primary" data-async data-done="Submitted" data-toast="Attendance submitted for review">Submit attendance</button>
+      </div>
+    </div>
+
+    <div class="span-5 stack-lg">
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Record an assessment</h2></div>
+        <div class="card-body stack">
+          <div class="field"><label class="field-label">Student</label><select class="select"><option>Fathima Rahman · G9</option><option>Zainab Ali · G11</option><option>Riya Thomas · G10</option></select></div>
+          <div class="field"><label class="field-label">Assessment / topic</label><input class="input" placeholder="e.g. Unit test · Quadratic equations" /></div>
+          <div class="form-grid">
+            <div class="field"><label class="field-label">Score</label><input class="input num" type="number" placeholder="42" inputmode="decimal" /></div>
+            <div class="field"><label class="field-label">Out of</label><input class="input num" type="number" value="50" inputmode="decimal" /></div>
+          </div>
+        </div>
+        <div class="card-foot end"><button class="btn btn-primary" data-async data-done="Recorded" data-toast="Assessment recorded">Record assessment</button></div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Assessment history</h2><a class="btn btn-ghost btn-sm" href="#">All</a></div>
+        <div class="list" style="margin-top:var(--s-2)">
+          <div class="list-item"><span class="ring" style="--p:84;--ring-size:40px" data-label="84"></span><span class="grow"><span class="t-small strong" style="display:block">Linear equations · unit test</span><span class="t-caption">Fathima Rahman · 22 Oct · 42 / 50</span></span></div>
+          <div class="list-item"><span class="ring" style="--p:62;--ring-size:40px" data-label="62"></span><span class="grow"><span class="t-small strong" style="display:block">Atomic structure · quiz</span><span class="t-caption">Zainab Ali · 20 Oct · 31 / 50</span></span></div>
+          <div class="list-item"><span class="ring" style="--p:91;--ring-size:40px" data-label="91"></span><span class="grow"><span class="t-small strong" style="display:block">Cell biology · revision</span><span class="t-caption">Riya Thomas · 17 Oct · 91 / 100</span></span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+<script>
+  // Recount after any marker change (incl. undo from the toast)
+  function recount() {
+    const lessons = [...document.querySelectorAll('.lesson')];
+    const done = lessons.filter(l => l.querySelector('.att [aria-pressed="true"]'));
+    lessons.forEach(l => l.toggleAttribute('data-done', done.includes(l)));
+    const c = document.getElementById('marked-count');
+    if (c.textContent !== String(done.length)) { c.classList.add('bump'); setTimeout(() => c.classList.remove('bump'), 200); }
+    c.textContent = done.length;
+    document.getElementById('marked-label').textContent = done.length === lessons.length ? 'All lessons marked, ready to submit' : `${done.length} of ${lessons.length} lessons marked`;
+  }
+  document.addEventListener('attendance-change', recount);
+  document.addEventListener('click', e => { if (e.target.closest('.toast')) setTimeout(recount, 0); });
+  document.addEventListener('app-ready', recount);
+</script>
+</body>
+</html>

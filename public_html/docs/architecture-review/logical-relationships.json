@@ -1,0 +1,562 @@
+[
+  {
+    "child": "erp_memberships",
+    "column": "user_id",
+    "parent": "users",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_memberships",
+    "column": "unit_id",
+    "parent": "erp_units",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_students",
+    "column": "unit_id",
+    "parent": "erp_units",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_student_profiles",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": false,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teachers",
+    "column": "user_id",
+    "parent": "users",
+    "nullable": true,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_units",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": false,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_units",
+    "column": "unit_id",
+    "parent": "erp_units",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_profiles",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": false,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_matching_profiles",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": false,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_eligibilities",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_eligibilities",
+    "column": "subject_id",
+    "parent": "erp_subjects",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_leads",
+    "column": "unit_id",
+    "parent": "erp_units",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_leads",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_leads",
+    "column": "assigned_to",
+    "parent": "users",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_lead_activities",
+    "column": "lead_id",
+    "parent": "erp_leads",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_lead_reminders",
+    "column": "lead_id",
+    "parent": "erp_leads",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_lead_transfers",
+    "column": "lead_id",
+    "parent": "erp_leads",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_demos",
+    "column": "lead_id",
+    "parent": "erp_leads",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_demos",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_demos",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_demos",
+    "column": "subject_id",
+    "parent": "erp_subjects",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_enquiries",
+    "column": "staff_id",
+    "parent": "users",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_candidate_sources",
+    "column": "candidate_id",
+    "parent": "erp_teacher_candidates",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_candidate_activities",
+    "column": "candidate_id",
+    "parent": "erp_teacher_candidates",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_candidates",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_teacher_candidates",
+    "column": "merged_into_id",
+    "parent": "erp_teacher_candidates",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_candidates",
+    "column": "unit_id",
+    "parent": "erp_units",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_candidate_interviews",
+    "column": "candidate_id",
+    "parent": "erp_candidates",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_enrollments",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_enrollments",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_enrollments",
+    "column": "subject_id",
+    "parent": "erp_subjects",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_availability",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_availability",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_exceptions",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_exceptions",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_agreements",
+    "column": "enrollment_id",
+    "parent": "erp_enrollments",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_agreements",
+    "column": "replaces_agreement_id",
+    "parent": "erp_agreements",
+    "nullable": true,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_lessons",
+    "column": "enrollment_id",
+    "parent": "erp_enrollments",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_lessons",
+    "column": "agreement_id",
+    "parent": "erp_agreements",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_lessons",
+    "column": "replaces_lesson_id",
+    "parent": "erp_lessons",
+    "nullable": true,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_attendance",
+    "column": "lesson_id",
+    "parent": "erp_lessons",
+    "nullable": false,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_internal_notes",
+    "column": "lesson_id",
+    "parent": "erp_lessons",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_duplicate_reviews",
+    "column": "attendance_id",
+    "parent": "erp_attendance",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_duplicate_reviews",
+    "column": "other_attendance_id",
+    "parent": "erp_attendance",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_marks",
+    "column": "enrollment_id",
+    "parent": "erp_enrollments",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_allocation_requests",
+    "column": "demo_id",
+    "parent": "erp_demos",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_allocation_requests",
+    "column": "enrollment_id",
+    "parent": "erp_enrollments",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_allocation_requests",
+    "column": "agreement_id",
+    "parent": "erp_agreements",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_demos",
+    "column": "enrollment_id",
+    "parent": "erp_enrollments",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_demos",
+    "column": "agreement_id",
+    "parent": "erp_agreements",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_ledger",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_ledger",
+    "column": "teacher_id",
+    "parent": "erp_teachers",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_ledger",
+    "column": "attendance_id",
+    "parent": "erp_attendance",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_ledger",
+    "column": "reverses_id",
+    "parent": "erp_ledger",
+    "nullable": true,
+    "unique_child_reference": true,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_ledger",
+    "column": "invoice_id",
+    "parent": "erp_invoices",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_invoices",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_invoice_lines",
+    "column": "invoice_id",
+    "parent": "erp_invoices",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_payment_requests",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_request_allocations",
+    "column": "request_id",
+    "parent": "erp_payment_requests",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_request_allocations",
+    "column": "payment_id",
+    "parent": "erp_ledger",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_tasks",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_tasks",
+    "column": "assigned_to",
+    "parent": "users",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_task_items",
+    "column": "task_id",
+    "parent": "erp_tasks",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_task_templates",
+    "column": "unit_id",
+    "parent": "erp_units",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_followups",
+    "column": "student_id",
+    "parent": "erp_students",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_attendance_batches",
+    "column": "unit_id",
+    "parent": "erp_units",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_audit",
+    "column": "actor_id",
+    "parent": "users",
+    "nullable": true,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_migration_mappings",
+    "column": "batch_id",
+    "parent": "erp_migration_batches",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_migration_history",
+    "column": "batch_id",
+    "parent": "erp_migration_batches",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  },
+  {
+    "child": "erp_migration_history",
+    "column": "enrollment_id",
+    "parent": "erp_enrollments",
+    "nullable": false,
+    "unique_child_reference": false,
+    "declared_foreign_key": false
+  }
+]

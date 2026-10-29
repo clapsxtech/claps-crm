@@ -31,6 +31,10 @@ class ErpSchedulingTest extends TestCase
         (new \AddRequestReferenceToErpLessons())->up();
         require_once __DIR__.'/../../database/migrations/2026_10_23_170000_add_intervals_to_erp_exceptions.php';
         (new \AddIntervalsToErpExceptions())->up();
+        require_once __DIR__.'/../../database/migrations/2026_10_26_090000_create_erp_admissions.php';
+        (new \CreateErpAdmissions())->up();
+        (require __DIR__.'/../../database/migrations/2026_10_26_140000_create_teacher_recruitment.php')->up();
+        (require __DIR__.'/../../database/migrations/2026_10_26_160000_add_teacher_allocation.php')->up();
         DB::table('erp_units')->insert(['id'=>1,'code'=>'TEST','name'=>'Synthetic unit','timezone'=>'Asia/Kolkata']);
         DB::table('erp_students')->insert(['id'=>1,'unit_id'=>1,'registered_on'=>'2027-01-01','code'=>'SYN-S1','name'=>'Synthetic Student','timezone'=>'Asia/Kolkata','status'=>'active','grade'=>'8','syllabus'=>'CBSE']);
         DB::table('erp_teachers')->insert(['id'=>1,'code'=>'SYN-T1','name'=>'Synthetic Teacher','timezone'=>'Asia/Kolkata','status'=>'active']);

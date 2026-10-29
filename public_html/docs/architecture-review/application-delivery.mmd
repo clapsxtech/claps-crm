@@ -1,0 +1,152 @@
+erDiagram
+  %% Logical references only. D1 schema declares zero ERP foreign keys.
+  erp_agreements {
+    integer id PK
+    integer unit_id
+    integer enrollment_id "logical reference"
+    integer replaces_agreement_id "logical reference"
+    integer weekday
+    varchar start_time
+    integer duration_minutes
+    varchar timezone
+    date starts_on
+    date ends_on
+    varchar status
+  }
+  erp_allocation_requests {
+    integer id PK
+    integer unit_id
+    varchar reference
+    varchar kind
+    integer demo_id "logical reference"
+    integer enrollment_id "logical reference"
+    integer agreement_id "logical reference"
+  }
+  erp_attendance {
+    integer id PK
+    integer unit_id
+    integer lesson_id "logical reference"
+    integer actual_minutes
+    varchar status
+  }
+  erp_availability {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    integer teacher_id "logical reference"
+    integer weekday
+    varchar start_time
+    varchar timezone
+    date starts_on
+    date ends_on
+  }
+  erp_demos {
+    integer id PK
+    integer unit_id
+    varchar status
+    datetime starts_at
+    datetime ends_at
+    varchar timezone
+    integer duration_minutes
+    integer enrollment_id "logical reference"
+    integer agreement_id "logical reference"
+  }
+  erp_duplicate_reviews {
+    integer id PK
+    integer unit_id
+    integer attendance_id "logical reference"
+    integer other_attendance_id "logical reference"
+    varchar status
+  }
+  erp_enrollments {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    integer teacher_id "logical reference"
+    integer subject_id "logical reference"
+    date starts_on
+    date ends_on
+    integer student_rate_paise
+    integer teacher_rate_paise
+    varchar currency
+    varchar status
+    varchar source_external_id
+  }
+  erp_exceptions {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    integer teacher_id "logical reference"
+    datetime starts_at
+    datetime ends_at
+    varchar timezone
+  }
+  erp_internal_notes {
+    integer id PK
+    integer unit_id
+    integer lesson_id "logical reference"
+    varchar kind
+  }
+  erp_lessons {
+    integer id PK
+    integer unit_id
+    integer enrollment_id "logical reference"
+    integer agreement_id "logical reference"
+    datetime starts_at
+    datetime ends_at
+    varchar status
+    varchar kind
+    integer replaces_lesson_id "logical reference"
+    integer student_rate_paise
+    integer teacher_rate_paise
+    varchar currency
+  }
+  erp_marks {
+    integer id PK
+    integer unit_id
+    integer enrollment_id "logical reference"
+    varchar assessment
+    integer score
+    integer maximum
+  }
+  erp_students {
+    integer id PK
+    integer unit_id
+    varchar code
+    varchar name
+    varchar timezone
+    varchar status
+  }
+  erp_subjects {
+    integer id PK
+    varchar name
+  }
+  erp_teachers {
+    integer id PK
+    varchar code
+    varchar name
+    varchar timezone
+    varchar status
+  }
+  erp_students ||..o{ erp_enrollments : "student_id"
+  erp_teachers ||..o{ erp_enrollments : "teacher_id"
+  erp_subjects ||..o{ erp_enrollments : "subject_id"
+  erp_students |o..o{ erp_availability : "student_id"
+  erp_teachers |o..o{ erp_availability : "teacher_id"
+  erp_students |o..o{ erp_exceptions : "student_id"
+  erp_teachers |o..o{ erp_exceptions : "teacher_id"
+  erp_enrollments ||..o{ erp_agreements : "enrollment_id"
+  erp_agreements |o..o| erp_agreements : "replaces_agreement_id"
+  erp_enrollments ||..o{ erp_lessons : "enrollment_id"
+  erp_agreements |o..o{ erp_lessons : "agreement_id"
+  erp_lessons |o..o| erp_lessons : "replaces_lesson_id"
+  erp_lessons ||..o| erp_attendance : "lesson_id"
+  erp_lessons ||..o{ erp_internal_notes : "lesson_id"
+  erp_attendance ||..o{ erp_duplicate_reviews : "attendance_id"
+  erp_attendance ||..o{ erp_duplicate_reviews : "other_attendance_id"
+  erp_enrollments ||..o{ erp_marks : "enrollment_id"
+  erp_demos |o..o{ erp_allocation_requests : "demo_id"
+  erp_enrollments |o..o{ erp_allocation_requests : "enrollment_id"
+  erp_agreements |o..o{ erp_allocation_requests : "agreement_id"
+  erp_enrollments |o..o{ erp_demos : "enrollment_id"
+  erp_agreements |o..o{ erp_demos : "agreement_id"

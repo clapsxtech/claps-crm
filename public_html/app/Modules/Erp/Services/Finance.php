@@ -98,6 +98,7 @@ class Finance
             $active = $this->activeEntries($ledger)->where('kind', 'teacher_accrual')->count();
             if ($active > 1) $this->fail('ledger', 'Multiple active teacher accruals require investigation.');
             if ($active === 1) return true;
+            (new TuitionWorkflows())->assertParentReviewed($attendance);
             $generation = $ledger->where('kind', 'teacher_accrual')->count() + 1;
             $key = 'attendance:'.$attendanceId.':'.$generation.':teacher_accrual';
             $amount = intdiv(((int) $lesson->teacher_rate_paise) * $minutes + 30, 60);

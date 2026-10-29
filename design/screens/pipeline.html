@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pipeline · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .field > .segmented { align-self: flex-start; }
+    .deal-title { text-align: left; color: var(--fg-default); }
+    .deal-title:hover { color: var(--accent-fg); text-decoration: underline; text-underline-offset: 3px; }
+    .deal .hot { color: var(--danger); }
+    .deal-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); padding-top: var(--s-2); border-top: 1px solid var(--border-subtle); }
+    .deal-foot .overdue { color: var(--danger-fg); font-weight: var(--w-medium); }
+    .lane-add { justify-content: flex-start; color: var(--fg-muted); }
+  </style>
+</head>
+<body data-page="pipeline" data-crumbs="Growth/Pipeline">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Admissions &amp; CRM</span>
+      <h1 class="t-title">Pipeline</h1>
+      <p class="muted">64 open enquiries · 9 follow-ups due today · drag a card to move its stage.</p>
+    </div>
+    <div class="actions">
+      <div class="segmented" role="group" aria-label="View">
+        <button aria-pressed="true"><span data-icon="grid" class="icon-sm"></span>Board</button><button aria-pressed="false"><span data-icon="rows" class="icon-sm"></span>List</button>
+      </div>
+      <button class="btn" data-toast="Pipeline exported as CSV"><span data-icon="download"></span>Export</button>
+      <button class="btn btn-primary" data-open="tpl-enquiry" data-kind="drawer"><span data-icon="plus"></span>New enquiry</button>
+    </div>
+  </header>
+
+  <section class="row wrap" aria-label="Filters" style="margin-top: calc(var(--gap-section) * -0.5)">
+    <div class="input-group" style="width:260px"><span data-icon="search"></span><input class="input input-sm" placeholder="Search leads or phone…" /></div>
+    <button class="chip" aria-pressed="true"><span data-icon="flame"></span>Hot</button>
+    <button class="chip" aria-pressed="false"><span data-icon="clock"></span>Overdue</button>
+    <button class="chip" aria-pressed="false"><span data-icon="calendar"></span>Today</button>
+    <button class="chip" aria-pressed="false"><span data-icon="user"></span>My leads</button>
+    <div class="grow"></div>
+    <span class="t-caption">Pipeline value <b class="num" style="color:var(--fg-default)">₹7,84,000</b> / month</span>
+  </section>
+
+  <section class="board" aria-label="Pipeline board">
+    <!-- New -->
+    <div class="lane" style="--lane-color: var(--n-400)">
+      <div class="lane-head"><span class="lane-dot"></span><span class="t-small">New</span><span class="count">3</span><span class="lane-sum">₹1,20,000</span></div>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Arjun Menon</button><span data-icon="flame" class="icon-sm hot" aria-label="Hot lead"></span></div>
+        <div class="deal-meta"><span>Grade 10 · CBSE</span><span>·</span><span>Maths</span></div>
+        <div class="row-sm wrap"><span class="badge info">Instagram</span></div>
+        <div class="deal-foot"><span class="t-caption overdue row-sm"><span data-icon="clock" class="icon-sm"></span>Overdue 2h</span><span class="avatar sm">NH</span></div>
+      </article>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Diya Suresh</button></div>
+        <div class="deal-meta"><span>Grade 6 · State</span><span>·</span><span>English</span></div>
+        <div class="row-sm wrap"><span class="badge">Referral</span></div>
+        <div class="deal-foot"><span class="t-caption row-sm"><span data-icon="clock" class="icon-sm"></span>Today 16:00</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span></div>
+      </article>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Rehan Basheer</button></div>
+        <div class="deal-meta"><span>Grade 12 · CBSE</span><span>·</span><span>Physics</span></div>
+        <div class="row-sm wrap"><span class="badge">Google</span><span class="badge warning">Repeat enquiry</span></div>
+        <div class="deal-foot"><span class="t-caption row-sm"><span data-icon="clock" class="icon-sm"></span>Tomorrow</span><span class="avatar sm">NH</span></div>
+      </article>
+      <button class="btn btn-ghost btn-sm lane-add" data-open="tpl-enquiry" data-kind="drawer"><span data-icon="plus"></span>Add enquiry</button>
+    </div>
+
+    <!-- Contacted -->
+    <div class="lane" style="--lane-color: var(--info)">
+      <div class="lane-head"><span class="lane-dot"></span><span class="t-small">Contacted</span><span class="count">2</span><span class="lane-sum">₹96,000</span></div>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Nandana Pillai</button><span data-icon="flame" class="icon-sm hot" aria-label="Hot lead"></span></div>
+        <div class="deal-meta"><span>Grade 9 · ICSE</span><span>·</span><span>Chemistry</span></div>
+        <div class="row-sm wrap"><span class="badge info">Instagram</span></div>
+        <div class="deal-foot"><span class="t-caption row-sm"><span data-icon="clock" class="icon-sm"></span>Today 18:30</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span></div>
+      </article>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Muhammed Hisham</button></div>
+        <div class="deal-meta"><span>Grade 8 · CBSE</span><span>·</span><span>Maths, Science</span></div>
+        <div class="row-sm wrap"><span class="badge">WhatsApp</span></div>
+        <div class="deal-foot"><span class="t-caption row-sm"><span data-icon="clock" class="icon-sm"></span>Fri, 31 Oct</span><span class="avatar sm">NH</span></div>
+      </article>
+    </div>
+
+    <!-- Demo scheduled -->
+    <div class="lane" style="--lane-color: var(--special)">
+      <div class="lane-head"><span class="lane-dot"></span><span class="t-small">Demo scheduled</span><span class="count">2</span><span class="lane-sum">₹88,000</span></div>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Meera Krishnan</button></div>
+        <div class="deal-meta"><span>Grade 10 · CBSE</span><span>·</span><span>Maths</span></div>
+        <div class="row-sm wrap"><span class="badge special dot">Demo today 17:00</span></div>
+        <div class="deal-foot"><span class="t-caption row-sm"><span data-icon="user" class="icon-sm"></span>Sneha P.</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span></div>
+      </article>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Aisha Thomas</button></div>
+        <div class="deal-meta"><span>Grade 5 · State</span><span>·</span><span>Malayalam</span></div>
+        <div class="row-sm wrap"><span class="badge special dot">Sat 10:00</span></div>
+        <div class="deal-foot"><span class="t-caption row-sm"><span data-icon="user" class="icon-sm"></span>Anjali S.</span><span class="avatar sm">NH</span></div>
+      </article>
+    </div>
+
+    <!-- Demo attended -->
+    <div class="lane" style="--lane-color: var(--warning)">
+      <div class="lane-head"><span class="lane-dot"></span><span class="t-small">Demo attended</span><span class="count">2</span><span class="lane-sum">₹1,04,000</span></div>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Gautham Varma</button><span data-icon="flame" class="icon-sm hot" aria-label="Hot lead"></span></div>
+        <div class="deal-meta"><span>Grade 11 · CBSE</span><span>·</span><span>Physics</span></div>
+        <div class="row-sm wrap"><span class="badge success">Continue with teacher</span></div>
+        <div class="deal-foot"><span class="t-caption row-sm"><span data-icon="clock" class="icon-sm"></span>Today 12:00</span><span class="avatar sm">NH</span></div>
+      </article>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Sana Fathima</button></div>
+        <div class="deal-meta"><span>Grade 7 · ICSE</span><span>·</span><span>Maths</span></div>
+        <div class="row-sm wrap"><span class="badge warning">Awaiting feedback</span></div>
+        <div class="deal-foot"><span class="t-caption overdue row-sm"><span data-icon="clock" class="icon-sm"></span>Overdue 1d</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span></div>
+      </article>
+    </div>
+
+    <!-- Registered -->
+    <div class="lane" style="--lane-color: var(--success)">
+      <div class="lane-head"><span class="lane-dot"></span><span class="t-small">Registered</span><span class="count">2</span><span class="lane-sum">₹92,000</span></div>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Fathima Rahman</button></div>
+        <div class="deal-meta"><span>Grade 9 · CBSE</span><span>·</span><span>Maths</span></div>
+        <div class="row-sm wrap"><span class="badge success dot">CL-1042</span></div>
+        <div class="deal-foot"><span class="t-caption">Joined 24 Oct</span><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span></div>
+      </article>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Adwaith Raj</button></div>
+        <div class="deal-meta"><span>Grade 4 · State</span><span>·</span><span>English</span></div>
+        <div class="row-sm wrap"><span class="badge success dot">CL-1045</span></div>
+        <div class="deal-foot"><span class="t-caption">Joined 27 Oct</span><span class="avatar sm">NH</span></div>
+      </article>
+    </div>
+
+    <!-- Lost -->
+    <div class="lane" style="--lane-color: var(--danger)">
+      <div class="lane-head"><span class="lane-dot"></span><span class="t-small">Lost</span><span class="count">1</span><span class="lane-sum">—</span></div>
+      <article class="deal">
+        <div class="row between"><button class="deal-title" data-open="tpl-lead" data-kind="drawer">Hridya Mohan</button></div>
+        <div class="deal-meta"><span>Grade 12 · State</span><span>·</span><span>Biology</span></div>
+        <div class="row-sm wrap"><span class="badge danger">Fee too high</span></div>
+        <div class="deal-foot"><span class="t-caption">Lost 26 Oct</span><span class="avatar sm">NH</span></div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<template id="tpl-lead">
+  <div class="drawer" role="dialog" aria-label="Lead: Arjun Menon">
+    <div class="drawer-head">
+      <span class="avatar lg">AM</span>
+      <div class="grow stack-xs" style="gap:0"><span class="t-subhead">Arjun Menon</span><span class="t-caption">Enquiry #4821 · Grade 10 CBSE · Maths</span></div>
+      <button class="btn btn-ghost btn-icon" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button>
+      <button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button>
+    </div>
+    <div class="drawer-body">
+      <div class="row wrap">
+        <span class="badge danger dot">Hot</span><span class="badge">New</span><span class="badge info">Instagram</span>
+      </div>
+      <div class="callout warning"><span data-icon="clock"></span><div><strong>Next step:</strong> call back about weekday evening slots. Overdue by 2 hours.</div></div>
+      <dl class="dl">
+        <dt>Parent / contact phone</dt><dd class="row-sm"><span class="num">+91 98470 12345</span><button class="btn btn-link t-caption" data-copy="+919847012345">Copy</button></dd>
+        <dt>Student WhatsApp</dt><dd class="num">+91 97450 66120</dd>
+        <dt>Owner</dt><dd class="row-sm"><span class="avatar sm">NH</span>Nihal</dd>
+        <dt>Enquiry date</dt><dd>27 Oct 2026</dd>
+      </dl>
+      <hr class="divider" />
+      <div class="stack">
+        <span class="t-subhead">Log follow-up</span>
+        <div class="field"><label class="field-label">Contact outcome</label>
+          <div class="segmented" role="group" aria-label="Contact outcome"><button aria-pressed="true">Spoke</button><button aria-pressed="false">No answer</button><button aria-pressed="false">Busy</button><button aria-pressed="false">WhatsApp</button></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label class="field-label">Interest / obstacle</label><select class="select"><option>Interested</option><option>Fee concern</option><option>Timing</option><option>Not interested</option></select></div>
+          <div class="field"><label class="field-label">Next follow-up</label><input class="input" type="date" value="2026-10-30" /></div>
+          <div class="field full"><label class="field-label">Notes <span class="opt">Optional</span></label><textarea class="textarea" placeholder="What did the parent say?"></textarea></div>
+        </div>
+        <div class="row end"><button class="btn btn-primary btn-sm" data-async data-done="Logged" data-toast="Follow-up logged · next call Thu 30 Oct">Log follow-up</button></div>
+      </div>
+      <hr class="divider" />
+      <div class="stack">
+        <span class="t-subhead">Activity history</span>
+        <div class="timeline">
+          <div class="tl-item"><span class="tl-dot info"><span data-icon="phone"></span></span><div class="tl-body"><b>Nihal</b> called · no answer<div class="t-caption">Today, 10:12</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><span data-icon="message"></span></span><div class="tl-body">WhatsApp: “Can we do 6pm on weekdays?”<div class="t-caption">Yesterday, 21:40</div></div></div>
+          <div class="tl-item"><span class="tl-dot success"><span data-icon="plus"></span></span><div class="tl-body">Enquiry created from Instagram campaign <b>Board Prep ’26</b><div class="t-caption">27 Oct, 18:05</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn" data-toast="Transfer request sent to Shahana"><span data-icon="swap"></span>Transfer to a colleague</button>
+      <div class="grow"></div>
+      <button class="btn btn-primary" data-async data-close data-done="Converted" data-toast="Arjun Menon converted · student CL-1046 created">Convert to student</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-enquiry">
+  <div class="drawer" role="dialog" aria-label="New enquiry">
+    <div class="drawer-head"><span class="t-subhead grow">New enquiry</span><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field full"><label class="field-label">Student name</label><input class="input" placeholder="e.g. Fathima Rahman" autofocus /></div>
+        <div class="field"><label class="field-label">Class / grade</label><select class="select"><option>Grade 9</option><option>Grade 10</option></select></div>
+        <div class="field"><label class="field-label">Syllabus</label><select class="select"><option>CBSE</option><option>ICSE</option><option>State</option></select></div>
+        <div class="field full"><label class="field-label">Parent / contact phone</label><div class="input-group"><span class="affix">+91</span><input class="input num" placeholder="98470 12345" /></div><span class="field-hint">We’ll check for a repeat enquiry or shared family number.</span></div>
+        <div class="field"><label class="field-label">Source</label><select class="select"><option>Instagram</option><option>Referral</option><option>Google</option></select></div>
+        <div class="field"><label class="field-label">Next follow-up</label><input class="input" type="date" /></div>
+      </div>
+      <label class="switch"><input type="checkbox" /><span class="t-small">Mark as hot lead</span></label>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Created" data-toast="Enquiry created · assigned to you">Create enquiry</button></div>
+  </div>
+</template>
+</body>
+</html>

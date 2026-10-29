@@ -1,0 +1,5748 @@
+{
+  "scope": "Disposable in-memory SQLite built from D1 SQL; no production connection or source records.",
+  "migrations": [
+    {
+      "file": "0001_initial.sql",
+      "sha256": "032fd56a2fd3de2c85f46f1a2d3137796f259b53402a1592e576915d85f0174f"
+    },
+    {
+      "file": "0002_teacher_result_keys.sql",
+      "sha256": "dc1b9aa2cb8b8cf063a1503cf372cba9f3c0bae7945a0c5df5107c9ce92195e5"
+    },
+    {
+      "file": "0003_team_lifecycle.sql",
+      "sha256": "8ebb1cdb2312bf6d6d7b83093002afd228487b45751b19dac610e3d9167dee50"
+    },
+    {
+      "file": "0004_account_two_factor.sql",
+      "sha256": "be7191c721dadce686e10e458d85fba6a804169954be5db7e21a381743ca0bf3"
+    },
+    {
+      "file": "0005_tuition_workflows.sql",
+      "sha256": "6c235061a3868bb4e4d25827587c17247a0d29ed168c99dea6a98f81981849ba"
+    },
+    {
+      "file": "0006_admissions.sql",
+      "sha256": "e25baf4fc0994f1931b632d9607a9b1794c8a0a5d0796472cade07f47655febd"
+    },
+    {
+      "file": "0007_canonical_layers.sql",
+      "sha256": "eacf0cd2711883ac3533c1743e828433364304e2dfa23fc94caab97dddbf46c1"
+    },
+    {
+      "file": "0008_revision_triggers_for_erp_modules.sql",
+      "sha256": "e48e36ddc92b7a793c7859160c8c9203cb4f0affc167003716e3dc76c73dc3db"
+    },
+    {
+      "file": "0009_teacher_recruitment.sql",
+      "sha256": "1b4dbf66ece788659de458e09f91f5a0657c84e967f85ce9d2126bf69c85d3f1"
+    },
+    {
+      "file": "0010_teacher_allocation.sql",
+      "sha256": "cf677d90e7e4663d5b9dc0568175161c78de0d9919273cf186d88fc3b1f5299b"
+    }
+  ],
+  "erp_table_count": 45,
+  "declared_erp_foreign_keys": 0,
+  "missing_revision_triggers": [],
+  "synthetic_constraint_probes": {
+    "orphan_student_profile": "ACCEPTED_INVALID_DATA",
+    "cross_team_student_profile": "ACCEPTED_INVALID_DATA",
+    "negative_attendance_with_missing_lesson": "ACCEPTED_INVALID_DATA",
+    "duplicate_task_source_identity": "ACCEPTED_INVALID_DATA"
+  },
+  "tables": {
+    "erp_agreements": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "enrollment_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "replaces_agreement_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "weekday",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "start_time",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "duration_minutes",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "timezone",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "starts_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "ends_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'proposed'",
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "teacher_confirmed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "student_confirmed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "confirmation_channel",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "confirmed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "confirmation_note",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_agreements_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_agreements_replaces_agreement_id_unique",
+          "unique": true,
+          "columns": [
+            "replaces_agreement_id"
+          ]
+        }
+      ]
+    },
+    "erp_allocation_requests": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "reference",
+          "type": "VARCHAR(120)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "fingerprint",
+          "type": "VARCHAR(64)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "kind",
+          "type": "VARCHAR(20)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "demo_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "enrollment_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "agreement_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_allocation_requests_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "sqlite_autoindex_erp_allocation_requests_1",
+          "unique": true,
+          "columns": [
+            "reference"
+          ]
+        }
+      ]
+    },
+    "erp_attendance": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "lesson_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "actual_minutes",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'submitted'",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "submitted_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "reviewed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "reviewed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "actual_starts_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "change_reason",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "submitted_late",
+          "type": "TINYINT(1)",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "parent_shared_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "parent_deadline_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "parent_review_status",
+          "type": "VARCHAR",
+          "notnull": 1,
+          "default": "'unshared'",
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "parent_review_note",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_attendance_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_attendance_lesson_id_unique",
+          "unique": true,
+          "columns": [
+            "lesson_id"
+          ]
+        }
+      ]
+    },
+    "erp_attendance_batches": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "reference",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "snapshot",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "imported_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "imported_at",
+          "type": "datetime",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_attendance_batches_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_attendance_batches_reference_unique",
+          "unique": true,
+          "columns": [
+            "reference"
+          ]
+        }
+      ]
+    },
+    "erp_audit": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "actor_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "action",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "entity_type",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "entity_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "payload",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_audit_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_availability": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "weekday",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "start_time",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "end_time",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "timezone",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "starts_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "ends_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_availability_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_candidate_interviews": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "candidate_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "score",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "recording_url",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "strengths",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "concerns",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "decision",
+          "type": "VARCHAR",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_candidate_interviews_unit_id_candidate_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "candidate_id"
+          ]
+        }
+      ]
+    },
+    "erp_candidates": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "name",
+          "type": "VARCHAR",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "contact",
+          "type": "VARCHAR",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "qualification",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "subjects",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "levels",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "languages",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "availability",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "status",
+          "type": "VARCHAR",
+          "notnull": 1,
+          "default": "'pool'",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_candidates_unit_id_status_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "status"
+          ]
+        }
+      ]
+    },
+    "erp_demos": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "lead_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "subject_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "scheduled_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "scheduled_time",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'SCHEDULED'",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "meet_link",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "scheduling_notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "completed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "starts_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "ends_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "timezone",
+          "type": "VARCHAR(255)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "duration_minutes",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 19,
+          "name": "matching_medium",
+          "type": "VARCHAR(100)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 20,
+          "name": "matching_grade",
+          "type": "VARCHAR(100)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 21,
+          "name": "matching_syllabus",
+          "type": "VARCHAR(100)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 22,
+          "name": "feedback_outcome",
+          "type": "VARCHAR(30)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 23,
+          "name": "feedback_note",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 24,
+          "name": "enrollment_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 25,
+          "name": "agreement_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_demos_starts_at_index",
+          "unique": false,
+          "columns": [
+            "starts_at"
+          ]
+        },
+        {
+          "name": "erp_demos_subject_id_index",
+          "unique": false,
+          "columns": [
+            "subject_id"
+          ]
+        },
+        {
+          "name": "erp_demos_teacher_id_index",
+          "unique": false,
+          "columns": [
+            "teacher_id"
+          ]
+        },
+        {
+          "name": "erp_demos_student_id_index",
+          "unique": false,
+          "columns": [
+            "student_id"
+          ]
+        },
+        {
+          "name": "erp_demos_lead_id_index",
+          "unique": false,
+          "columns": [
+            "lead_id"
+          ]
+        },
+        {
+          "name": "erp_demos_schedule_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "scheduled_on",
+            "status"
+          ]
+        },
+        {
+          "name": "erp_demos_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_duplicate_reviews": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "attendance_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "other_attendance_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'pending'",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "channel",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'gallabox'",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "teacher_reply",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "reason",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "reviewed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "reviewed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_duplicate_reviews_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_eligibilities": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "subject_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "grade",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "syllabus",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_eligibility_unique",
+          "unique": true,
+          "columns": [
+            "teacher_id",
+            "subject_id",
+            "grade",
+            "syllabus"
+          ]
+        }
+      ]
+    },
+    "erp_enrollments": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "subject_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "starts_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "ends_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "student_rate_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "teacher_rate_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "currency",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'INR'",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'active'",
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "section",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "grade",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "syllabus",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "source_external_id",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_enrollments_section_index",
+          "unique": false,
+          "columns": [
+            "section"
+          ]
+        },
+        {
+          "name": "erp_enrollments_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_enrollments_teacher_id_index",
+          "unique": false,
+          "columns": [
+            "teacher_id"
+          ]
+        },
+        {
+          "name": "erp_enrollments_student_id_index",
+          "unique": false,
+          "columns": [
+            "student_id"
+          ]
+        }
+      ]
+    },
+    "erp_exceptions": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "date",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "reason",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "starts_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "ends_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "timezone",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_exceptions_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_exceptions_teacher_interval",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "teacher_id",
+            "starts_at"
+          ]
+        },
+        {
+          "name": "erp_exceptions_student_interval",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "student_id",
+            "starts_at"
+          ]
+        }
+      ]
+    },
+    "erp_followups": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "contact_channel",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "note",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "outcome",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "next_due_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_followups_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_internal_notes": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "lesson_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "kind",
+          "type": "VARCHAR",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "outcome",
+          "type": "VARCHAR",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "note",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_internal_notes_unit_id_lesson_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "lesson_id"
+          ]
+        }
+      ]
+    },
+    "erp_invoice_lines": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "invoice_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "description",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "quantity",
+          "type": "numeric",
+          "notnull": 1,
+          "default": "1",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "unit_rate_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "amount_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_invoice_lines_invoice_id_index",
+          "unique": false,
+          "columns": [
+            "invoice_id"
+          ]
+        },
+        {
+          "name": "erp_invoice_lines_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_invoices": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "invoice_number",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'issued'",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "issue_date",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "due_date",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "currency",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'INR'",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "subtotal_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "discount_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "tax_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "total_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "billing_name",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "billing_contact",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_invoices_student_id_index",
+          "unique": false,
+          "columns": [
+            "student_id"
+          ]
+        },
+        {
+          "name": "erp_invoices_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "sqlite_autoindex_erp_invoices_1",
+          "unique": true,
+          "columns": [
+            "unit_id",
+            "invoice_number"
+          ]
+        }
+      ]
+    },
+    "erp_lead_activities": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "lead_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "actor_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "kind",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "channel",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "outcome",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "summary",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "metadata",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "occurred_at",
+          "type": "datetime",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_lead_activity_timeline_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "lead_id",
+            "occurred_at"
+          ]
+        },
+        {
+          "name": "erp_lead_activities_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_lead_reminders": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "lead_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "due_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "due_time",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "text",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "is_completed",
+          "type": "tinyint(1)",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "completed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "completed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_lead_reminders_lead_id_index",
+          "unique": false,
+          "columns": [
+            "lead_id"
+          ]
+        },
+        {
+          "name": "erp_lead_reminders_due_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "due_on",
+            "is_completed"
+          ]
+        },
+        {
+          "name": "erp_lead_reminders_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_lead_transfers": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "lead_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "from_user_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "to_user_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'pending'",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "resolved_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_lead_transfers_lead_id_index",
+          "unique": false,
+          "columns": [
+            "lead_id"
+          ]
+        },
+        {
+          "name": "erp_lead_transfers_inbox_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "to_user_id",
+            "status"
+          ]
+        },
+        {
+          "name": "erp_lead_transfers_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_leads": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "external_id",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "name",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "phone",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "email",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "enquiry_date",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'LEAD'",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "grade",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "subject",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "syllabus",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "source",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "country",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "student_phone",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "monthly_fee_paise",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "fee_per_hour_paise",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "teacher_code",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "teacher_section",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 19,
+          "name": "learning_requirement",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 20,
+          "name": "concern",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 21,
+          "name": "about_student",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 22,
+          "name": "about_parent",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 23,
+          "name": "assigned_to",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 24,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 25,
+          "name": "is_hot",
+          "type": "tinyint(1)",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 26,
+          "name": "interest_status",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 27,
+          "name": "next_follow_up_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 28,
+          "name": "is_post_demo",
+          "type": "tinyint(1)",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 29,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 30,
+          "name": "joined_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 31,
+          "name": "admission_code",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 32,
+          "name": "lost_reason",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 33,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 34,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_leads_student_id_index",
+          "unique": false,
+          "columns": [
+            "student_id"
+          ]
+        },
+        {
+          "name": "erp_leads_next_follow_up_on_index",
+          "unique": false,
+          "columns": [
+            "next_follow_up_on"
+          ]
+        },
+        {
+          "name": "erp_leads_assigned_to_index",
+          "unique": false,
+          "columns": [
+            "assigned_to"
+          ]
+        },
+        {
+          "name": "erp_leads_phone_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "phone"
+          ]
+        },
+        {
+          "name": "erp_leads_pipeline_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "status",
+            "enquiry_date"
+          ]
+        },
+        {
+          "name": "erp_leads_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_leads_admission_code_unique",
+          "unique": true,
+          "columns": [
+            "admission_code"
+          ]
+        },
+        {
+          "name": "erp_leads_unit_external_unique",
+          "unique": true,
+          "columns": [
+            "unit_id",
+            "external_id"
+          ]
+        }
+      ]
+    },
+    "erp_ledger": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "attendance_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "kind",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "amount_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "currency",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "reference",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "event_key",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "reverses_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "occurred_at",
+          "type": "datetime",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "invoice_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_ledger_invoice_id_index",
+          "unique": false,
+          "columns": [
+            "invoice_id"
+          ]
+        },
+        {
+          "name": "erp_ledger_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_ledger_teacher_id_index",
+          "unique": false,
+          "columns": [
+            "teacher_id"
+          ]
+        },
+        {
+          "name": "erp_ledger_student_id_index",
+          "unique": false,
+          "columns": [
+            "student_id"
+          ]
+        },
+        {
+          "name": "erp_ledger_reverses_id_unique",
+          "unique": true,
+          "columns": [
+            "reverses_id"
+          ]
+        },
+        {
+          "name": "erp_ledger_reference_unique",
+          "unique": true,
+          "columns": [
+            "reference"
+          ]
+        },
+        {
+          "name": "erp_ledger_event_key_unique",
+          "unique": true,
+          "columns": [
+            "event_key"
+          ]
+        }
+      ]
+    },
+    "erp_lessons": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "enrollment_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "agreement_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "subject_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "starts_at",
+          "type": "datetime",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "ends_at",
+          "type": "datetime",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'scheduled'",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "kind",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'regular'",
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "replaces_lesson_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "student_rate_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "teacher_rate_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "currency",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'INR'",
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "cancellation_reason",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "request_reference",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_lessons_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_lessons_teacher_id_index",
+          "unique": false,
+          "columns": [
+            "teacher_id"
+          ]
+        },
+        {
+          "name": "erp_lessons_student_id_index",
+          "unique": false,
+          "columns": [
+            "student_id"
+          ]
+        },
+        {
+          "name": "erp_lessons_starts_at_index",
+          "unique": false,
+          "columns": [
+            "starts_at"
+          ]
+        },
+        {
+          "name": "erp_lessons_request_reference_unique",
+          "unique": true,
+          "columns": [
+            "request_reference"
+          ]
+        },
+        {
+          "name": "erp_lessons_replaces_lesson_id_unique",
+          "unique": true,
+          "columns": [
+            "replaces_lesson_id"
+          ]
+        },
+        {
+          "name": "erp_lessons_agreement_id_starts_at_unique",
+          "unique": true,
+          "columns": [
+            "agreement_id",
+            "starts_at"
+          ]
+        }
+      ]
+    },
+    "erp_marks": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "enrollment_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "assessment",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "assessed_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "score",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "maximum",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "submission_key",
+          "type": "VARCHAR(36)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "submission_hash",
+          "type": "VARCHAR(64)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_marks_submission_key_unique",
+          "unique": true,
+          "columns": [
+            "submission_key"
+          ]
+        },
+        {
+          "name": "erp_marks_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_memberships": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "user_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "role",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_memberships_user_id_unit_id_unique",
+          "unique": true,
+          "columns": [
+            "user_id",
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_migration_batches": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "source_id",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "cutoff",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "digest",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "manifest",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "counts",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "totals",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "actor_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_migration_batches_source_id_cutoff_unique",
+          "unique": true,
+          "columns": [
+            "source_id",
+            "cutoff"
+          ]
+        },
+        {
+          "name": "erp_migration_batches_digest_unique",
+          "unique": true,
+          "columns": [
+            "digest"
+          ]
+        }
+      ]
+    },
+    "erp_migration_history": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "batch_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "enrollment_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "external_id",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "starts_at",
+          "type": "datetime",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "actual_minutes",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "financial_effect",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'none'",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_migration_history_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_migration_history_enrollment_id_starts_at_unique",
+          "unique": true,
+          "columns": [
+            "enrollment_id",
+            "starts_at"
+          ]
+        }
+      ]
+    },
+    "erp_migration_mappings": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "source_id",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "entity_type",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "external_id",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "target_type",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "target_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "row_digest",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "batch_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_migration_target_lookup",
+          "unique": false,
+          "columns": [
+            "target_type",
+            "target_id",
+            "entity_type"
+          ]
+        },
+        {
+          "name": "erp_migration_source_identity",
+          "unique": true,
+          "columns": [
+            "source_id",
+            "entity_type",
+            "external_id"
+          ]
+        }
+      ]
+    },
+    "erp_payment_requests": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "reference",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "amount_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'pending'",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "requested_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "due_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_payment_requests_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_payment_requests_reference_unique",
+          "unique": true,
+          "columns": [
+            "reference"
+          ]
+        }
+      ]
+    },
+    "erp_request_allocations": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "request_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "payment_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "amount_paise",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_request_allocations_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_request_allocations_request_id_payment_id_unique",
+          "unique": true,
+          "columns": [
+            "request_id",
+            "payment_id"
+          ]
+        }
+      ]
+    },
+    "erp_student_profiles": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "whatsapp_number",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "student_contact",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "country",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "source",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "section",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "hour_rate_paise",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "email",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "date_of_birth",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "father_name",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "mother_name",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "address",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "city",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "pin_code",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "school",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "preferred_medium",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "preferred_time",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 19,
+          "name": "network_connectivity",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 20,
+          "name": "gender",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 21,
+          "name": "parent_occupation",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 22,
+          "name": "student_occupation",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 23,
+          "name": "gmeet_link",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 24,
+          "name": "requirements",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 25,
+          "name": "concerns",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 26,
+          "name": "about_student",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 27,
+          "name": "about_parent",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 28,
+          "name": "feedback",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 29,
+          "name": "admin_label",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 30,
+          "name": "demo_status",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 31,
+          "name": "next_follow_up_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 32,
+          "name": "public_exam",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 33,
+          "name": "joined_class",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 34,
+          "name": "source_external_id",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 35,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 36,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_student_profiles_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "sqlite_autoindex_erp_student_profiles_1",
+          "unique": true,
+          "columns": [
+            "student_id"
+          ]
+        }
+      ]
+    },
+    "erp_students": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "code",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "name",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "registered_on",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "timezone",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'active'",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "grade",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "syllabus",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "guardian_contact",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "meeting_url",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_students_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_students_code_unique",
+          "unique": true,
+          "columns": [
+            "code"
+          ]
+        }
+      ]
+    },
+    "erp_subjects": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "name",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_subjects_name_unique",
+          "unique": true,
+          "columns": [
+            "name"
+          ]
+        }
+      ]
+    },
+    "erp_task_items": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "task_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "title",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "completed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "completed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "item_type",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'checklist'",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "points",
+          "type": "numeric",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "required",
+          "type": "tinyint(1)",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "source_external_id",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_task_items_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_task_templates": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "department",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'operations'",
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "name",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "description",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "default_points",
+          "type": "numeric",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "checklist_definition",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "active",
+          "type": "tinyint(1)",
+          "notnull": 1,
+          "default": "1",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_task_templates_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "sqlite_autoindex_erp_task_templates_1",
+          "unique": true,
+          "columns": [
+            "unit_id",
+            "department",
+            "name"
+          ]
+        }
+      ]
+    },
+    "erp_tasks": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "student_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "assigned_to",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "title",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "due_on",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'open'",
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "department",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "task_type",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "points",
+          "type": "numeric",
+          "notnull": 1,
+          "default": "0",
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "completed_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "completed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "source",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "source_external_id",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_tasks_source_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "source",
+            "source_external_id"
+          ]
+        },
+        {
+          "name": "erp_tasks_task_type_index",
+          "unique": false,
+          "columns": [
+            "task_type"
+          ]
+        },
+        {
+          "name": "erp_tasks_department_index",
+          "unique": false,
+          "columns": [
+            "department"
+          ]
+        },
+        {
+          "name": "erp_tasks_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_teacher_candidate_activities": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "candidate_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "actor_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "kind",
+          "type": "VARCHAR(40)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "note",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "next_follow_up_on",
+          "type": "DATE",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_teacher_candidate_activities_candidate_id_index",
+          "unique": false,
+          "columns": [
+            "candidate_id"
+          ]
+        }
+      ]
+    },
+    "erp_teacher_candidate_sources": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "candidate_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "source_key",
+          "type": "VARCHAR(255)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "kind",
+          "type": "VARCHAR(24)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "payload",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_teacher_candidate_sources_candidate_id_index",
+          "unique": false,
+          "columns": [
+            "candidate_id"
+          ]
+        },
+        {
+          "name": "sqlite_autoindex_erp_teacher_candidate_sources_1",
+          "unique": true,
+          "columns": [
+            "source_key"
+          ]
+        }
+      ]
+    },
+    "erp_teacher_candidates": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "business_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "identity_key",
+          "type": "VARCHAR(64)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "name",
+          "type": "VARCHAR(255)",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "phone",
+          "type": "VARCHAR(40)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "email",
+          "type": "VARCHAR(255)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "teacher_code",
+          "type": "VARCHAR(100)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "stage",
+          "type": "VARCHAR(24)",
+          "notnull": 1,
+          "default": "'APPLIED'",
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "qualification",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "subjects",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "grades",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "syllabuses",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "medium",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "availability",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "source_status",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "cv_url",
+          "type": "VARCHAR(2000)",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "registered_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 19,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 20,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 21,
+          "name": "merged_into_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 22,
+          "name": "reviewed_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 23,
+          "name": "reviewed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_teacher_candidates_merged_into_id_index",
+          "unique": false,
+          "columns": [
+            "merged_into_id"
+          ]
+        },
+        {
+          "name": "erp_teacher_candidates_stage_index",
+          "unique": false,
+          "columns": [
+            "stage"
+          ]
+        },
+        {
+          "name": "erp_teacher_candidates_teacher_code_index",
+          "unique": false,
+          "columns": [
+            "teacher_code"
+          ]
+        },
+        {
+          "name": "erp_teacher_candidates_teacher_id_index",
+          "unique": false,
+          "columns": [
+            "teacher_id"
+          ]
+        },
+        {
+          "name": "erp_teacher_candidates_phone_index",
+          "unique": false,
+          "columns": [
+            "phone"
+          ]
+        },
+        {
+          "name": "erp_teacher_candidates_business_id_index",
+          "unique": false,
+          "columns": [
+            "business_id"
+          ]
+        },
+        {
+          "name": "sqlite_autoindex_erp_teacher_candidates_1",
+          "unique": true,
+          "columns": [
+            "business_id",
+            "identity_key"
+          ]
+        }
+      ]
+    },
+    "erp_teacher_enquiries": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "phone",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "enquiry_date",
+          "type": "date",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "source",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "staff_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_teacher_enquiries_phone_index",
+          "unique": false,
+          "columns": [
+            "unit_id",
+            "phone"
+          ]
+        },
+        {
+          "name": "erp_teacher_enquiries_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        }
+      ]
+    },
+    "erp_teacher_matching_profiles": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "mediums",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "verified_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "verified_at",
+          "type": "DATETIME",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "verification_note",
+          "type": "TEXT",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "updated_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_erp_teacher_matching_profiles_1",
+          "unique": true,
+          "columns": [
+            "teacher_id"
+          ]
+        }
+      ]
+    },
+    "erp_teacher_profiles": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "whatsapp_number",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "date_of_birth",
+          "type": "date",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "category",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "teacher_type",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "medium",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "source_external_id",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_teacher_profiles_unit_id_index",
+          "unique": false,
+          "columns": [
+            "unit_id"
+          ]
+        },
+        {
+          "name": "sqlite_autoindex_erp_teacher_profiles_1",
+          "unique": true,
+          "columns": [
+            "teacher_id"
+          ]
+        }
+      ]
+    },
+    "erp_teacher_units": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "teacher_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "unit_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_teacher_units_teacher_id_unit_id_unique",
+          "unique": true,
+          "columns": [
+            "teacher_id",
+            "unit_id"
+          ]
+        },
+        {
+          "name": "erp_teacher_units_teacher_id_unique",
+          "unique": true,
+          "columns": [
+            "teacher_id"
+          ]
+        }
+      ]
+    },
+    "erp_teachers": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "user_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "code",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "name",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "timezone",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "status",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'active'",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_teachers_user_id_unique",
+          "unique": true,
+          "columns": [
+            "user_id"
+          ]
+        },
+        {
+          "name": "erp_teachers_code_unique",
+          "unique": true,
+          "columns": [
+            "code"
+          ]
+        }
+      ]
+    },
+    "erp_units": {
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "default": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "code",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "name",
+          "type": "varchar",
+          "notnull": 1,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "phone",
+          "type": "varchar",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "timezone",
+          "type": "varchar",
+          "notnull": 1,
+          "default": "'Asia/Kolkata'",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "created_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "updated_at",
+          "type": "datetime",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "archived_at",
+          "type": "DATETIME",
+          "notnull": 0,
+          "default": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "name": "erp_units_code_unique",
+          "unique": true,
+          "columns": [
+            "code"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -231,7 +231,7 @@ class Scheduling
         } return $out;
     }
     private function coverage($unitId,$e,$start,$end) {
-        foreach (['student_id'=>$e->student_id,'teacher_id'=>$e->teacher_id] as $field=>$id) {
+        foreach (array_filter(['student_id'=>$e->student_id,'teacher_id'=>$e->teacher_id],fn($id)=>$id!==null) as $field=>$id) {
             $person=$this->row($field === 'student_id' ? 'erp_students' : 'erp_teachers',$id,null,true);
             if ($this->exceptionOverlaps($unitId,$field,$id,$start,$end,$person->timezone)->isNotEmpty()) $this->fail('A date-specific holiday or unavailability exception overlaps this lesson.');
             $covered=false;
@@ -257,6 +257,34 @@ class Scheduling
         if ($exceptLesson) $q->where('id','<>',$exceptLesson);
         if ($q->lockForUpdate()->first()) $this->fail('Teacher or student has an overlapping lesson, possibly in another unit.');
         foreach ($this->agreementsFor($e,$exceptAgreement) as $a) $this->agreementConflict($a,$start,$end,$exemptOccurrence);
+        $this->demoConflicts($e,$start,$end);
+    }
+    /** Same checks for a tentative match and its transactional booking. */
+    public function checkMatchedSlot(int $unit,int $teacher,?int $student,string $start,string $end): void
+    {
+        $t=$this->row('erp_teachers',$teacher,null,true);
+        if($t->status!=='active' || DB::table('erp_teacher_units')->where('teacher_id',$teacher)->count()!==1 || !DB::table('erp_teacher_units')->where('unit_id',$unit)->where('teacher_id',$teacher)->exists())$this->fail('Teacher must be active in exactly this unit pool.');
+        if($student)$this->parents($unit,$teacher,$student,true);
+        $e=(object)['teacher_id'=>$teacher,'student_id'=>$student];
+        $this->coverage($unit,$e,$start,$end);
+        $this->conflicts($e,$start,$end);
+    }
+    private function demoConflicts($e,string $start,string $end): void
+    {
+        $query=DB::table('erp_demos as d')->join('erp_units as u','u.id','=','d.unit_id')
+            ->leftJoin('erp_leads as l','l.id','=','d.lead_id')->whereIn('d.status',['SCHEDULED','RESCHEDULED'])
+            ->where(function($q)use($e){$q->where('d.teacher_id',$e->teacher_id);if($e->student_id)$q->orWhere('d.student_id',$e->student_id)->orWhere('l.student_id',$e->student_id);})
+            ->select('d.*','u.timezone as unit_timezone')->lockForUpdate();
+        foreach($query->get() as $demo){
+            if($demo->starts_at && $demo->ends_at){$ds=$demo->starts_at;$de=$demo->ends_at;}
+            else{
+                // Legacy demos have no duration. Do not invent a free end time:
+                // reserve that local date until an operator cancels/rebooks it.
+                $ds=$this->localToUtc($demo->scheduled_on,'00:00',$demo->unit_timezone);
+                $de=$this->localToUtc((new DateTimeImmutable($demo->scheduled_on))->modify('+1 day')->format('Y-m-d'),'00:00',$demo->unit_timezone);
+            }
+            if($ds<$end && $de>$start)$this->fail('A scheduled demo overlaps this slot. Legacy demos without duration reserve their local date until reviewed.');
+        }
     }
     public function materialize(int $unitId, int $actorId, array $p) {
         $this->required($p,['agreement_id','from','through']);

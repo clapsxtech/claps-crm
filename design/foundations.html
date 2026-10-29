@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Foundations · ClapsLearn Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="system/tokens.css" />
+  <link rel="stylesheet" href="system/components.css" />
+  <script src="system/app.js" defer></script>
+  <script src="system/charts.js" defer></script>
+  <style>
+    .wrap-ds { max-width: 1120px; margin: 0 auto; padding: var(--s-10) var(--s-8) var(--s-16); display: flex; flex-direction: column; gap: var(--s-12); }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--s-2); }
+    .sw { display: flex; flex-direction: column; gap: var(--s-1); font: var(--t-xs); }
+    .sw i { height: 56px; border-radius: var(--r-md); border: 1px solid rgba(0,0,0,.06); }
+    .sw code { font-family: var(--font-mono); color: var(--fg-muted); font-size: 11px; }
+    .type-row { display: grid; grid-template-columns: 140px 1fr; gap: var(--s-4); align-items: baseline; padding: var(--s-3) 0; border-top: 1px solid var(--border-subtle); }
+    .space-row { display: grid; grid-template-columns: 80px 56px 1fr; gap: var(--s-4); align-items: center; font: var(--t-xs); }
+    .space-row b { height: 16px; background: var(--g-200); border-radius: 2px; display: block; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--s-4); }
+    .tile { height: 96px; background: var(--bg-surface); border: 1px solid var(--border-default); display: grid; place-items: center; font: var(--t-xs); color: var(--fg-muted); }
+    .motion-track { position: relative; height: 40px; border-radius: var(--r-md); background: var(--bg-sunken); border: 1px solid var(--border-subtle); }
+    .motion-dot { position: absolute; left: 4px; top: 4px; width: 32px; height: 30px; border-radius: var(--r-sm); background: var(--accent); }
+    .motion-grid:hover .motion-dot { transform: translateX(calc(min(560px, 60vw))); }
+    .redline { position: relative; display: inline-block; outline: 1px dashed var(--danger); outline-offset: 0; }
+  </style>
+</head>
+<body data-shell="none">
+<main class="wrap-ds">
+  <header class="stack-sm">
+    <a href="index.html" class="t-small">← ClapsLearn DS</a>
+    <h1 class="t-display">Foundations</h1>
+    <p class="muted t-md" style="max-width:64ch">Tokens are the single source of truth. Components use only semantic tokens, so theme and density can change globally without editing a single component.</p>
+  </header>
+
+  <section class="stack">
+    <h2 class="t-heading">Colour</h2>
+    <p class="muted">The neutrals are tinted toward the brand green (hue ≈165), so greys feel warm next to it. Brand green-600 carries the legacy <code class="mono">#117c66</code> forward.</p>
+    <div class="t-overline">Brand</div>
+    <div class="swatches">
+      <div class="sw"><i style="background:var(--g-50)"></i>50<code>#ecf8f3</code></div><div class="sw"><i style="background:var(--g-100)"></i>100<code>#d2f0e4</code></div><div class="sw"><i style="background:var(--g-200)"></i>200<code>#a6e0ca</code></div><div class="sw"><i style="background:var(--g-300)"></i>300<code>#6fc9a9</code></div><div class="sw"><i style="background:var(--g-400)"></i>400<code>#36ab87</code></div><div class="sw"><i style="background:var(--g-500)"></i>500<code>#13906f</code></div><div class="sw"><i style="background:var(--g-600)"></i><b>600 · accent</b><code>#0c7a5f</code></div><div class="sw"><i style="background:var(--g-700)"></i>700<code>#0a624d</code></div><div class="sw"><i style="background:var(--g-800)"></i>800<code>#0a4d3d</code></div><div class="sw"><i style="background:var(--g-900)"></i>900<code>#083a2f</code></div>
+    </div>
+    <div class="t-overline">Neutral</div>
+    <div class="swatches">
+      <div class="sw"><i style="background:var(--n-0)"></i>0<code>#ffffff</code></div><div class="sw"><i style="background:var(--n-50)"></i>50 · canvas<code>#f4f6f5</code></div><div class="sw"><i style="background:var(--n-100)"></i>100<code>#eaeeec</code></div><div class="sw"><i style="background:var(--n-200)"></i>200 · border<code>#dce2df</code></div><div class="sw"><i style="background:var(--n-300)"></i>300<code>#c3ccc8</code></div><div class="sw"><i style="background:var(--n-400)"></i>400<code>#98a5a0</code></div><div class="sw"><i style="background:var(--n-500)"></i>500 · muted<code>#5f6d68</code></div><div class="sw"><i style="background:var(--n-700)"></i>700<code>#3a4541</code></div><div class="sw"><i style="background:var(--n-900)"></i>900 · ink<code>#151d1a</code></div>
+    </div>
+    <div class="t-overline">Semantic — subtle / solid / text</div>
+    <div class="swatches">
+      <div class="sw"><i style="background:linear-gradient(90deg,var(--success-subtle) 33%,var(--success) 33% 66%,var(--success-fg) 66%)"></i>success</div>
+      <div class="sw"><i style="background:linear-gradient(90deg,var(--warning-subtle) 33%,var(--warning) 33% 66%,var(--warning-fg) 66%)"></i>warning</div>
+      <div class="sw"><i style="background:linear-gradient(90deg,var(--danger-subtle) 33%,var(--danger) 33% 66%,var(--danger-fg) 66%)"></i>danger</div>
+      <div class="sw"><i style="background:linear-gradient(90deg,var(--info-subtle) 33%,var(--info) 33% 66%,var(--info-fg) 66%)"></i>info</div>
+      <div class="sw"><i style="background:linear-gradient(90deg,var(--special-subtle) 33%,var(--special) 33% 66%,var(--special-fg) 66%)"></i>special (demo)</div>
+    </div>
+    <div class="callout"><span data-icon="info"></span><div>Measured WCAG contrast: status text (<code class="mono">*-fg</code> on <code class="mono">*-subtle</code>) is ≥ 5.4:1 in light and ≥ 6.0:1 in dark; muted text is ≥ 4.6:1 even on a hovered row; white on accent is 5.3:1 and on danger 5.1:1. <code class="mono">--fg-subtle</code> (2.5:1) is reserved for placeholders and decoration and never carries meaning.</div></div>
+  </section>
+
+  <section class="stack">
+    <h2 class="t-heading">Typography</h2>
+    <p class="muted">Inter, with every line height snapped to the 4px grid. Negative tracking applies only at 22px and above. Numbers use tabular figures wherever they line up in columns.</p>
+    <div>
+      <div class="type-row"><span class="t-caption">3xl · 36/44 · 600</span><span class="t-display">₹4,82,300 collected</span></div>
+      <div class="type-row"><span class="t-caption">2xl · 28/36 · 600</span><span class="t-title">Good morning, Amnas</span></div>
+      <div class="type-row"><span class="t-caption">lg · 18/28 · 600</span><span class="t-heading">Section heading</span></div>
+      <div class="type-row"><span class="t-caption">md · 16/24 · 600</span><span class="t-subhead">Card title</span></div>
+      <div class="type-row"><span class="t-caption">base · 14/20 · 400</span><span class="t-body">Body copy and table cells. The default for almost everything.</span></div>
+      <div class="type-row"><span class="t-caption">sm · 13/20 · 400</span><span class="t-small">Secondary text, form labels, list meta.</span></div>
+      <div class="type-row"><span class="t-caption">xs · 12/16 · 400</span><span class="t-caption">Captions, timestamps, helper text</span></div>
+      <div class="type-row"><span class="t-caption">overline · 12/16 · 600</span><span class="t-overline">Section label</span></div>
+      <div class="type-row"><span class="t-caption">mono · 12</span><span class="mono">CL-1042 · 09:00 · 2026-10-29T03:30Z</span></div>
+    </div>
+  </section>
+
+  <section class="stack">
+    <h2 class="t-heading">Spacing</h2>
+    <p class="muted">A 4px base composed into an 8pt rhythm. Components reference <b>role</b> tokens rather than raw steps; switching to compact density changes only the role tokens.</p>
+    <div class="grid">
+      <div class="span-6 stack-sm">
+        <div class="space-row"><code class="mono">--s-1</code><span>4px</span><b style="width:4px"></b></div>
+        <div class="space-row"><code class="mono">--s-2</code><span>8px</span><b style="width:8px"></b></div>
+        <div class="space-row"><code class="mono">--s-3</code><span>12px</span><b style="width:12px"></b></div>
+        <div class="space-row"><code class="mono">--s-4</code><span>16px</span><b style="width:16px"></b></div>
+        <div class="space-row"><code class="mono">--s-5</code><span>20px</span><b style="width:20px"></b></div>
+        <div class="space-row"><code class="mono">--s-6</code><span>24px</span><b style="width:24px"></b></div>
+        <div class="space-row"><code class="mono">--s-8</code><span>32px</span><b style="width:32px"></b></div>
+        <div class="space-row"><code class="mono">--s-10</code><span>40px</span><b style="width:40px"></b></div>
+        <div class="space-row"><code class="mono">--s-12</code><span>48px</span><b style="width:48px"></b></div>
+        <div class="space-row"><code class="mono">--s-16</code><span>64px</span><b style="width:64px"></b></div>
+      </div>
+      <div class="span-6 card">
+        <table class="table">
+          <thead><tr><th>Role</th><th>Comfortable</th><th>Compact</th><th>Used for</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">--gap-inline</td><td>8</td><td>8</td><td>icon ↔ label, chips</td></tr>
+            <tr><td class="mono">--gap-stack</td><td>16</td><td>12</td><td>form fields, card rows</td></tr>
+            <tr><td class="mono">--gap-group</td><td>24</td><td>16</td><td>cards in a grid</td></tr>
+            <tr><td class="mono">--gap-section</td><td>32</td><td>32</td><td>page regions</td></tr>
+            <tr><td class="mono">--pad-card</td><td>20</td><td>16</td><td>card / table edge</td></tr>
+            <tr><td class="mono">--row-default</td><td>52</td><td>40</td><td>table rows</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="callout success"><span data-icon="check"></span><div><b>Proximity rule:</b> space inside a group is always smaller than space between groups. Within a component use 4–12, between components 16–24, between page regions 32.</div></div>
+  </section>
+
+  <section class="stack">
+    <h2 class="t-heading">Layout</h2>
+    <div class="grid">
+      <div class="span-6 dl" style="grid-template-columns:160px 1fr">
+        <dt>Grid</dt><dd>12 columns · 24px gutter</dd>
+        <dt>Content max</dt><dd>1440px, centred</dd>
+        <dt>Page padding</dt><dd>32 → 24 (≤1024) → 16 (≤640)</dd>
+        <dt>Sidebar</dt><dd>248 · collapses to 68 · off-canvas ≤900</dd>
+        <dt>Top bar</dt><dd>60, sticky, blurred; border appears on scroll</dd>
+        <dt>Drawer</dt><dd>480 (full width on mobile)</dd>
+      </div>
+      <div class="span-6 dl" style="grid-template-columns:160px 1fr">
+        <dt>KPI row</dt><dd>4 × span-3 → 2 × span-6 → stacked</dd>
+        <dt>Main + aside</dt><dd>span-8 + span-4</dd>
+        <dt>Touch target</dt><dd>≥ 44px on mobile surfaces</dd>
+        <dt>Control heights</dt><dd>32 · 36 · 44</dd>
+        <dt>Alignment</dt><dd>Text left · numbers right · status badges left · row actions right</dd>
+        <dt>Breakpoints</dt><dd>640 · 720 · 900 · 1024 · 1180</dd>
+      </div>
+    </div>
+  </section>
+
+  <section class="stack">
+    <h2 class="t-heading">Radius &amp; elevation</h2>
+    <div class="tiles">
+      <div class="tile" style="border-radius:var(--r-xs)">xs · 4 · checkbox</div>
+      <div class="tile" style="border-radius:var(--r-sm)">sm · 6 · badge-ish</div>
+      <div class="tile" style="border-radius:var(--r-md)">md · 8 · control</div>
+      <div class="tile" style="border-radius:var(--r-lg)">lg · 12 · card</div>
+      <div class="tile" style="border-radius:var(--r-xl)">xl · 16 · dialog</div>
+    </div>
+    <div class="tiles">
+      <div class="tile" style="border-radius:var(--r-lg);box-shadow:var(--e-1)">e-1 · resting</div>
+      <div class="tile" style="border-radius:var(--r-lg);box-shadow:var(--e-2)">e-2 · hover</div>
+      <div class="tile" style="border-radius:var(--r-lg);box-shadow:var(--e-3)">e-3 · menu</div>
+      <div class="tile" style="border-radius:var(--r-lg);box-shadow:var(--e-4)">e-4 · dialog</div>
+    </div>
+  </section>
+
+  <section class="stack">
+    <h2 class="t-heading">Motion</h2>
+    <p class="muted">Motion should explain what changed. Entering elements decelerate and exiting ones accelerate. Only toggles and confirmations get the spring. All durations drop to 0 under <code class="mono">prefers-reduced-motion</code>.</p>
+    <div class="card card-body stack motion-grid">
+      <span class="t-caption">Hover this card to race the easings</span>
+      <div class="stack-xs"><span class="t-caption">standard · 280ms · cubic-bezier(.2,0,0,1) — position, size</span><div class="motion-track"><span class="motion-dot" style="transition:transform var(--d-slow) var(--ease-standard)"></span></div></div>
+      <div class="stack-xs"><span class="t-caption">enter · 280ms · cubic-bezier(0,0,.2,1) — things appearing</span><div class="motion-track"><span class="motion-dot" style="transition:transform var(--d-slow) var(--ease-enter)"></span></div></div>
+      <div class="stack-xs"><span class="t-caption">exit · 200ms · cubic-bezier(.4,0,1,1) — things leaving</span><div class="motion-track"><span class="motion-dot" style="transition:transform var(--d-base) var(--ease-exit)"></span></div></div>
+      <div class="stack-xs"><span class="t-caption">spring · 280ms · cubic-bezier(.34,1.56,.64,1) — switch thumb, toast, dialog, drop</span><div class="motion-track"><span class="motion-dot" style="transition:transform var(--d-slow) var(--ease-spring)"></span></div></div>
+    </div>
+    <div class="card">
+      <table class="table">
+        <thead><tr><th>Micro-interaction</th><th>Trigger</th><th>Spec</th></tr></thead>
+        <tbody>
+          <tr><td>Button press</td><td>:active</td><td>scale .98 · 80ms · shadow drops</td></tr>
+          <tr><td>Async button</td><td>Save</td><td>spinner → green ✓ “Saved” 1.1s → reset · toast</td></tr>
+          <tr><td>Card lift</td><td>hover</td><td>translateY −2 · e-1→e-3 · 200ms</td></tr>
+          <tr><td>Checkbox</td><td>check</td><td>tick draws via stroke-dashoffset · 180ms · press scale .88</td></tr>
+          <tr><td>Switch</td><td>toggle</td><td>thumb springs 16px · stretches to 20px while pressed</td></tr>
+          <tr><td>Segmented / tabs</td><td>select</td><td>thumb or ink slides and resizes · 280ms standard</td></tr>
+          <tr><td>Nav indicator</td><td>page load</td><td>3px bar scales in from the centre · spring</td></tr>
+          <tr><td>Row actions</td><td>row hover/focus</td><td>fade + slide 4px · 140ms</td></tr>
+          <tr><td>Sort</td><td>header click</td><td>arrow rotates 180° · rows reorder</td></tr>
+          <tr><td>Bulk bar</td><td>select ≥1 row</td><td>rises from bottom · spring · live count</td></tr>
+          <tr><td>KPI value</td><td>enters viewport</td><td>counts up · 900ms ease-out cubic · en-IN grouping</td></tr>
+          <tr><td>Sparkline / bars</td><td>load</td><td>line draws 1.1s; bars grow, staggered 40ms</td></tr>
+          <tr><td>Kanban</td><td>drag</td><td>5px threshold · ghost tilts 2.5° · lane tints · land pulse · undo toast</td></tr>
+          <tr><td>Attendance</td><td>tap P/A/L</td><td>bump 1.12 · optimistic · 3s undo toast</td></tr>
+          <tr><td>Toast</td><td>event</td><td>spring in · timer bar (pauses on hover) · slides out right</td></tr>
+          <tr><td>Field error</td><td>invalid</td><td>hint shakes ±3px once · red halo</td></tr>
+          <tr><td>Tooltip</td><td>hover</td><td>400ms intent delay, then instant for neighbours</td></tr>
+          <tr><td>Page</td><td>navigate</td><td>sections rise 6px, staggered 40ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

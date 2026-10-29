@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales report · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .hbar { display: grid; grid-template-columns: 96px 1fr 72px; align-items: center; gap: var(--s-3); font: var(--t-sm); }
+    .hbar .progress { height: 8px; }
+    .hbar .num { text-align: right; }
+  </style>
+</head>
+<body data-page="sales" data-crumbs="Growth/Sales report">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Sales activity</span>
+      <h1 class="t-title">Sales report</h1>
+      <p class="muted">1 Oct – 29 Oct 2026 · compared with the same days in September.</p>
+    </div>
+    <div class="actions">
+      <div class="segmented" role="group" aria-label="Period"><button aria-pressed="false">7D</button><button aria-pressed="true">MTD</button><button aria-pressed="false">QTD</button><button aria-pressed="false">Custom</button></div>
+      <button class="btn" data-toast="Sales report downloaded as CSV"><span data-icon="download"></span>Download CSV</button>
+    </div>
+  </header>
+
+  <section class="grid" aria-label="Key numbers">
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--info-subtle);color:var(--info-fg)"><span data-icon="funnel"></span></span>Enquiries</div>
+      <div class="kpi-value" data-count="164">0</div>
+      <div class="kpi-foot"><span class="row-sm"><span class="delta up"><span data-icon="arrowUp" class="icon-sm"></span>18%</span>vs Sep</span><span>22 repeat</span></div>
+    </article>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--special-subtle);color:var(--special-fg)"><span data-icon="video"></span></span>Demos booked</div>
+      <div class="kpi-value" data-count="71">0</div>
+      <div class="kpi-foot"><span class="row-sm"><span class="delta up"><span data-icon="arrowUp" class="icon-sm"></span>9%</span>vs Sep</span><span>58 leads with a demo</span></div>
+    </article>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon"><span data-icon="checkCircle"></span></span>Joined</div>
+      <div class="kpi-value" data-count="38">0</div>
+      <div class="kpi-foot"><span class="row-sm"><span class="delta down"><span data-icon="trendDown" class="icon-sm"></span>4%</span>vs Sep</span><span>41 recorded</span></div>
+    </article>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--success-subtle);color:var(--success-fg)"><span data-icon="target"></span></span>Conversion</div>
+      <div class="kpi-value"><span data-count="23">0</span>.2%</div>
+      <div class="kpi-foot"><span class="row-sm"><span class="delta up"><span data-icon="arrowUp" class="icon-sm"></span>1.8</span>pts</span><span>Target 25%</span></div>
+    </article>
+  </section>
+
+  <section class="grid">
+    <article class="card span-8">
+      <div class="card-head"><h2 class="t-subhead">By staff</h2><div class="segmented" role="group" aria-label="Group by"><button aria-pressed="true">Staff</button><button aria-pressed="false">Source</button></div></div>
+      <div class="card-body flush table-wrap" style="margin-top:var(--s-3)">
+        <table class="table">
+          <thead><tr>
+            <th><button class="th-sort">Staff<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort">Enquiries<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort">Attempts<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort">Demos<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort">Joined<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort">Lost<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort" aria-sort="descending">Conversion<span data-icon="arrowUp"></span></button></th>
+          </tr></thead>
+          <tbody>
+            <tr><td data-v="Shahana"><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span><span class="name">Shahana</span></div></td><td class="num">58</td><td class="num">142</td><td class="num">29</td><td class="num">17</td><td class="num">9</td><td class="num" data-v="29.3"><span class="row-sm end"><span class="progress" style="width:40px"><span style="width:88%"></span></span><b>29.3%</b></span></td></tr>
+            <tr><td data-v="Nihal"><div class="cell-primary"><span class="avatar sm">NH</span><span class="name">Nihal</span></div></td><td class="num">61</td><td class="num">166</td><td class="num">25</td><td class="num">13</td><td class="num">14</td><td class="num" data-v="21.3"><span class="row-sm end"><span class="progress" style="width:40px"><span style="width:64%"></span></span><b>21.3%</b></span></td></tr>
+            <tr><td data-v="Ameena"><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">AM</span><span class="name">Ameena</span></div></td><td class="num">31</td><td class="num">74</td><td class="num">12</td><td class="num">6</td><td class="num">7</td><td class="num" data-v="19.4"><span class="row-sm end"><span class="progress warning" style="width:40px"><span style="width:58%"></span></span><b>19.4%</b></span></td></tr>
+            <tr><td data-v="Vishnu"><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">VS</span><span class="name">Vishnu</span></div></td><td class="num">14</td><td class="num">29</td><td class="num">5</td><td class="num">2</td><td class="num">6</td><td class="num" data-v="14.3"><span class="row-sm end"><span class="progress danger" style="width:40px"><span style="width:43%"></span></span><b>14.3%</b></span></td></tr>
+          </tbody>
+          <tfoot><tr><td class="strong" style="padding-left:var(--pad-card)">Team</td><td class="num strong">164</td><td class="num strong">411</td><td class="num strong">71</td><td class="num strong">38</td><td class="num strong">36</td><td class="num strong" style="padding-right:var(--pad-card)">23.2%</td></tr></tfoot>
+        </table>
+      </div>
+    </article>
+
+    <article class="card span-4">
+      <div class="card-head"><h2 class="t-subhead">Enquiries by source</h2></div>
+      <div class="card-body stack">
+        <div class="hbar"><span>Instagram</span><div class="progress"><span style="width:100%"></span></div><span class="num strong">62</span></div>
+        <div class="hbar"><span>Referral</span><div class="progress"><span style="width:61%"></span></div><span class="num strong">38</span></div>
+        <div class="hbar"><span>Google</span><div class="progress"><span style="width:48%"></span></div><span class="num strong">30</span></div>
+        <div class="hbar"><span>WhatsApp</span><div class="progress"><span style="width:34%"></span></div><span class="num strong">21</span></div>
+        <div class="hbar"><span>Walk-in</span><div class="progress"><span style="width:21%"></span></div><span class="num strong">13</span></div>
+        <hr class="divider" />
+        <div class="stack-sm">
+          <span class="t-overline">Campaign outcomes</span>
+          <div class="row between t-small"><span>Board Prep ’26</span><span class="row-sm"><span class="num">41 → 14</span><span class="badge success">34%</span></span></div>
+          <div class="row between t-small"><span>Onam Offer</span><span class="row-sm"><span class="num">27 → 5</span><span class="badge warning">19%</span></span></div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="grid">
+    <article class="card span-8">
+      <div class="card-head"><h2 class="t-subhead">Follow-ups needing attention now</h2><span class="badge danger dot">6 overdue</span><a class="btn btn-ghost btn-sm" href="pipeline.html">Pipeline<span data-icon="arrowRight"></span></a></div>
+      <div class="list" style="margin-top:var(--s-3)">
+        <a class="list-item" href="pipeline.html"><span class="avatar sm">AM</span><span class="grow"><span class="t-small strong" style="display:block">Arjun Menon <span style="color:var(--danger)"><span data-icon="flame" class="icon-sm"></span></span></span><span class="t-caption">Grade 10 CBSE · Maths · Owner Nihal</span></span><span class="badge danger">Overdue 2h</span><span data-icon="chevronRight" class="chev"></span></a>
+        <a class="list-item" href="pipeline.html"><span class="avatar sm" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">SF</span><span class="grow"><span class="t-small strong" style="display:block">Sana Fathima</span><span class="t-caption">Demo attended · awaiting feedback · Owner Shahana</span></span><span class="badge danger">Overdue 1d</span><span data-icon="chevronRight" class="chev"></span></a>
+        <a class="list-item" href="pipeline.html"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">NP</span><span class="grow"><span class="t-small strong" style="display:block">Nandana Pillai</span><span class="t-caption">Contacted · fee concern · Owner Shahana</span></span><span class="badge warning">Today 18:30</span><span data-icon="chevronRight" class="chev"></span></a>
+      </div>
+    </article>
+    <article class="card span-4">
+      <div class="card-head"><h2 class="t-subhead">Team collections in this period</h2></div>
+      <div class="card-body stack">
+        <div class="row-lg" style="align-items:baseline"><span class="t-title num">₹2,14,500</span><span class="delta up">+11%</span></div>
+        <div class="stack-sm t-small">
+          <div class="row between"><span class="row-sm"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">SH</span>Shahana</span><span class="num strong">₹96,000</span></div>
+          <div class="row between"><span class="row-sm"><span class="avatar sm">NH</span>Nihal</span><span class="num strong">₹78,500</span></div>
+          <div class="row between"><span class="row-sm"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">AM</span>Ameena</span><span class="num strong">₹40,000</span></div>
+        </div>
+      </div>
+    </article>
+  </section>
+</main>
+</body>
+</html>

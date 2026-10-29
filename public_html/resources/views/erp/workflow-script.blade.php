@@ -76,8 +76,14 @@
         summary.focus();
     } else revealAction();
     window.addEventListener('hashchange', revealAction);
+    window.addEventListener('click', function (event) {
+        var link = event.target.closest('a[href^="#action-"]');
+        if (link && link.getAttribute('href') === window.location.hash) {
+            event.preventDefault(); revealAction();
+        }
+    });
     document.querySelectorAll('.entity-picker').forEach(function (select, index) {
-        var search = select.parentElement.querySelector('.entity-search'), timer, sequence = 0;
+        var search = select.parentElement.querySelector('.entity-search'), timer, sequence = 0, started = false;
         var label = select.closest ? select.closest('label') : null;
         if (label) {
             var group = document.createElement('div'); group.className = 'entity-field';
@@ -93,6 +99,7 @@
         var retry = document.createElement('button'); retry.type = 'button'; retry.className = 'lookup-retry';
         retry.textContent = 'Retry record search'; retry.hidden = true; status.insertAdjacentElement('afterend', retry);
         function load() {
+            started = true;
             var ticket = ++sequence, url = new URL(select.dataset.url, window.location.origin);
             url.searchParams.set('q', search ? search.value : '');
             status.textContent = 'Searching records…'; retry.hidden = true; select.setAttribute('aria-busy', 'true');
@@ -120,7 +127,17 @@
             // Invalidate in-flight results immediately, not only when the debounce finishes.
             ++sequence; clearTimeout(timer); timer = setTimeout(load, 200);
         });
-        retry.addEventListener('click', load); load();
+        retry.addEventListener('click', load);
+        // Closed forms do not need lookup requests until the user opens them.
+        var disclosures = [];
+        for (var ancestor = select.parentElement; ancestor; ancestor = ancestor.parentElement) {
+            if (ancestor.tagName === 'DETAILS') disclosures.push(ancestor);
+        }
+        function loadWhenRevealed() {
+            if (!started && disclosures.every(function (details) { return details.open; })) load();
+        }
+        disclosures.forEach(function (details) { details.addEventListener('toggle', loadWhenRevealed); });
+        loadWhenRevealed();
     });
 })();
 </script>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teachers · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>.stage-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s-2); }
+  .stage-strip .card { padding: var(--s-3) var(--s-4); }</style>
+</head>
+<body data-page="teachers" data-crumbs="People/Teachers">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Teacher pool</span>
+      <h1 class="t-title">Teachers</h1>
+      <p class="muted">42 approved teachers · average load 61% · 7 candidates in recruitment.</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" data-open="tpl-application" data-kind="drawer"><span data-icon="plus"></span>New application</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Teacher sections" style="margin-top: calc(var(--gap-section) * -0.5)">
+    <button role="tab" aria-selected="true" aria-controls="t-dir">Directory<span class="count">42</span></button>
+    <button role="tab" aria-selected="false" aria-controls="t-rec">Recruitment<span class="count">7</span></button>
+  </nav>
+
+  <section id="t-dir" class="tab-panel stack-lg" role="tabpanel">
+    <div class="row wrap">
+      <div class="input-group" style="width:260px"><span data-icon="search"></span><input class="input input-sm" placeholder="Name, subject or code…" /></div>
+      <button class="chip" aria-pressed="false">Has capacity</button>
+      <button class="chip" aria-pressed="false"><span data-icon="plus"></span>Subject</button>
+      <button class="chip" aria-pressed="false"><span data-icon="plus"></span>Medium</button>
+    </div>
+    <div class="auto-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))">
+      <article class="card card-interactive" tabindex="0">
+        <div class="card-body stack">
+          <div class="row-lg">
+            <span class="avatar lg" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)" data-presence="online">RK</span>
+            <div class="grow stack-xs" style="gap:0"><span class="t-subhead truncate">Rahul K.</span><span class="t-caption truncate">English + Malayalam</span></div>
+            <div class="ring" style="--p:86;background:conic-gradient(var(--danger) calc(var(--p)*1%), var(--n-100) 0)" data-label="86%" data-tip="Weekly load"></div>
+          </div>
+          <div class="row-sm wrap"><span class="badge">Maths</span><span class="badge">Physics</span></div>
+          <div class="row between t-small"><span class="row-sm muted"><span style="color:var(--warning)" aria-hidden="true">★</span><b style="color:var(--fg-default)">4.9</b> demo rating</span><span class="muted">18 students</span></div>
+        </div>
+      </article>
+      <article class="card card-interactive" tabindex="0">
+        <div class="card-body stack">
+          <div class="row-lg">
+            <span class="avatar lg" style="" data-presence="online">SP</span>
+            <div class="grow stack-xs" style="gap:0"><span class="t-subhead truncate">Sneha P.</span><span class="t-caption truncate">English</span></div>
+            <div class="ring" style="--p:72;" data-label="72%" data-tip="Weekly load"></div>
+          </div>
+          <div class="row-sm wrap"><span class="badge">Maths</span><span class="badge">Physics</span><span class="badge">English</span></div>
+          <div class="row between t-small"><span class="row-sm muted"><span style="color:var(--warning)" aria-hidden="true">★</span><b style="color:var(--fg-default)">4.8</b> demo rating</span><span class="muted">15 students</span></div>
+        </div>
+      </article>
+      <article class="card card-interactive" tabindex="0">
+        <div class="card-body stack">
+          <div class="row-lg">
+            <span class="avatar lg" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)" data-presence="busy">AS</span>
+            <div class="grow stack-xs" style="gap:0"><span class="t-subhead truncate">Anjali S.</span><span class="t-caption truncate">Malayalam</span></div>
+            <div class="ring" style="--p:54;" data-label="54%" data-tip="Weekly load"></div>
+          </div>
+          <div class="row-sm wrap"><span class="badge">Science</span><span class="badge">English</span></div>
+          <div class="row between t-small"><span class="row-sm muted"><span style="color:var(--warning)" aria-hidden="true">★</span><b style="color:var(--fg-default)">4.7</b> demo rating</span><span class="muted">11 students</span></div>
+        </div>
+      </article>
+      <article class="card card-interactive" tabindex="0">
+        <div class="card-body stack">
+          <div class="row-lg">
+            <span class="avatar lg" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)" data-presence="offline">DM</span>
+            <div class="grow stack-xs" style="gap:0"><span class="t-subhead truncate">Divya M.</span><span class="t-caption truncate">English + Malayalam</span></div>
+            <div class="ring" style="--p:38;" data-label="38%" data-tip="Weekly load"></div>
+          </div>
+          <div class="row-sm wrap"><span class="badge">English</span><span class="badge">Hindi</span></div>
+          <div class="row between t-small"><span class="row-sm muted"><span style="color:var(--warning)" aria-hidden="true">★</span><b style="color:var(--fg-default)">4.6</b> demo rating</span><span class="muted">8 students</span></div>
+        </div>
+      </article>
+      <article class="card card-interactive" tabindex="0">
+        <div class="card-body stack">
+          <div class="row-lg">
+            <span class="avatar lg" style="" data-presence="online">FT</span>
+            <div class="grow stack-xs" style="gap:0"><span class="t-subhead truncate">Faisal T.</span><span class="t-caption truncate">Arabic</span></div>
+            <div class="ring" style="--p:92;background:conic-gradient(var(--danger) calc(var(--p)*1%), var(--n-100) 0)" data-label="92%" data-tip="Weekly load"></div>
+          </div>
+          <div class="row-sm wrap"><span class="badge">Arabic</span><span class="badge">Quran</span></div>
+          <div class="row between t-small"><span class="row-sm muted"><span style="color:var(--warning)" aria-hidden="true">★</span><b style="color:var(--fg-default)">4.9</b> demo rating</span><span class="muted">21 students</span></div>
+        </div>
+      </article>
+      <article class="card card-interactive" tabindex="0">
+        <div class="card-body stack">
+          <div class="row-lg">
+            <span class="avatar lg" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)" data-presence="offline">LN</span>
+            <div class="grow stack-xs" style="gap:0"><span class="t-subhead truncate">Lakshmi N.</span><span class="t-caption truncate">Tamil</span></div>
+            <div class="ring" style="--p:20;" data-label="20%" data-tip="Weekly load"></div>
+          </div>
+          <div class="row-sm wrap"><span class="badge">Chemistry</span><span class="badge">Biology</span></div>
+          <div class="row between t-small"><span class="row-sm muted"><span style="color:var(--warning)" aria-hidden="true">★</span><b style="color:var(--fg-default)">4.5</b> demo rating</span><span class="muted">4 students</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="t-rec" class="tab-panel stack-lg" role="tabpanel" hidden>
+    <div class="stage-strip">
+      <div class="card stack-xs"><span class="t-caption">Applied</span><span class="t-heading num">12</span></div>
+      <div class="card stack-xs"><span class="t-caption">Contacted</span><span class="t-heading num">8</span></div>
+      <div class="card stack-xs"><span class="t-caption">Selected</span><span class="t-heading num">4</span></div>
+      <div class="card stack-xs"><span class="t-caption">Registered</span><span class="t-heading num">3</span></div>
+      <div class="card stack-xs"><span class="t-caption">Approved · Oct</span><span class="t-heading num" style="color:var(--success-fg)">5</span></div>
+    </div>
+    <article class="card">
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Candidate</th><th>Subjects</th><th>Stage</th><th>Note</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><div class="cell-primary"><span class="avatar sm">HV</span><span class="stack-xs" style="gap:0"><span class="name">Haritha V.</span><span class="meta">M.Sc Physics</span></span></div></td><td>Physics, Maths</td><td><span class="badge  dot mono" style="font-family:var(--font-mono);font-size:11px">APPLIED</span></td><td class="muted">2 Nov</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm" data-toast="Contact logged for Haritha V."><span data-icon="phone"></span>Log contact</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm">JP</span><span class="stack-xs" style="gap:0"><span class="name">Junaid P.</span><span class="meta">B.Ed English</span></span></div></td><td>English</td><td><span class="badge info dot mono" style="font-family:var(--font-mono);font-size:11px">CONTACTED</span></td><td class="muted">31 Oct</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm" data-toast="Contact logged for Junaid P."><span data-icon="phone"></span>Log contact</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm">RI</span><span class="stack-xs" style="gap:0"><span class="name">Reshma Iqbal</span><span class="meta">M.A Arabic</span></span></div></td><td>Arabic, Quran</td><td><span class="badge special dot mono" style="font-family:var(--font-mono);font-size:11px">SELECTED</span></td><td class="muted">Interview 82/100</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm" data-toast="Contact logged for Reshma Iqbal"><span data-icon="phone"></span>Log contact</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm">SG</span><span class="stack-xs" style="gap:0"><span class="name">Sreeja Gopal</span><span class="meta">B.Sc Chemistry</span></span></div></td><td>Chemistry</td><td><span class="badge info dot mono" style="font-family:var(--font-mono);font-size:11px">REGISTERED</span></td><td class="muted">Docs pending</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm" data-toast="Contact logged for Sreeja Gopal"><span data-icon="phone"></span>Log contact</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm">AD</span><span class="stack-xs" style="gap:0"><span class="name">Akhil Dev</span><span class="meta">M.Sc Maths</span></span></div></td><td>Maths</td><td><span class="badge success dot mono" style="font-family:var(--font-mono);font-size:11px">APPROVED</span></td><td class="muted">Linked TC-061</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm" data-toast="Contact logged for Akhil Dev"><span data-icon="phone"></span>Log contact</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm">NR</span><span class="stack-xs" style="gap:0"><span class="name">Neethu Raj</span><span class="meta">B.A Hindi</span></span></div></td><td>Hindi</td><td><span class="badge warning dot mono" style="font-family:var(--font-mono);font-size:11px">REVIEW</span></td><td class="muted">Possible duplicate</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm" data-toast="Contact logged for Neethu Raj"><span data-icon="phone"></span>Log contact</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm">RK</span><span class="stack-xs" style="gap:0"><span class="name">Rinshad K.</span><span class="meta">Plus Two</span></span></div></td><td>Maths</td><td><span class="badge danger dot mono" style="font-family:var(--font-mono);font-size:11px">REJECTED</span></td><td class="muted">Do not proceed</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm" data-toast="Contact logged for Rinshad K."><span data-icon="phone"></span>Log contact</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+</main>
+
+<template id="tpl-application">
+  <div class="drawer" role="dialog" aria-label="New application">
+    <div class="drawer-head"><span class="t-subhead grow">New application</span><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field full"><label class="field-label">Full name</label><input class="input" autofocus /></div>
+        <div class="field"><label class="field-label">Phone</label><div class="input-group"><span class="affix">+91</span><input class="input num" /></div></div>
+        <div class="field"><label class="field-label">Email</label><input class="input" type="email" /></div>
+        <div class="field"><label class="field-label">Qualification</label><input class="input" placeholder="e.g. M.Sc Physics" /></div>
+        <div class="field"><label class="field-label">Teaching medium</label><select class="select"><option>English</option><option>Malayalam</option><option>English + Malayalam</option><option>Hindi</option><option>Arabic</option><option>Tamil</option></select></div>
+        <div class="field full"><label class="field-label">Subjects</label>
+          <div class="row-sm wrap"><button class="chip" aria-pressed="true">Maths</button><button class="chip" aria-pressed="false">Physics</button><button class="chip" aria-pressed="false">Chemistry</button><button class="chip" aria-pressed="false">English</button><button class="chip" aria-pressed="false">Arabic</button></div>
+        </div>
+        <div class="field full"><label class="field-label">CV link <span class="opt">Optional</span></label><div class="input-group"><span data-icon="link"></span><input class="input" placeholder="https://" /></div></div>
+        <div class="field full"><label class="field-label">Availability</label><textarea class="textarea" placeholder="Weekday evenings after 17:00…"></textarea></div>
+      </div>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Added" data-toast="Application added · stage APPLIED">Add application</button></div>
+  </div>
+</template>
+</body>
+</html>

@@ -52,6 +52,18 @@ class OperationalHealth
             return ['status' => 'ok', 'events_last_24_hours' => DB::table('erp_audit')->where('created_at', '>=', now()->subDay())->count(),
                 'latest_event_at' => DB::table('erp_audit')->max('created_at')];
         });
+        if (config('sheet_transition.enabled')) {
+            $this->check($checks, 'sheet_transition', function () {
+                $states = DB::table('erp_sheet_sources')->get()->keyBy('source_key');
+                $stale = 0; $attention = 0;
+                foreach (array_keys(config('sheet_transition.sources')) as $key) {
+                    $state = $states[$key] ?? null;
+                    if (!$state || !$state->last_success_at || \Carbon\Carbon::parse($state->last_success_at)->lt(now()->subMinutes(config('sheet_transition.stale_minutes')))) $stale++;
+                    if ($state && in_array($state->last_status,['review','failed'],true)) $attention++;
+                }
+                return ['status'=>$stale || $attention ? 'warning' : 'ok','stale_sources'=>$stale,'sources_needing_attention'=>$attention];
+            });
+        }
         $statuses = array_column($checks, 'status');
         return ['status' => in_array('error', $statuses, true) ? 'error' : (in_array('warning', $statuses, true) ? 'warning' : 'ok'), 'checks' => $checks];
     }

@@ -1,0 +1,85 @@
+erDiagram
+  %% Reconstructed domain model. These are business entities, not literal tabs or implemented SQL tables.
+  STAFF ||..o{ LEAD : owns
+  LEAD ||..o{ DEMO : attempts
+  TEACHER |o..o{ DEMO : delivers
+  STUDENT |o..o{ LEAD : converted_to
+  STUDENT ||..o{ STUDENT_CONTACT : has
+  CONTACT ||..o{ STUDENT_CONTACT : linked_to
+  TEACHER_CANDIDATE ||..o{ RECRUITMENT_EVENT : has
+  TEACHER |o..o{ TEACHER_CANDIDATE : resolves_to
+  TEACHER ||..o{ TEACHER_CAPABILITY : qualified_for
+  SUBJECT ||..o{ TEACHER_CAPABILITY : includes
+  STUDENT ||..o{ ENROLLMENT : studies
+  TEACHER ||..o{ ENROLLMENT : teaches
+  SUBJECT ||..o{ ENROLLMENT : specifies
+  RATE_VERSION ||..o{ ENROLLMENT : prices
+  ENROLLMENT ||..o{ TIMETABLE_AGREEMENT : schedules
+  TIMETABLE_AGREEMENT |o..o{ LESSON : generates
+  ENROLLMENT ||..o{ LESSON : contains
+  LESSON |o..o{ LESSON : replaces
+  LESSON ||..o| ATTENDANCE : records
+  ATTENDANCE ||..o{ DUPLICATE_REVIEW : investigated
+  ATTENDANCE |o..o{ LEDGER_ENTRY : posts
+  STUDENT |o..o{ LEDGER_ENTRY : balance
+  TEACHER |o..o{ LEDGER_ENTRY : payable
+  LEDGER_ENTRY |o..o| LEDGER_ENTRY : reverses
+  STUDENT ||..o{ INVOICE : billed
+  INVOICE ||..|{ INVOICE_LINE : contains
+  INVOICE ||..o{ PAYMENT_ALLOCATION : settled_by
+  LEDGER_ENTRY ||..o{ PAYMENT_ALLOCATION : receipt
+  ENROLLMENT ||..o{ ASSESSMENT : evaluated
+  STUDENT |o..o{ FOLLOWUP : supported
+  STAFF ||..o{ TASK : assigned
+  TASK_TEMPLATE_VERSION |o..o{ TASK : instantiated
+  TASK ||..o{ TASK_ITEM : checklist
+  TASK |o..o{ FOLLOWUP : triggers
+  STUDENT {
+    bigint id PK
+    string student_code UK
+    string unit
+  }
+  TEACHER {
+    bigint id PK
+    string teacher_code UK
+    string status
+  }
+  ENROLLMENT {
+    bigint id PK
+    bigint student_id FK
+    bigint teacher_id FK
+    bigint subject_id FK
+    date valid_from
+    date valid_to
+  }
+  LESSON {
+    bigint id PK
+    datetime starts_at_utc
+    datetime ends_at_utc
+    string timezone
+    int student_rate_minor
+    int teacher_rate_minor
+  }
+  ATTENDANCE {
+    bigint id PK
+    bigint lesson_id FK, UK
+    int actual_minutes
+    string review_status
+  }
+  LEDGER_ENTRY {
+    bigint id PK
+    string event_key UK
+    int signed_amount_minor
+    string currency
+    string entry_kind
+  }
+  RATE_VERSION {
+    bigint id PK
+    date effective_from
+    date effective_to
+    string section
+    string syllabus
+    string teacher_category
+    int student_rate_minor
+    int teacher_rate_minor
+  }

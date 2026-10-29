@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ledger &amp; receipts · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+</head>
+<body data-page="money" data-crumbs="Money/Ledger & receipts">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">October 2026 · Kochi Tuition</span>
+      <h1 class="t-title">Ledger &amp; receipts</h1>
+      <p class="muted">Every rupee in and out, in one place. Amounts are stored exactly, to the paisa.</p>
+    </div>
+    <div class="actions">
+      <button class="btn" data-async data-done="Downloaded" data-toast="ledger-oct-2026.csv downloaded"><span data-icon="download"></span>Download CSV</button>
+      <button class="btn btn-primary" data-open="tpl-payment" data-kind="drawer"><span data-icon="plus"></span>Record payment</button>
+    </div>
+  </header>
+
+  <section class="grid" aria-label="Money summary">
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--success-subtle);color:var(--success-fg)"><span data-icon="wallet"></span></span>Collected · Oct</div>
+      <div class="kpi-value" data-count="482300" data-prefix="₹">₹0</div>
+      <div class="kpi-foot"><span class="row-sm"><span class="delta up"><span data-icon="arrowUp" class="icon-sm"></span>8.4%</span>vs Sep</span><span>142 receipts</span></div>
+    </article>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--warning-subtle);color:var(--warning-fg)"><span data-icon="clock"></span></span>Outstanding</div>
+      <div class="kpi-value" data-count="138650" data-prefix="₹">₹0</div>
+      <div class="kpi-foot"><span>31 students</span><span class="badge warning dot">₹38,400 this week</span></div>
+    </article>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--info-subtle);color:var(--info-fg)"><span data-icon="users"></span></span>Teacher accruals</div>
+      <div class="kpi-value" data-count="214800" data-prefix="₹">₹0</div>
+      <div class="kpi-foot"><span>From 1,086 approved classes</span></div>
+    </article>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon"><span data-icon="send"></span></span>Paid out</div>
+      <div class="kpi-value" data-count="176200" data-prefix="₹">₹0</div>
+      <div class="kpi-foot"><span>18 of 24 teachers</span><div class="progress" style="width:88px"><span style="width:75%"></span></div></div>
+    </article>
+  </section>
+
+  <section class="card">
+    <div style="padding:0 var(--pad-card)">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" aria-controls="p-ledger">Ledger <span class="count">1,284</span></button>
+        <button role="tab" aria-selected="false" aria-controls="p-receipts">Receipts <span class="count">142</span></button>
+        <button role="tab" aria-selected="false" aria-controls="p-payouts">Teacher payouts <span class="count">24</span></button>
+      </div>
+    </div>
+
+    <div id="p-ledger" class="tab-panel">
+      <div class="toolbar">
+        <div class="input-group"><span data-icon="search"></span><input class="input input-sm" placeholder="Search student, receipt, reference…" aria-label="Search ledger" /></div>
+        <button class="chip" aria-pressed="true"><span data-icon="wallet"></span>Payments</button>
+        <button class="chip" aria-pressed="false"><span data-icon="book"></span>Lesson charges</button>
+        <button class="chip" aria-pressed="false"><span data-icon="users"></span>Teacher</button>
+        <button class="chip" aria-pressed="false"><span data-icon="refresh"></span>Reversals</button>
+        <span class="spacer"></span>
+        <select class="select select-sm" style="width:auto" aria-label="Period"><option>October 2026</option><option>September 2026</option></select>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr>
+            <th><button class="th-sort" aria-sort="descending">Date<span data-icon="arrowUp"></span></button></th>
+            <th>Entry</th><th>Kind</th><th>Reference</th>
+            <th class="num"><button class="th-sort">Debit<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort">Credit<span data-icon="arrowUp"></span></button></th>
+            <th class="num">Balance</th><th></th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="num mono" style="text-align:left" data-v="20261029">29 Oct</td><td><div class="cell-primary"><span class="avatar sm">FR</span><div class="stack-xs" style="gap:0"><span class="name">Fathima Rahman</span><span class="meta">UPI · by Shahana</span></div></div></td><td><span class="badge success">payment</span></td><td><a href="receipt.html" class="mono">CL-2291</a></td><td class="num" data-v="0"><span class="subtle">—</span></td><td class="num" data-v="12500"><span class="money pos">+₹12,500.00</span></td><td class="num money">₹0.00</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="ledger-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="num mono" style="text-align:left" data-v="20261029">29 Oct</td><td><div class="cell-primary"><span class="avatar sm">FR</span><div class="stack-xs" style="gap:0"><span class="name">Fathima Rahman</span><span class="meta">Maths · 60 min · Rahul K.</span></div></div></td><td><span class="badge">lesson_charge</span></td><td class="mono muted">LS-88412</td><td class="num" data-v="650"><span class="money neg">−₹650.00</span></td><td class="num" data-v="0"><span class="subtle">—</span></td><td class="num money">−₹12,500.00</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="ledger-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="num mono" style="text-align:left" data-v="20261028">28 Oct</td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">RK</span><div class="stack-xs" style="gap:0"><span class="name">Rahul Krishnan</span><span class="meta">Teacher · approved class</span></div></div></td><td><span class="badge info">teacher_accrual</span></td><td class="mono muted">AT-30917</td><td class="num" data-v="0"><span class="subtle">—</span></td><td class="num" data-v="400"><span class="money pos">+₹400.00</span></td><td class="num money">₹18,400.00</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="ledger-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="num mono" style="text-align:left" data-v="20261027">27 Oct</td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">SP</span><div class="stack-xs" style="gap:0"><span class="name">Sneha Pillai</span><span class="meta">Salary · Sep cycle</span></div></div></td><td><span class="badge special">teacher_payment</span></td><td class="mono muted">PY-0912</td><td class="num" data-v="21600"><span class="money neg">−₹21,600.00</span></td><td class="num" data-v="0"><span class="subtle">—</span></td><td class="num money">₹0.00</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="ledger-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="num mono" style="text-align:left" data-v="20261026">26 Oct</td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">ZA</span><div class="stack-xs" style="gap:0"><span class="name">Zainab Ali</span><span class="meta">Corrected · wrong amount</span></div></div></td><td><span class="badge danger">reversal</span></td><td><a href="receipt.html" class="mono">CL-2264</a></td><td class="num" data-v="8000"><span class="money neg">−₹8,000.00</span></td><td class="num" data-v="0"><span class="subtle">—</span></td><td class="num money">−₹4,200.00</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="ledger-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="num mono" style="text-align:left" data-v="20261001">01 Oct</td><td><div class="cell-primary"><span class="avatar sm">AN</span><div class="stack-xs" style="gap:0"><span class="name">Aarav Nair</span><span class="meta">Carried from Sheets</span></div></div></td><td><span class="badge warning">opening_balance</span></td><td class="mono muted">MG-0004</td><td class="num" data-v="3250"><span class="money neg">−₹3,250.00</span></td><td class="num" data-v="0"><span class="subtle">—</span></td><td class="num money">−₹3,250.00</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="ledger-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-foot"><span>Showing 6 of 1,284 entries</span>
+        <div class="pagination"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Previous" disabled><span data-icon="chevronLeft"></span></button><span class="t-small num">1 / 214</span><button class="btn btn-ghost btn-icon btn-sm" aria-label="Next"><span data-icon="chevronRight"></span></button></div>
+      </div>
+    </div>
+
+    <div id="p-receipts" class="tab-panel" hidden>
+      <div class="list">
+        <a class="list-item" href="receipt.html"><span class="tl-dot success"><span data-icon="receipt"></span></span><span class="grow"><span class="t-small strong" style="display:block">CL-2291 · Fathima Rahman</span><span class="t-caption">UPI · 29 Oct, 10:14</span></span><span class="money strong">₹12,500.00</span><span data-icon="chevronRight" class="chev"></span></a>
+        <a class="list-item" href="receipt.html"><span class="tl-dot success"><span data-icon="receipt"></span></span><span class="grow"><span class="t-small strong" style="display:block">CL-2290 · Meera Krishnan</span><span class="t-caption">Bank transfer · 28 Oct, 18:02</span></span><span class="money strong">₹9,750.00</span><span data-icon="chevronRight" class="chev"></span></a>
+        <a class="list-item" href="receipt.html"><span class="tl-dot danger" style="background:var(--danger-subtle);color:var(--danger-fg)"><span data-icon="refresh"></span></span><span class="grow"><span class="t-small strong" style="display:block">CL-2264 · Zainab Ali <span class="badge danger">Reversed</span></span><span class="t-caption">Cash · 21 Oct</span></span><span class="money strong subtle" style="text-decoration:line-through">₹8,000.00</span><span data-icon="chevronRight" class="chev"></span></a>
+      </div>
+    </div>
+
+    <div id="p-payouts" class="tab-panel" hidden>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Teacher</th><th class="num">Classes</th><th class="num">Accrued</th><th class="num">Paid</th><th class="num">Due</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">RK</span><span class="name">Rahul Krishnan</span></div></td><td class="num">46</td><td class="num money">₹18,400.00</td><td class="num money">₹0.00</td><td class="num money strong">₹18,400.00</td><td class="num"><button class="btn btn-sm" data-async data-done="Paid" data-toast="Salary marked paid · Rahul Krishnan">Mark paid</button></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">SP</span><span class="name">Sneha Pillai</span></div></td><td class="num">54</td><td class="num money">₹21,600.00</td><td class="num money">₹21,600.00</td><td class="num"><span class="badge success dot">Settled</span></td><td class="num"><button class="btn btn-ghost btn-sm" data-toast="Payment reversed" data-undo>Reverse</button></td></tr>
+            <tr><td><div class="cell-primary"><span class="avatar sm">AS</span><span class="name">Anjali Suresh</span></div></td><td class="num">31</td><td class="num money">₹11,160.00</td><td class="num money">₹5,000.00</td><td class="num money strong">₹6,160.00</td><td class="num"><button class="btn btn-sm" data-async data-done="Paid" data-toast="Salary marked paid · Anjali Suresh">Mark paid</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<template id="ledger-row">
+  <a class="menu-item" href="receipt.html"><span data-icon="eye"></span>Open receipt<span class="kbd">↵</span></a>
+  <button class="menu-item"><span data-icon="edit"></span>Correct receipt</button>
+  <button class="menu-item"><span data-icon="printer"></span>Print acknowledgement</button>
+  <div class="menu-sep"></div>
+  <button class="menu-item danger" data-action="confirm-delete"><span data-icon="refresh"></span>Reverse entry</button>
+</template>
+
+<template id="tpl-payment">
+  <div class="drawer" role="dialog" aria-label="Record payment">
+    <div class="drawer-head"><div class="stack-xs grow" style="gap:0"><span class="t-subhead">Record payment</span><span class="t-caption">For money already received</span></div><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field full"><label class="field-label">Student</label><select class="select" autofocus><option>Fathima Rahman · CL-1042</option><option>Aarav Nair · CL-1031</option><option>Zainab Ali · CL-0987</option></select><span class="field-hint">Balance due: <b class="money">₹12,500.00</b></span></div>
+        <div class="field full"><label class="field-label">Amount</label><div class="input-group"><span class="affix">₹</span><input class="input num" inputmode="decimal" value="12,500.00" style="font:var(--t-lg);font-weight:600;height:var(--control-lg)" /></div></div>
+        <div class="field full"><span class="field-label">Method</span><div class="segmented" role="group" aria-label="Method"><button aria-pressed="true"><span data-icon="phone" class="icon-sm"></span>UPI</button><button aria-pressed="false"><span data-icon="building" class="icon-sm"></span>Bank</button><button aria-pressed="false"><span data-icon="wallet" class="icon-sm"></span>Cash</button></div></div>
+        <div class="field"><label class="field-label">Received on</label><input class="input" type="date" value="2026-10-29" /></div>
+        <div class="field"><label class="field-label">Receipt reference</label><input class="input mono" placeholder="UPI txn / cheque no." /></div>
+        <div class="field full"><label class="field-label">Note <span class="opt">Optional</span></label><textarea class="textarea" placeholder="Visible on the acknowledgement"></textarea></div>
+      </div>
+      <div class="callout"><span data-icon="info"></span><span>A receipt number is issued on save. Mistakes are fixed with a reversal, never by editing.</span></div>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Recorded" data-toast="₹12,500.00 recorded · receipt CL-2292">Record payment</button></div>
+  </div>
+</template>
+</body>
+</html>

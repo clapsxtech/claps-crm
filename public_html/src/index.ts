@@ -2,7 +2,7 @@ import { checkOperations } from "./monitoring";
 import { DurableObject, WorkerEntrypoint } from "cloudflare:workers";
 import { storageRequest, isStorageAuthorized, type StorageEnv } from "./storage";
 
-interface Env extends StorageEnv {
+interface Env extends StorageEnv, Partial<Pick<Cloudflare.Env, "ERP_SHEETS_TRANSITION_ENABLED" | "ERP_DATA_AUTHORITY" | "ERP_SHEETS_BAND_UNITS">> {
     LARAVEL_CONTAINER: DurableObjectNamespace<LaravelContainer>;
     STORAGE_GATEWAY: Fetcher;
     APP_KEY: string;
@@ -115,6 +115,9 @@ export class LaravelContainer extends DurableObject<Env> {
                     PUBLIC_ORIGIN: secureOrigin ? this.env.APP_URL : "",
                     TRUSTED_PROXIES: this.env.TRUSTED_PROXIES ?? "",
                     ERP_BUSINESS_ID: this.env.ERP_BUSINESS_ID ?? "1",
+                    ERP_SHEETS_TRANSITION_ENABLED: this.env.ERP_SHEETS_TRANSITION_ENABLED ?? "false",
+                    ERP_DATA_AUTHORITY: this.env.ERP_DATA_AUTHORITY ?? "application",
+                    ERP_SHEETS_BAND_UNITS: this.env.ERP_SHEETS_BAND_UNITS ?? "{}",
                     SHEETS_SYNC_ENABLED: this.env.SHEETS_SYNC_ENABLED ?? "false",
                     GOOGLE_SPREADSHEET_ID: this.env.GOOGLE_SPREADSHEET_ID ?? "",
                     GOOGLE_SERVICE_ENABLED: this.env.GOOGLE_SERVICE_ENABLED ?? "false",

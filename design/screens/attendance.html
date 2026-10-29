@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Attendance · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .minutes { display: inline-flex; align-items: baseline; gap: var(--s-1); }
+    .minutes .sched { color: var(--fg-subtle); }
+    .minutes.short .act { color: var(--warning-fg); font-weight: var(--w-semibold); }
+    .compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--s-4); align-items: stretch; }
+    .compare .vs { align-self: center; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--n-100); font: var(--t-xs); font-weight: var(--w-semibold); color: var(--fg-muted); }
+    .compare .side { padding: var(--s-4); border: 1px solid var(--border-default); border-radius: var(--r-md); background: var(--bg-sunken); }
+    .compare dd.diff { color: var(--warning-fg); }
+    @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } .compare .vs { justify-self: center; } }
+  </style>
+</head>
+<body data-page="attendance" data-crumbs="Teaching/Attendance">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Teacher accrual depends on this</span>
+      <h1 class="t-title">Attendance</h1>
+      <p class="muted">Approve submitted classes so teachers accrue pay and parents are charged. Shortened classes are flagged for makeup time.</p>
+    </div>
+    <div class="actions">
+      <button class="btn"><span data-icon="upload"></span>Import batch</button>
+      <button class="btn" data-toast="Export started · you’ll get a CSV shortly"><span data-icon="download"></span>Export</button>
+    </div>
+  </header>
+
+  <section class="grid" aria-label="Summary">
+    <article class="card span-3 kpi"><div class="kpi-top"><span class="kpi-icon" style="background:var(--warning-subtle);color:var(--warning-fg)"><span data-icon="inbox"></span></span>Awaiting review</div><div class="kpi-value" data-count="18">0</div><div class="kpi-foot"><span>Oldest submitted 2 days ago</span></div></article>
+    <article class="card span-3 kpi"><div class="kpi-top"><span class="kpi-icon" style="background:var(--danger-subtle);color:var(--danger-fg)"><span data-icon="copy"></span></span>Possible duplicates</div><div class="kpi-value" data-count="3">0</div><div class="kpi-foot"><span>Flagged by Gallabox</span></div></article>
+    <article class="card span-3 kpi"><div class="kpi-top"><span class="kpi-icon" style="background:var(--info-subtle);color:var(--info-fg)"><span data-icon="clock"></span></span>Shortened classes</div><div class="kpi-value" data-count="5">0</div><div class="kpi-foot"><span>142 minutes to make up</span></div></article>
+    <article class="card span-3 kpi"><div class="kpi-top"><span class="kpi-icon"><span data-icon="checkCircle"></span></span>Approved · Oct</div><div class="kpi-value" data-count="864">0</div><div class="kpi-foot"><span class="row-sm"><span class="delta up">96.2%</span>approval rate</span></div></article>
+  </section>
+
+  <section class="stack">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" aria-controls="p-review">Review queue <span class="count">18</span></button>
+      <button role="tab" aria-selected="false" aria-controls="p-dup">Duplicates <span class="count">3</span></button>
+      <button role="tab" aria-selected="false" aria-controls="p-corr">Corrections</button>
+    </div>
+
+    <!-- Review queue -->
+    <div id="p-review" class="tab-panel card">
+      <div class="toolbar">
+        <div class="input-group"><span data-icon="search"></span><input class="input input-sm" placeholder="Search student or teacher" /></div>
+        <button class="chip" aria-pressed="true"><span data-icon="clock"></span>Shortened only</button>
+        <button class="chip" aria-pressed="false"><span data-icon="user"></span>Teacher</button>
+        <button class="chip" aria-pressed="false"><span data-icon="calendar"></span>This week</button>
+        <span class="spacer"></span>
+        <span class="t-caption">Sorted by oldest first</span>
+      </div>
+      <div class="table-wrap">
+        <table class="table" data-bulk="bulk-att">
+          <thead><tr>
+            <th class="sel"><label class="check"><input type="checkbox" aria-label="Select all" /></label></th>
+            <th><button class="th-sort">Student &amp; class<span data-icon="arrowUp"></span></button></th>
+            <th><button class="th-sort">Teacher<span data-icon="arrowUp"></span></button></th>
+            <th class="num"><button class="th-sort">Scheduled → actual<span data-icon="arrowUp"></span></button></th>
+            <th>Status</th>
+            <th class="num">Charge</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td>
+              <td><div class="cell-primary"><span class="avatar sm">FR</span><div><div class="name">Fathima Rahman</div><div class="meta">Maths · Tue 27 Oct, 09:00</div></div></div></td>
+              <td>Rahul K.</td>
+              <td class="num" data-v="60"><span class="minutes"><span class="sched">60</span>→<span class="act">60m</span></span></td>
+              <td><span class="badge info dot">submitted</span></td>
+              <td class="num money"><span class="cur">₹</span>650</td>
+              <td class="num"><span class="row-actions"><button class="btn btn-sm" data-toast="Approved for teacher accrual">Approve</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="att-row" aria-label="More"><span data-icon="more"></span></button></span></td>
+            </tr>
+            <tr>
+              <td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td>
+              <td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">ZA</span><div><div class="name">Zainab Ali</div><div class="meta">Chemistry · Tue 27 Oct, 12:00</div></div></div></td>
+              <td>Rahul K.</td>
+              <td class="num" data-v="35"><span class="minutes short" data-tip="Teacher reason: network outage"><span class="sched">60</span>→<span class="act">35m</span></span></td>
+              <td><span class="badge info dot">submitted</span></td>
+              <td class="num money"><span class="cur">₹</span>380</td>
+              <td class="num"><span class="row-actions"><button class="btn btn-sm" data-toast="Approved for teacher accrual">Approve</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="att-row" aria-label="More"><span data-icon="more"></span></button></span></td>
+            </tr>
+            <tr>
+              <td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td>
+              <td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">AN</span><div><div class="name">Aarav Nair</div><div class="meta">Physics · Mon 26 Oct, 16:00</div></div></div></td>
+              <td>Sneha P.</td>
+              <td class="num" data-v="60"><span class="minutes"><span class="sched">60</span>→<span class="act">60m</span></span></td>
+              <td><span class="badge danger dot">duplicate</span></td>
+              <td class="num money"><span class="cur">₹</span>600</td>
+              <td class="num"><span class="row-actions"><button class="btn btn-sm" data-action="noop">Compare</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="att-row" aria-label="More"><span data-icon="more"></span></button></span></td>
+            </tr>
+            <tr>
+              <td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td>
+              <td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">IM</span><div><div class="name">Ibrahim M.</div><div class="meta">English · Mon 26 Oct, 10:00</div></div></div></td>
+              <td>Anjali S.</td>
+              <td class="num" data-v="45"><span class="minutes short" data-tip="Teacher reason: student joined late"><span class="sched">60</span>→<span class="act">45m</span></span></td>
+              <td><span class="badge info dot">submitted</span></td>
+              <td class="num money"><span class="cur">₹</span>413</td>
+              <td class="num"><span class="row-actions"><button class="btn btn-sm" data-toast="Approved for teacher accrual">Approve</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="att-row" aria-label="More"><span data-icon="more"></span></button></span></td>
+            </tr>
+            <tr>
+              <td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td>
+              <td><div class="cell-primary"><span class="avatar sm">MK</span><div><div class="name">Meera Krishnan</div><div class="meta">Maths · Mon 26 Oct, 18:00</div></div></div></td>
+              <td>Sneha P.</td>
+              <td class="num" data-v="60"><span class="minutes"><span class="sched">60</span>→<span class="act">60m</span></span></td>
+              <td><span class="badge success dot">approved</span></td>
+              <td class="num money"><span class="cur">₹</span>600</td>
+              <td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="att-row" aria-label="More"><span data-icon="more"></span></button></span></td>
+            </tr>
+            <tr>
+              <td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td>
+              <td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--red-50);--av-fg:var(--red-700)">NS</span><div><div class="name">Nihal S.</div><div class="meta">Accounts · Sat 24 Oct, 11:00</div></div></div></td>
+              <td>Anjali S.</td>
+              <td class="num" data-v="0"><span class="minutes short"><span class="sched">60</span>→<span class="act">0m</span></span></td>
+              <td><span class="badge danger dot">rejected</span></td>
+              <td class="num money"><span class="cur">₹</span>0</td>
+              <td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="att-row" aria-label="More"><span data-icon="more"></span></button></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-foot"><span>6 of 18 shown</span><div class="pagination"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Previous" disabled><span data-icon="chevronLeft"></span></button><span class="t-small num">1 / 3</span><button class="btn btn-ghost btn-icon btn-sm" aria-label="Next"><span data-icon="chevronRight"></span></button></div></div>
+    </div>
+
+    <!-- Duplicates -->
+    <div id="p-dup" class="tab-panel stack" hidden>
+      <div class="callout warning"><span data-icon="alert"></span><div><strong>Gallabox found 3 pairs that look identical.</strong> Mark each as genuine (two real classes) or duplicate (one class submitted twice). Duplicates are excluded from charges and accrual.</div></div>
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Aarav Nair · Physics</h2><span class="badge warning dot">pending</span></div>
+        <div class="card-body">
+          <div class="compare">
+            <div class="side"><div class="t-overline" style="margin-bottom:var(--s-3)">Entry #4182</div><dl class="dl"><dt>Date</dt><dd>Mon 26 Oct</dd><dt>Time</dt><dd class="num">16:00 – 17:00</dd><dt>Teacher</dt><dd>Sneha P.</dd><dt>Submitted</dt><dd>Teacher portal · 17:04</dd></dl></div>
+            <span class="vs">vs</span>
+            <div class="side"><div class="t-overline" style="margin-bottom:var(--s-3)">Entry #4190</div><dl class="dl"><dt>Date</dt><dd>Mon 26 Oct</dd><dt>Time</dt><dd class="num diff">16:05 – 17:00</dd><dt>Teacher</dt><dd>Sneha P.</dd><dt>Submitted</dt><dd class="diff">Gallabox import · 21:30</dd></dl></div>
+          </div>
+        </div>
+        <div class="card-foot"><span class="t-caption grow">Differences are highlighted</span><button class="btn" data-toast="Marked as genuine · both classes kept">Genuine</button><button class="btn btn-primary" data-toast="Marked duplicate · #4190 excluded" data-undo>Duplicate</button></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Riya Thomas · Biology</h2><span class="badge warning dot">pending</span></div>
+        <div class="card-body">
+          <div class="compare">
+            <div class="side"><div class="t-overline" style="margin-bottom:var(--s-3)">Entry #4171</div><dl class="dl"><dt>Date</dt><dd>Sat 24 Oct</dd><dt>Time</dt><dd class="num">10:00 – 11:00</dd><dt>Teacher</dt><dd>Anjali S.</dd><dt>Submitted</dt><dd>Teacher portal · 11:02</dd></dl></div>
+            <span class="vs">vs</span>
+            <div class="side"><div class="t-overline" style="margin-bottom:var(--s-3)">Entry #4172</div><dl class="dl"><dt>Date</dt><dd>Sat 24 Oct</dd><dt>Time</dt><dd class="num diff">11:00 – 12:00</dd><dt>Teacher</dt><dd>Anjali S.</dd><dt>Submitted</dt><dd>Teacher portal · 12:01</dd></dl></div>
+          </div>
+        </div>
+        <div class="card-foot"><span class="t-caption grow">Back-to-back slots, which may be a double lesson</span><button class="btn btn-primary" data-toast="Marked as genuine · both classes kept">Genuine</button><button class="btn" data-toast="Marked duplicate · #4172 excluded" data-undo>Duplicate</button></div>
+      </article>
+    </div>
+
+    <!-- Corrections -->
+    <div id="p-corr" class="tab-panel grid" hidden>
+      <article class="card span-5">
+        <div class="card-head"><h2 class="t-subhead">Correct attendance with reason</h2></div>
+        <div class="card-body stack">
+          <div class="field"><label class="field-label">Lesson</label><select class="select"><option>Zainab Ali · Chemistry · Tue 27 Oct 12:00</option></select></div>
+          <div class="form-grid">
+            <div class="field"><label class="field-label">Actual minutes</label><input class="input num" type="number" value="35" /></div>
+            <div class="field"><label class="field-label">Status</label><select class="select"><option>approved</option><option>rejected</option></select></div>
+          </div>
+          <div class="field"><label class="field-label">Reason</label><textarea class="textarea" placeholder="Visible in the audit log and to the teacher"></textarea><span class="field-hint">Corrections are logged with your name and can’t be deleted.</span></div>
+        </div>
+        <div class="card-foot end"><button class="btn btn-primary" data-async data-done="Corrected" data-toast="Correction saved to audit log">Save correction</button></div>
+      </article>
+      <article class="card span-7">
+        <div class="card-head"><h2 class="t-subhead">Recent corrections</h2></div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="tl-item"><span class="tl-dot info"><span data-icon="edit"></span></span><div class="tl-body"><b>Shahana</b> changed Ibrahim M. · English from 60 → 45 minutes<div class="t-caption">“Student joined late, confirmed with parent” · Yesterday 18:20</div></div></div>
+            <div class="tl-item"><span class="tl-dot warning"><span data-icon="x"></span></span><div class="tl-body"><b>Amnas</b> rejected Nihal S. · Accounts<div class="t-caption">“Lesson was cancelled by parent before start” · 25 Oct</div></div></div>
+            <div class="tl-item"><span class="tl-dot success"><span data-icon="check"></span></span><div class="tl-body"><b>Shahana</b> resolved Gallabox verification for Meera K.<div class="t-caption">24 Oct</div></div></div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <template id="att-row">
+    <button class="menu-item"><span data-icon="eye"></span>Open lesson</button>
+    <button class="menu-item"><span data-icon="edit"></span>Correct with reason</button>
+    <button class="menu-item"><span data-icon="clock"></span>Schedule makeup time</button>
+    <div class="menu-sep"></div>
+    <button class="menu-item danger" data-toast="Attendance rejected" data-undo><span data-icon="x"></span>Reject</button>
+  </template>
+</main>
+
+<div class="bulk-bar" id="bulk-att" role="region" aria-label="Bulk actions">
+  <span class="t-small"><b data-selected-count>0</b> selected</span>
+  <button class="btn btn-sm" data-toast="Rejected selected entries" data-undo><span data-icon="x"></span>Reject</button>
+  <button class="btn btn-sm" style="--btn-bg:var(--accent);--btn-fg:#fff" data-toast="Approved for teacher accrual"><span data-icon="check"></span>Approve for teacher accrual</button>
+</div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClapsLearn ERP · Design System v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="system/tokens.css" />
+  <link rel="stylesheet" href="system/components.css" />
+  <script src="system/app.js" defer></script>
+  <script src="system/charts.js" defer></script>
+  <style>
+    .hub { max-width: 1120px; margin: 0 auto; padding: var(--s-16) var(--s-8); display: flex; flex-direction: column; gap: var(--s-12); }
+    .hero { display: flex; flex-direction: column; gap: var(--s-4); max-width: 720px; }
+    .screen-card { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-4) var(--s-5); color: inherit; }
+    .screen-card:hover { text-decoration: none; }
+    .screen-card .row { color: var(--fg-default); }
+    @media (max-width: 640px) { .hub { padding: var(--s-10) var(--s-4); } }
+  </style>
+</head>
+<body data-shell="none">
+<main class="hub">
+  <header class="hero">
+    <div class="row"><span class="brand-mark">cl</span><span class="t-overline">ClapsLearn ERP · Design system v2</span></div>
+    <h1 class="t-display">A calmer operating system for a tutoring business</h1>
+    <p class="muted t-md">The whole ERP, rethought from first principles: one navigation model grouped around jobs (Growth, People, Teaching, Money), one component library with every state specified, and motion that explains each change. It’s plain HTML and CSS with a small runtime, so you can open any file straight in a browser.</p>
+    <div class="row wrap">
+      <a class="btn btn-primary" href="screens/dashboard.html"><span data-icon="arrowRight"></span>Open the prototype</a>
+      <a class="btn" href="components.html"><span data-icon="layers"></span>Components</a>
+      <a class="btn" href="foundations.html"><span data-icon="sliders"></span>Foundations</a>
+      <button class="btn btn-ghost btn-icon" data-action="theme" aria-label="Toggle theme" data-tip="Toggle theme"><span data-icon="moon"></span></button>
+    </div>
+  </header>
+
+  <section class="stack">
+    <h2 class="t-heading">Screens</h2>
+    <div class="stack-lg" id="screen-groups"></div>
+  </section>
+
+  <section class="grid">
+    <article class="card span-4 card-body stack-sm"><span class="kpi-icon"><span data-icon="grid"></span></span><h3 class="t-subhead">Jobs, not tables</h3><p class="muted t-small">Twelve flat links become four groups that match how the team actually works. Pages a role can’t use are hidden, and you can preview any role from the account menu.</p></article>
+    <article class="card span-4 card-body stack-sm"><span class="kpi-icon"><span data-icon="command"></span></span><h3 class="t-subhead">Keyboard-first</h3><p class="muted t-small"><span class="kbd">⌘K</span> searches students, leads and receipts, and jumps to any page. <span class="kbd">[</span> collapses the sidebar and <span class="kbd">D</span> switches density.</p></article>
+    <article class="card span-4 card-body stack-sm"><span class="kpi-icon"><span data-icon="refresh"></span></span><h3 class="t-subhead">Optimistic + undo</h3><p class="muted t-small">Attendance, pipeline moves and archiving apply instantly and offer undo, so day-to-day edits don’t need a confirmation dialog.</p></article>
+  </section>
+</main>
+<script>
+  const GROUPS = [
+    ['Overview', [['dashboard', 'Today', 'Daily briefing: KPIs, live lessons, attention queue']]],
+    ['Growth', [['pipeline', 'Pipeline', 'Drag-and-drop CRM board with a lead drawer'], ['sales-report', 'Sales report', 'Staff and source performance']]],
+    ['People', [['students', 'Students', 'Bulk-selectable directory'], ['student', 'Student profile', 'Tabbed 360° record'], ['teachers', 'Teachers', 'Directory and recruitment'], ['matching', 'Teacher matching', 'Availability → demo → confirm']]],
+    ['Teaching', [['timetable', 'Timetable', 'Week grid with a now line'], ['attendance', 'Attendance', 'Review queue and duplicate resolver'], ['teacher-portal', 'Teacher portal', 'Mobile-first one-tap attendance'], ['tasks', 'My tasks', 'Priority-grouped follow-ups']]],
+    ['Money', [['finance', 'Ledger & receipts', 'Ledger, receipts, payouts'], ['payment-requests', 'Payment requests', 'Line items with a live total'], ['statement', 'Parent statement', 'Share → dispute → accept'], ['receipt', 'Receipt', 'Printable acknowledgement']]],
+    ['Admin', [['team', 'Team & access', 'Members and the permission matrix'], ['operations', 'Operations & audit', 'Health, backups and audit log'], ['migration', 'Migration & exports', 'Three-step guarded import'], ['security', 'Account security', '2FA, recovery codes, sessions']]],
+  ];
+  document.getElementById('screen-groups').innerHTML = GROUPS.map(([g, items]) => `
+    <div class="stack-sm"><div class="t-overline">${g}</div>
+      <div class="auto-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--s-3)">
+        ${items.map(([f, t, d]) => `<a class="card card-interactive screen-card" href="screens/${f}.html"><span class="row between strong">${t}<span data-icon="arrowRight" class="icon-sm"></span></span><span class="t-small muted">${d}</span></a>`).join('')}
+      </div></div>`).join('');
+</script>
+</body>
+</html>

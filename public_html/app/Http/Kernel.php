@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\ActiveAccount::class,
+            \App\Http\Middleware\SheetAuthority::class,
             \App\Http\Middleware\TeacherWorkspaceRedirect::class,
         ],
 

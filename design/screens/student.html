@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fathima Rahman · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .profile-card { overflow: hidden; }
+    .profile-cover { position: relative; height: 112px; background:
+      radial-gradient(420px 160px at 88% 0%, rgba(166,224,202,.55), transparent 70%),
+      radial-gradient(360px 200px at 0% 100%, rgba(206,226,251,.6), transparent 70%),
+      linear-gradient(120deg, var(--g-50), #eef5ff); }
+    .profile-cover::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(color-mix(in srgb, var(--g-600) 18%, transparent) 1px, transparent 1px); background-size: 16px 16px; mask-image: linear-gradient(90deg, transparent, #000 40%, #000 70%, transparent); }
+    [data-theme="dark"] .profile-cover { background: radial-gradient(420px 160px at 88% 0%, rgba(19,144,111,.35), transparent 70%), linear-gradient(120deg, #12221c, #121a24); }
+    .profile { display: flex; align-items: center; gap: var(--s-5); flex-wrap: wrap; padding: var(--s-4) var(--s-6) var(--s-5); position: relative; }
+    .profile .avatar.xl { --size: 88px; font-size: 30px; align-self: flex-start; margin-top: -60px; box-shadow: 0 0 0 4px var(--bg-surface), 0 8px 24px -8px rgba(16,24,21,.3); }
+    .profile .titles { flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: 2px; }
+    .profile-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--border-subtle); }
+    .profile-stats > div { padding: var(--s-4) var(--s-6); display: flex; flex-direction: column; gap: 2px; }
+    .profile-stats > div + div { border-left: 1px solid var(--border-subtle); }
+    .profile-stats b { font: var(--t-lg); font-weight: 650; letter-spacing: -0.015em; }
+    .profile-tabs { padding: 0 var(--s-6); border-top: 1px solid var(--border-subtle); border-bottom: 0; }
+    @media (max-width: 720px) { .profile-stats { grid-template-columns: repeat(2, 1fr); } .profile-stats > div:nth-child(3) { border-left: 0; } }
+    .assign { display: grid; grid-template-columns: 32px 1fr auto; gap: var(--s-3); align-items: center; }
+  </style>
+</head>
+<body data-page="students" data-crumbs="Students/Fathima Rahman">
+<main>
+  <section class="card profile-card">
+  <div class="profile-cover" aria-hidden="true"></div>
+  <header class="profile">
+    <span class="avatar xl">FR</span>
+    <div class="titles">
+      <div class="row wrap"><h1 class="t-title">Fathima Rahman</h1><span class="badge success dot">Active</span></div>
+      <div class="row wrap t-small muted">
+        <button class="btn btn-ghost btn-sm mono" data-copy="CL-1042" data-tip="Copy student code" style="margin-left: calc(var(--s-3) * -1)">CL-1042<span data-icon="copy" class="icon-sm"></span></button>
+        <span>Grade 9 · CBSE</span><span>·</span><span>Registered 24 Oct 2026</span><span>·</span><span>Asia/Kolkata</span>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn" data-tip="Call guardian"><span data-icon="phone"></span>Call</button>
+      <button class="btn" data-open="tpl-payment"><span data-icon="wallet"></span>Record payment</button>
+      <button class="btn btn-primary" data-toast="Lesson scheduler opened"><span data-icon="calendar"></span>Schedule</button>
+      <button class="btn btn-icon" data-menu="row-menu" aria-label="More actions"><span data-icon="more"></span></button>
+    </div>
+  </header>
+  <div class="profile-stats">
+    <div><span class="t-caption">Attendance · Oct</span><b>94%</b><span class="t-caption">30 of 32 lessons</span></div>
+    <div><span class="t-caption">Next lesson</span><b>Today, 12:00</b><span class="t-caption">Maths · Rahul K.</span></div>
+    <div><span class="t-caption">Latest assessment</span><b>82<span class="muted" style="font-size:14px;font-weight:500">/100</span></b><span class="t-caption">Quadratics · 27 Oct</span></div>
+    <div><span class="t-caption">Teachers</span><div class="avatar-stack" style="margin-top:2px"><span class="avatar sm">RK</span><span class="avatar sm">AS</span><span class="avatar sm">SP</span></div><span class="t-caption">Maths, Science, English</span></div>
+  </div>
+  <nav class="tabs profile-tabs" role="tablist" aria-label="Student sections">
+    <button role="tab" aria-selected="true" aria-controls="p-overview">Overview</button>
+    <button role="tab" aria-selected="false" aria-controls="p-timetable">Timetable</button>
+    <button role="tab" aria-selected="false" aria-controls="p-attendance">Attendance<span class="count">32</span></button>
+    <button role="tab" aria-selected="false" aria-controls="p-money">Money</button>
+    <button role="tab" aria-selected="false" aria-controls="p-followups">Follow-ups<span class="count">2</span></button>
+  </nav>
+  </section>
+
+  <!-- Overview -->
+  <section id="p-overview" class="tab-panel grid" role="tabpanel">
+    <div class="span-8 stack-lg">
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Student details</h2><button class="btn btn-ghost btn-sm"><span data-icon="edit"></span>Edit</button></div>
+        <div class="card-body">
+          <dl class="dl">
+            <dt>Guardian</dt><dd>Rahman K. (father)</dd>
+            <dt>Guardian contact</dt><dd class="row-sm"><span class="num">+91 98470 12345</span><button class="btn btn-link t-caption" data-copy="+919847012345">Copy</button></dd>
+            <dt>Student hourly rate</dt><dd class="money">₹450 / hour</dd>
+            <dt>Teaching medium</dt><dd>English + Malayalam</dd>
+            <dt>Admission handoff</dt><dd><a href="pipeline.html">Enquiry #4790</a> · converted by Shahana</dd>
+          </dl>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Teacher and subject assignments</h2><a class="btn btn-ghost btn-sm" href="matching.html"><span data-icon="plus"></span>Assign</a></div>
+        <div class="list" style="margin-top:var(--s-3)">
+          <div class="list-item assign"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">RK</span><span><span class="t-small strong" style="display:block">Maths · Rahul K.</span><span class="t-caption">Mon, Wed, Fri · 09:00–10:00 · agreement active</span></span><span class="badge success dot">Active</span></div>
+          <div class="list-item assign"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">AS</span><span><span class="t-small strong" style="display:block">Science · Anjali S.</span><span class="t-caption">Tue, Thu · 17:00–18:00 · starts 3 Nov</span></span><span class="badge info dot">Confirmed</span></div>
+          <div class="list-item assign"><span class="avatar sm">SP</span><span><span class="t-small strong" style="display:block">English · Sneha P.</span><span class="t-caption">Sat · 10:00–11:00 · awaiting parent confirmation</span></span><span class="badge warning dot">Proposed</span></div>
+        </div>
+      </article>
+    </div>
+
+    <div class="span-4 stack-lg">
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Balance</h2><span class="badge danger">Due</span></div>
+        <div class="card-body stack">
+          <div class="stack-xs"><span class="t-title money neg">−₹12,500</span><span class="t-caption">Includes 14 October lessons not yet paid</span></div>
+          <div class="progress danger"><span style="width:62%"></span></div>
+          <div class="row between t-small"><span class="muted">Paid this term</span><span class="money strong">₹20,000</span></div>
+          <div class="row between t-small"><span class="muted">Charged this term</span><span class="money strong">₹32,500</span></div>
+          <button class="btn btn-block" data-async data-done="Sent" data-toast="Payment request sent on WhatsApp"><span data-icon="send"></span>Send payment request</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2 class="t-subhead">Activity</h2></div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="tl-item"><span class="tl-dot success"><span data-icon="check"></span></span><div class="tl-body">Maths lesson completed · 60 min<div class="t-caption">Today, 10:00</div></div></div>
+            <div class="tl-item"><span class="tl-dot info"><span data-icon="file"></span></span><div class="tl-body">Sept statement shared with parent<div class="t-caption">26 Oct</div></div></div>
+            <div class="tl-item"><span class="tl-dot"><span data-icon="wallet"></span></span><div class="tl-body"><b>₹10,000</b> received · <a href="receipt.html">CL-2244</a><div class="t-caption">24 Oct</div></div></div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Timetable -->
+  <section id="p-timetable" class="tab-panel card" role="tabpanel" hidden>
+    <div class="list">
+      <div class="list-item"><span class="mono">Mon 03 Nov · 09:00</span><span class="grow">Maths · Rahul K.</span><span class="badge">Scheduled</span></div>
+      <div class="list-item"><span class="mono">Tue 04 Nov · 17:00</span><span class="grow">Science · Anjali S.</span><span class="badge">Scheduled</span></div>
+      <div class="list-item"><span class="mono">Wed 05 Nov · 09:00</span><span class="grow">Maths · Rahul K.</span><span class="badge warning dot">Rescheduled</span></div>
+    </div>
+    <div class="card-foot"><a href="timetable.html" class="t-small">Open in weekly timetable</a></div>
+  </section>
+
+  <!-- Attendance -->
+  <section id="p-attendance" class="tab-panel card" role="tabpanel" hidden>
+    <table class="table">
+      <thead><tr><th>Date and time</th><th>Subject</th><th>Teacher</th><th class="num">Minutes</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">29 Oct · 09:00</td><td>Maths</td><td>Rahul K.</td><td class="num">60</td><td><span class="badge success dot">Approved</span></td></tr>
+        <tr><td class="mono">27 Oct · 09:00</td><td>Maths</td><td>Rahul K.</td><td class="num">45</td><td><span class="badge warning dot">Submitted</span></td></tr>
+        <tr><td class="mono">24 Oct · 09:00</td><td>Maths</td><td>Rahul K.</td><td class="num">60</td><td><span class="badge success dot">Approved</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Money -->
+  <section id="p-money" class="tab-panel card" role="tabpanel" hidden>
+    <table class="table">
+      <thead><tr><th>Date</th><th>Entry</th><th>Reference</th><th class="num">Amount</th></tr></thead>
+      <tbody>
+        <tr><td>29 Oct</td><td>Lesson charge · Maths 60 min</td><td class="mono">LS-88213</td><td class="num"><span class="money neg">−₹450</span></td></tr>
+        <tr><td>24 Oct</td><td>Payment · UPI</td><td class="mono"><a href="receipt.html">CL-2244</a></td><td class="num"><span class="money pos">₹10,000</span></td></tr>
+        <tr><td>01 Oct</td><td>Opening balance</td><td class="mono">MIG-0042</td><td class="num"><span class="money neg">−₹2,500</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Follow-ups -->
+  <section id="p-followups" class="tab-panel card" role="tabpanel" hidden>
+    <div class="list">
+      <label class="list-item check"><input type="checkbox" /><span class="grow t-small">Collect October balance before 5 Nov<span class="t-caption" style="display:block">Super · current month · Shahana</span></span></label>
+      <label class="list-item check"><input type="checkbox" /><span class="grow t-small">Confirm Saturday English slot with parent<span class="t-caption" style="display:block">Medium · Nihal</span></span></label>
+    </div>
+  </section>
+</main>
+
+<template id="tpl-payment">
+  <div class="dialog" role="dialog" aria-label="Record payment">
+    <div class="dialog-head"><span class="kpi-icon"><span data-icon="wallet"></span></span><div class="stack-xs grow"><div class="t-subhead">Record an already received payment</div><p class="muted t-small">Fathima Rahman · balance −₹12,500</p></div></div>
+    <div class="dialog-body">
+      <div class="form-grid">
+        <div class="field"><label class="field-label">Amount</label><div class="input-group"><span class="affix">₹</span><input class="input num" value="12,500" autofocus /></div></div>
+        <div class="field"><label class="field-label">Received on</label><input class="input" type="date" value="2026-10-29" /></div>
+        <div class="field full"><label class="field-label">Method</label><div class="segmented" role="group"><button aria-pressed="true">UPI</button><button aria-pressed="false">Bank</button><button aria-pressed="false">Cash</button></div></div>
+        <div class="field full"><label class="field-label">Receipt reference <span class="opt">Optional</span></label><input class="input" placeholder="UPI txn id" /></div>
+      </div>
+    </div>
+    <div class="dialog-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Recorded" data-toast="₹12,500 recorded · receipt CL-2292">Record payment</button></div>
+  </div>
+</template>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Receipt CL-2291 · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .action-bar { display: flex; align-items: center; gap: var(--s-2); max-width: 720px; width: 100%; margin: 0 auto; }
+    .doc { position: relative; overflow: hidden; }
+    .doc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s-6); }
+    .doc-amount { padding: var(--s-6); border-radius: var(--r-lg); background: var(--accent-subtle); display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s-4); flex-wrap: wrap; }
+    .doc-amount .big { font: var(--t-3xl); font-weight: var(--w-semibold); letter-spacing: var(--tracking-tight); color: var(--accent-fg); font-variant-numeric: tabular-nums; }
+    .doc .table th:first-child, .doc .table td:first-child { padding-left: 0; }
+    .doc .table th:last-child, .doc .table td:last-child { padding-right: 0; }
+    .doc .table th { background: none; }
+    .doc-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s-6); padding-top: var(--s-6); border-top: 1px dashed var(--border-strong); }
+    .sign { width: 160px; border-top: 1px solid var(--border-strong); padding-top: var(--s-2); text-align: center; }
+    /* Reversed / corrected record — add data-reversed to .doc */
+    .stamp { display: none; position: absolute; top: var(--s-16); right: calc(var(--s-10) * -1); transform: rotate(18deg); padding: var(--s-2) var(--s-16); background: var(--danger-subtle); color: var(--danger-fg); border-block: 2px solid var(--danger); font: var(--t-sm); font-weight: var(--w-bold); letter-spacing: var(--tracking-caps); }
+    .doc[data-reversed] .stamp { display: block; }
+    .doc[data-reversed] .doc-amount .big { text-decoration: line-through; color: var(--fg-subtle); }
+    @media print { body { background: #fff; } .page { padding: 0; } }
+  </style>
+</head>
+<body data-page="money" data-crumbs="Ledger & receipts/CL-2291">
+<main>
+  <div class="action-bar no-print">
+    <a class="btn btn-ghost btn-sm" style="margin-left:calc(var(--s-2) * -1)" href="finance.html"><span data-icon="chevronLeft"></span>Ledger</a>
+    <span class="grow"></span>
+    <label class="switch t-small" data-tip="Preview the reversed / corrected state"><input type="checkbox" onchange="document.querySelector('.doc').toggleAttribute('data-reversed', this.checked)" />Reversed preview</label>
+    <button class="btn btn-sm" data-toast="Opening WhatsApp with acknowledgement PDF"><span data-icon="message"></span>Share via WhatsApp</button>
+    <button class="btn btn-primary btn-sm" onclick="window.print()"><span data-icon="printer"></span>Print acknowledgement</button>
+    <button class="btn btn-ghost btn-icon btn-sm" data-menu="receipt-menu" aria-label="More actions"><span data-icon="more"></span></button>
+  </div>
+
+  <!-- Toggle the reversed record state: add data-reversed to the .doc below (or use the switch) -->
+  <article class="doc" aria-label="Payment acknowledgement">
+    <div class="stamp" aria-hidden="true">REVERSED / CORRECTED RECORD</div>
+    <div class="doc-head">
+      <div class="row-lg"><div class="brand-mark" style="width:44px;height:44px;font-size:18px">cl</div><div class="stack-xs" style="gap:0"><span class="t-heading">ClapsLearn</span><span class="t-caption">Kochi Tuition · Kakkanad, Kochi 682030</span></div></div>
+      <div class="stack-xs" style="align-items:flex-end;text-align:right">
+        <span class="t-overline">Payment acknowledgement</span>
+        <button class="btn btn-ghost btn-sm mono" style="margin-right:calc(var(--s-3) * -1)" data-copy="CL-2291" data-tip="Copy receipt number">CL-2291 <span data-icon="copy" class="icon-sm"></span></button>
+        <span class="t-caption">29 October 2026, 10:14 IST</span>
+      </div>
+    </div>
+
+    <div class="doc-amount">
+      <div class="stack-xs"><span class="t-caption">Amount received</span><span class="big">₹12,500.00</span><span class="t-small muted">Rupees Twelve Thousand Five Hundred Only</span></div>
+      <span class="badge success dot">Paid · UPI</span>
+    </div>
+
+    <dl class="dl">
+      <dt>Received from</dt><dd>Rasheed Rahman (parent)</dd>
+      <dt>Student</dt><dd>Fathima Rahman · CL-1042 · Grade 9 CBSE</dd>
+      <dt>Method</dt><dd>UPI · <span class="mono">412983776120</span></dd>
+      <dt>Against request</dt><dd><a href="payment-requests.html" class="mono">PR-0402</a> · October 2026</dd>
+      <dt>Recorded by</dt><dd>Shahana K.</dd>
+    </dl>
+
+    <table class="table">
+      <thead><tr><th>Description</th><th class="num">Classes</th><th class="num">Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Maths · Rahul Krishnan</td><td class="num">12</td><td class="num money">₹7,800.00</td></tr>
+        <tr><td>Physics · Sneha Pillai</td><td class="num">8</td><td class="num money">₹4,800.00</td></tr>
+        <tr><td class="muted">Credit carried forward</td><td class="num"></td><td class="num money muted">−₹100.00</td></tr>
+        <tr><td class="strong">Total</td><td class="num"></td><td class="num money strong">₹12,500.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="doc-foot">
+      <p class="t-caption" style="max-width:40ch">This acknowledgement is system generated. Corrections are issued as a new record; this number is never reused.</p>
+      <div class="sign t-caption">Authorised signatory</div>
+    </div>
+  </article>
+</main>
+
+<template id="receipt-menu">
+  <button class="menu-item"><span data-icon="download"></span>Download PDF</button>
+  <button class="menu-item"><span data-icon="edit"></span>Correct receipt</button>
+  <div class="menu-sep"></div>
+  <button class="menu-item danger" data-open="tpl-reverse"><span data-icon="refresh"></span>Reverse receipt</button>
+</template>
+
+<template id="tpl-reverse">
+  <div class="dialog" role="alertdialog" aria-label="Reverse receipt">
+    <div class="dialog-head"><span class="kpi-icon" style="background:var(--danger-subtle);color:var(--danger-fg)"><span data-icon="refresh"></span></span><div class="stack-xs grow"><div class="t-subhead">Reverse CL-2291?</div><p class="muted t-small">A reversal entry of −₹12,500.00 is added to the ledger and this acknowledgement is stamped. The original stays visible for audit.</p></div></div>
+    <div class="dialog-body"><div class="field"><label class="field-label">Reason</label><textarea class="textarea" placeholder="e.g. Duplicate entry, wrong student" autofocus></textarea></div></div>
+    <div class="dialog-foot"><button class="btn" data-action="close">Keep receipt</button><button class="btn btn-danger" data-async data-close data-done="Reversed" data-toast="Receipt CL-2291 reversed">Reverse receipt</button></div>
+  </div>
+</template>
+</body>
+</html>

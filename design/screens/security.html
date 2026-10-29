@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account security · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .narrow { max-width: 880px; width: 100%; }
+    .qr { width: 160px; height: 160px; flex: none; border-radius: var(--r-lg); border: 1px solid var(--border-default); background: var(--bg-surface); display: grid; grid-template-columns: repeat(21, 1fr); padding: var(--s-3); gap: 0; }
+    .qr i { background: var(--fg-default); border-radius: 1px; }
+    .qr i.o { background: transparent; }
+    .setup { display: flex; gap: var(--s-6); align-items: flex-start; flex-wrap: wrap; }
+    .otp { display: flex; gap: var(--s-2); }
+    .otp input { width: 44px; height: var(--control-lg); text-align: center; font: var(--t-lg); font-weight: var(--w-semibold); padding: 0; }
+    .otp input:nth-child(3) { margin-right: var(--s-2); }
+    .codes { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-2) var(--s-6); padding: var(--s-4); border-radius: var(--r-md); background: var(--bg-sunken); border: 1px dashed var(--border-strong); }
+    .codes span { font-family: var(--font-mono); font-size: 14px; line-height: 24px; letter-spacing: .04em; }
+    .list-item > .btn-ghost:last-child, .row.between > .btn-ghost:last-child { margin-right: calc(var(--s-2) * -1); }
+  </style>
+</head>
+<body data-page="security" data-crumbs="Admin/Account security">
+<main class="narrow">
+  <header class="page-header">
+    <div class="titles">
+      <h1 class="t-title">Account security</h1>
+      <p class="muted">Protect access to student and payment records.</p>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="card-head"><span class="kpi-icon"><span data-icon="shield"></span></span><div class="stack-xs grow" style="gap:0"><h2 class="t-subhead">Two-factor authentication</h2><span class="t-caption">Required for Team managers and Finance</span></div><span class="badge warning dot">Not set up</span></div>
+    <div class="card-body">
+      <div class="setup">
+        <div class="qr" id="qr" role="img" aria-label="QR code for authenticator app"></div>
+        <div class="stack grow" style="min-width:260px">
+          <div class="stack-xs"><span class="t-small strong">1. Scan with an authenticator app</span><span class="t-small muted">Google Authenticator, 1Password or Authy. Can’t scan?</span>
+            <button class="btn btn-sm mono" style="align-self:flex-start" data-copy="JBSW Y3DP EHPK 3PXP">JBSW Y3DP EHPK 3PXP <span data-icon="copy" class="icon-sm"></span></button></div>
+          <div class="field"><label class="field-label">2. Enter the 6-digit code</label>
+            <div class="otp" data-otp>
+              <input class="input num" inputmode="numeric" maxlength="1" aria-label="Digit 1" /><input class="input num" inputmode="numeric" maxlength="1" aria-label="Digit 2" /><input class="input num" inputmode="numeric" maxlength="1" aria-label="Digit 3" /><input class="input num" inputmode="numeric" maxlength="1" aria-label="Digit 4" /><input class="input num" inputmode="numeric" maxlength="1" aria-label="Digit 5" /><input class="input num" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
+            </div>
+          </div>
+          <div class="row"><button class="btn btn-primary" data-async data-done="Enabled" data-toast="Two-factor authentication enabled">Verify and enable</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="kpi-icon" style="background:var(--warning-subtle);color:var(--warning-fg)"><span data-icon="key"></span></span><div class="stack-xs grow" style="gap:0"><h2 class="t-subhead">Recovery codes</h2><span class="t-caption">Each code works once. Store them somewhere safe.</span></div>
+      <button class="btn btn-sm" data-copy="7KQ2-MX9P&#10;R4TN-8WLC&#10;J6VD-2HZF&#10;P3SB-Q9EK&#10;W8YG-5NRT&#10;C2LA-7MDV&#10;F9UX-4KJS&#10;H5PE-6TQB"><span data-icon="copy" class="icon-sm"></span>Copy all</button>
+      <button class="btn btn-sm" data-toast="recovery-codes.txt downloaded"><span data-icon="download" class="icon-sm"></span>Download</button>
+    </div>
+    <div class="card-body stack">
+      <div class="codes"><span>7KQ2-MX9P</span><span>R4TN-8WLC</span><span>J6VD-2HZF</span><span>P3SB-Q9EK</span><span>W8YG-5NRT</span><span>C2LA-7MDV</span><span>F9UX-4KJS</span><span>H5PE-6TQB</span></div>
+      <div class="row between"><span class="t-caption">Generated 29 Oct 2026 · 8 of 8 unused</span><button class="btn btn-ghost btn-sm" data-toast="New codes generated · old ones no longer work"><span data-icon="refresh"></span>Regenerate</button></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="kpi-icon" style="background:var(--info-subtle);color:var(--info-fg)"><span data-icon="activity"></span></span><h2 class="t-subhead">Active sessions</h2><button class="btn btn-sm" data-open="tpl-signout">Sign out all sessions</button></div>
+    <div class="list" style="margin-top:var(--s-3)">
+      <div class="list-item"><span class="tl-dot success"><span data-icon="grid"></span></span><span class="grow"><span class="t-small strong" style="display:block">Chrome on macOS <span class="badge success">This device</span></span><span class="t-caption">Kochi, IN · 103.42.x.x · active now</span></span></div>
+      <div class="list-item"><span class="tl-dot"><span data-icon="phone"></span></span><span class="grow"><span class="t-small strong" style="display:block">Safari on iPhone</span><span class="t-caption">Kochi, IN · 2 hours ago</span></span><button class="btn btn-ghost btn-sm" data-toast="Session revoked" data-undo>Revoke</button></div>
+      <div class="list-item"><span class="tl-dot warning"><span data-icon="alert"></span></span><span class="grow"><span class="t-small strong" style="display:block">Firefox on Windows</span><span class="t-caption">Dubai, AE · 4 days ago · unfamiliar location</span></span><button class="btn btn-ghost btn-sm" data-toast="Session revoked" data-undo>Revoke</button></div>
+    </div>
+  </section>
+</main>
+
+<template id="tpl-signout">
+  <div class="dialog" role="alertdialog" aria-label="Sign out all sessions">
+    <div class="dialog-head"><span class="kpi-icon" style="background:var(--danger-subtle);color:var(--danger-fg)"><span data-icon="logout"></span></span><div class="stack-xs grow"><div class="t-subhead">Sign out everywhere?</div><p class="muted t-small">All other devices will need to sign in again. This device stays signed in.</p></div></div>
+    <div class="dialog-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-danger" data-async data-close data-done="Signed out" data-toast="2 other sessions signed out">Sign out all</button></div>
+  </div>
+</template>
+
+<script>
+  /* Decorative QR placeholder with three finder squares */
+  const N = 21, finder = (r, c) => [[0, 0], [0, 14], [14, 0]].some(([y, x]) => {
+    const dy = r - y, dx = c - x; if (dy < 0 || dy > 6 || dx < 0 || dx > 6) return null;
+    return dy === 0 || dy === 6 || dx === 0 || dx === 6 || (dy >= 2 && dy <= 4 && dx >= 2 && dx <= 4);
+  });
+  const inFinder = (r, c) => [[0, 0], [0, 14], [14, 0]].some(([y, x]) => r - y >= 0 && r - y <= 7 && c - x >= 0 && c - x <= 7);
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  document.getElementById('qr').innerHTML = Array.from({ length: N * N }, (_, i) => {
+    const r = Math.floor(i / N), c = i % N;
+    const on = inFinder(r, c) ? finder(r, c) : rnd() > .52;
+    return `<i class="${on ? '' : 'o'}"></i>`;
+  }).join('');
+
+  /* OTP: auto-advance, backspace goes back, paste fills all */
+  const otp = document.querySelector('[data-otp]'), boxes = [...otp.querySelectorAll('input')];
+  otp.addEventListener('input', e => { const i = boxes.indexOf(e.target); e.target.value = e.target.value.replace(/\D/g, '').slice(-1); if (e.target.value && boxes[i + 1]) boxes[i + 1].focus(); });
+  otp.addEventListener('keydown', e => { const i = boxes.indexOf(e.target); if (e.key === 'Backspace' && !e.target.value && boxes[i - 1]) boxes[i - 1].focus(); });
+  otp.addEventListener('paste', e => { const d = (e.clipboardData.getData('text').match(/\d/g) || []).slice(0, 6); if (!d.length) return; e.preventDefault(); d.forEach((v, i) => (boxes[i].value = v)); boxes[Math.min(d.length, 5)].focus(); });
+</script>
+</body>
+</html>

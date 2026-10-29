@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment requests · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .line { display: grid; grid-template-columns: minmax(0, 1fr) 72px 120px var(--control-sm); gap: var(--s-2); align-items: center; }
+    .line-head { font: var(--t-xs); color: var(--fg-muted); font-weight: var(--w-medium); }
+    .total-row { display: flex; justify-content: space-between; align-items: baseline; padding-top: var(--s-3); border-top: 1px solid var(--border-subtle); }
+    .total-row .money { font: var(--t-xl); font-weight: var(--w-semibold); letter-spacing: var(--tracking-tight); }
+    .summary-strip { display: flex; gap: var(--s-8); flex-wrap: wrap; padding: var(--s-4) var(--pad-card); border-bottom: 1px solid var(--border-subtle); }
+  </style>
+</head>
+<body data-page="requests" data-crumbs="Money/Payment requests">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <h1 class="t-title">Payment requests</h1>
+      <p class="muted">Ask parents for fees with an itemised request. Payments allocate against it automatically.</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" data-open="tpl-request" data-kind="drawer"><span data-icon="plus"></span>New payment request</button>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="summary-strip">
+      <div class="stack-xs"><span class="t-caption">Sent, awaiting payment</span><span class="t-heading money">₹1,04,250.00</span></div>
+      <div class="stack-xs"><span class="t-caption">Partially paid</span><span class="t-heading money">₹22,600.00</span></div>
+      <div class="stack-xs"><span class="t-caption">Paid this month</span><span class="t-heading money pos">₹3,18,900.00</span></div>
+      <div class="stack-xs"><span class="t-caption">Drafts</span><span class="t-heading num">4</span></div>
+    </div>
+    <div class="toolbar">
+      <div class="input-group"><span data-icon="search"></span><input class="input input-sm" placeholder="Search student or request no." aria-label="Search requests" /></div>
+      <button class="chip" aria-pressed="false">Draft</button>
+      <button class="chip" aria-pressed="true">Sent</button>
+      <button class="chip" aria-pressed="true">Partially paid</button>
+      <button class="chip" aria-pressed="false">Paid</button>
+      <button class="chip" aria-pressed="false">Cancelled</button>
+      <span class="spacer"></span>
+      <div class="segmented" role="group" aria-label="Period"><button aria-pressed="false">Sep</button><button aria-pressed="true">Oct</button><button aria-pressed="false">Nov</button></div>
+    </div>
+    <div class="table-wrap">
+      <table class="table" data-bulk="bulk-requests">
+        <thead><tr>
+          <th class="sel"><label class="check"><input type="checkbox" aria-label="Select all" /></label></th>
+          <th><button class="th-sort">Student<span data-icon="arrowUp"></span></button></th>
+          <th>Request</th><th>Period</th>
+          <th class="num"><button class="th-sort" aria-sort="descending">Amount<span data-icon="arrowUp"></span></button></th>
+          <th class="num">Paid</th><th>Status</th><th>Due</th><th></th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td><div class="cell-primary"><span class="avatar sm">FR</span><div class="stack-xs" style="gap:0"><span class="name">Fathima Rahman</span><span class="meta">Grade 9 · CBSE</span></div></div></td><td class="mono">PR-0418</td><td>Nov 2026</td><td class="num money" data-v="15600">₹15,600.00</td><td class="num money muted">₹0.00</td><td><span class="badge info dot">Sent</span></td><td class="t-small">5 Nov</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-tip="Resend on WhatsApp" aria-label="Resend" data-toast="Request resent to +91 98470 12345"><span data-icon="send"></span></button><button class="btn btn-ghost btn-icon btn-sm" data-menu="req-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">AN</span><div class="stack-xs" style="gap:0"><span class="name">Aarav Nair</span><span class="meta">Grade 7 · ICSE</span></div></div></td><td class="mono">PR-0417</td><td>Oct 2026</td><td class="num money" data-v="11200">₹11,200.00</td><td class="num money">₹6,000.00</td><td><span class="badge warning dot">Partially paid</span></td><td class="t-small" style="color:var(--danger-fg)">Overdue 3d</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-tip="Resend on WhatsApp" aria-label="Resend" data-toast="Reminder sent"><span data-icon="send"></span></button><button class="btn btn-ghost btn-icon btn-sm" data-menu="req-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">ZA</span><div class="stack-xs" style="gap:0"><span class="name">Zainab Ali</span><span class="meta">Grade 11 · State</span></div></div></td><td class="mono">PR-0416</td><td>Oct 2026</td><td class="num money" data-v="18900">₹18,900.00</td><td class="num money">₹18,900.00</td><td><span class="badge success dot">Paid</span></td><td class="t-small muted">—</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="req-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">IM</span><div class="stack-xs" style="gap:0"><span class="name">Ibrahim Musthafa</span><span class="meta">Grade 5 · CBSE</span></div></div></td><td class="mono">PR-0415</td><td>Nov 2026</td><td class="num money" data-v="7800">₹7,800.00</td><td class="num money muted">₹0.00</td><td><span class="badge">Draft</span></td><td class="t-small muted">—</td><td class="num"><span class="row-actions"><button class="btn btn-sm">Send</button><button class="btn btn-ghost btn-icon btn-sm" data-menu="req-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td class="sel"><label class="check"><input type="checkbox" aria-label="Select" /></label></td><td><div class="cell-primary"><span class="avatar sm">MK</span><div class="stack-xs" style="gap:0"><span class="name">Meera Krishnan</span><span class="meta">Grade 10 · CBSE</span></div></div></td><td class="mono">PR-0409</td><td>Oct 2026</td><td class="num money subtle" data-v="9750" style="text-decoration:line-through">₹9,750.00</td><td class="num money muted">₹0.00</td><td><span class="badge danger">Cancelled</span></td><td class="t-small muted">—</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="req-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-foot"><span>5 of 38 requests</span><a href="#">Show all</a></div>
+  </section>
+</main>
+
+<div class="bulk-bar" id="bulk-requests" role="toolbar" aria-label="Bulk actions">
+  <span class="t-small"><b data-selected-count>0</b> selected</span>
+  <button class="btn btn-sm" data-toast="Reminders queued on WhatsApp"><span data-icon="send"></span>Send reminder</button>
+  <button class="btn btn-sm" data-toast="PDFs prepared"><span data-icon="printer"></span>Print</button>
+  <button class="btn btn-sm" data-action="confirm-delete"><span data-icon="x"></span>Cancel</button>
+</div>
+
+<template id="req-row">
+  <button class="menu-item"><span data-icon="eye"></span>Open request<span class="kbd">↵</span></button>
+  <button class="menu-item"><span data-icon="wallet"></span>Allocate a payment</button>
+  <button class="menu-item"><span data-icon="printer"></span>Print request</button>
+  <button class="menu-item"><span data-icon="copy"></span>Duplicate for next month</button>
+  <div class="menu-sep"></div>
+  <button class="menu-item danger" data-action="confirm-delete"><span data-icon="x"></span>Cancel request</button>
+</template>
+
+<template id="tpl-request">
+  <div class="drawer" role="dialog" aria-label="New payment request">
+    <div class="drawer-head"><span class="t-subhead grow">New payment request</span><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body" data-request>
+      <div class="form-grid">
+        <div class="field full"><label class="field-label">Student</label><select class="select" autofocus><option>Fathima Rahman · CL-1042</option><option>Aarav Nair · CL-1031</option></select></div>
+        <div class="field"><label class="field-label">Period</label><select class="select"><option>November 2026</option><option>December 2026</option></select></div>
+        <div class="field"><label class="field-label">Due on</label><input class="input" type="date" value="2026-11-05" /></div>
+      </div>
+      <div class="stack-sm">
+        <div class="row between"><span class="t-small strong">Line items</span><button class="btn btn-ghost btn-sm" data-add-line><span data-icon="plus"></span>Add line</button></div>
+        <div class="line line-head"><span>Description</span><span>Qty</span><span style="text-align:right">Rate (₹)</span><span></span></div>
+        <div class="stack-sm" data-lines>
+          <div class="line"><input class="input input-sm" value="Maths · 60 min classes" /><input class="input input-sm num" data-qty value="12" /><input class="input input-sm num" data-rate value="650" style="text-align:right" /><button class="btn btn-ghost btn-icon btn-sm" data-remove-line aria-label="Remove line"><span data-icon="x"></span></button></div>
+          <div class="line"><input class="input input-sm" value="Physics · 60 min classes" /><input class="input input-sm num" data-qty value="8" /><input class="input input-sm num" data-rate value="600" style="text-align:right" /><button class="btn btn-ghost btn-icon btn-sm" data-remove-line aria-label="Remove line"><span data-icon="x"></span></button></div>
+        </div>
+        <div class="total-row"><span class="t-small muted">Total</span><span class="money" data-total>₹12,600.00</span></div>
+        <span class="field-hint">Existing credit of ₹0.00 will be applied first.</span>
+      </div>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn" data-async data-close data-done="Saved" data-toast="Draft saved · PR-0419">Save draft</button><button class="btn btn-primary" data-async data-close data-done="Sent" data-toast="Request PR-0419 sent on WhatsApp"><span data-icon="send"></span>Send request</button></div>
+  </div>
+</template>
+
+<script>
+  /* Live total: recomputes on any qty/rate edit inside the open drawer */
+  const fmt = n => '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const recalc = root => {
+    let t = 0;
+    root.querySelectorAll('[data-lines] .line').forEach(l => {
+      t += (parseFloat(l.querySelector('[data-qty]').value) || 0) * (parseFloat(l.querySelector('[data-rate]').value.replace(/,/g, '')) || 0);
+    });
+    root.querySelector('[data-total]').textContent = fmt(t);
+  };
+  document.addEventListener('input', e => { const r = e.target.closest('[data-request]'); if (r) recalc(r); });
+  document.addEventListener('click', e => {
+    const r = e.target.closest('[data-request]'); if (!r) return;
+    if (e.target.closest('[data-add-line]')) {
+      const lines = r.querySelector('[data-lines]'), row = lines.firstElementChild.cloneNode(true);
+      row.querySelectorAll('input').forEach(i => (i.value = i.matches('[data-qty]') ? '1' : ''));
+      row.style.animation = 'rise var(--d-base) var(--ease-enter)';
+      lines.appendChild(row); row.querySelector('input').focus();
+    }
+    const rm = e.target.closest('[data-remove-line]');
+    if (rm && r.querySelectorAll('[data-lines] .line').length > 1) rm.closest('.line').remove();
+    recalc(r);
+  });
+</script>
+</body>
+</html>

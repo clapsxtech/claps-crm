@@ -11,6 +11,9 @@ class StudentProfile
     {
         $student = DB::table('erp_students')->where('unit_id', $unitId)->where('id', $studentId)->first();
         abort_unless($student, 404);
+        $sheetProfile = DB::table('erp_student_profiles')->where('unit_id', $unitId)->where('student_id', $studentId)->first();
+
+        $admissionHandoffs = DB::table('erp_leads')->where('unit_id', $unitId)->where('student_id', $studentId)->select('id', 'source', 'joined_on', 'learning_requirement', 'concern', 'about_student', 'about_parent')->orderByDesc('id')->get();
 
         $assignments = $this->parties('erp_enrollments', $unitId, $studentId)
             ->select('p.id', 'p.starts_on', 'p.ends_on', 'p.status', 't.name as teacher_name', 'subject.name as subject_name')
@@ -44,7 +47,7 @@ class StudentProfile
             ->whereIn('id', $tasks->pluck('assigned_to')->filter()->all())
             ->whereIn('id', DB::table('erp_memberships')->where('unit_id', $unitId)->select('user_id'))
             ->pluck('name', 'id')->all()];
-        return compact('student', 'assignments', 'agreements', 'lessons', 'attendance', 'balances', 'ledger', 'requests', 'requestSummaries', 'followups', 'tasks', 'labels');
+        return compact('student', 'sheetProfile', 'admissionHandoffs', 'assignments', 'agreements', 'lessons', 'attendance', 'balances', 'ledger', 'requests', 'requestSummaries', 'followups', 'tasks', 'labels');
     }
 
     private function studentRows(string $table, int $unitId, int $studentId)

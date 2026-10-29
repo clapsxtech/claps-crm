@@ -12,6 +12,7 @@
     <server name="APP_ENV" value="testing"/>
     <server name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="/>
     <server name="APP_DEBUG" value="false"/>
+    <server name="ERP_PARENT_REVIEW_REQUIRED" value="false"/>
     <server name="ERP_BUSINESS_ID" value="1"/>
     <server name="SHEETS_SYNC_ENABLED" value="false"/>
     <server name="GOOGLE_CLIENT_SECRET" value=""/>

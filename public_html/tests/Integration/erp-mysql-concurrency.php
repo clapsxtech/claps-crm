@@ -144,10 +144,17 @@ require_once $base.'/database/migrations/2026_10_23_140000_add_request_reference
 require_once $base.'/database/migrations/2026_10_23_150000_create_erp_business_workflows.php';
 require_once $base.'/database/migrations/2026_10_23_160000_index_erp_migration_targets.php';
 require_once $base.'/database/migrations/2026_10_23_170000_add_intervals_to_erp_exceptions.php';
+require_once $base.'/database/migrations/2026_10_26_090000_create_erp_admissions.php';
 function resetFixture(): void {
+    $root=dirname(__DIR__,2);
+    $recruitment=require $root.'/database/migrations/2026_10_26_140000_create_teacher_recruitment.php';
+    $allocation=require $root.'/database/migrations/2026_10_26_160000_add_teacher_allocation.php';
+    if(\Illuminate\Support\Facades\Schema::hasTable('erp_allocation_requests'))$allocation->down();
+    $recruitment->down();(new CreateErpAdmissions())->down();
     $migration = new CreateErpCoreTables();
     $business = new CreateErpBusinessWorkflows();
     $business->down(); $migration->down(); $migration->up(); (new AddRequestReferenceToErpLessons())->up(); $business->up(); (new IndexErpMigrationTargets())->up(); (new AddIntervalsToErpExceptions())->up();
+    (new CreateErpAdmissions())->up();$recruitment->up();$allocation->up();
     DB::table('erp_units')->insert(['id' => 1, 'code' => 'PROBE', 'name' => 'Synthetic concurrency unit', 'timezone' => 'UTC']);
     DB::table('erp_students')->insert(['id' => 1, 'unit_id' => 1, 'code' => 'PROBE-S', 'name' => 'Synthetic student', 'registered_on' => '2026-01-01', 'timezone' => 'UTC', 'status' => 'active', 'grade' => '8', 'syllabus' => 'Synthetic']);
     DB::table('erp_teachers')->insert(['id' => 1, 'code' => 'PROBE-T', 'name' => 'Synthetic teacher', 'timezone' => 'UTC', 'status' => 'active']);

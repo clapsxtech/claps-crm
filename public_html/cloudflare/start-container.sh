@@ -47,4 +47,8 @@ chown -R www-data:www-data storage bootstrap/cache
 
 php artisan config:cache
 
+if [ "${ERP_SHEETS_TRANSITION_ENABLED:-false}" = "true" ]; then
+    exec /usr/bin/supervisord -n -c /etc/supervisor/erp.conf
+fi
+
 exec apache2-foreground

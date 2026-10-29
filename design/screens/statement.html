@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parent statement · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .table tfoot td { height: var(--row-default); padding: 0 var(--s-3); background: var(--bg-sunken); font-weight: var(--w-semibold); border-top: 1px solid var(--border-default); }
+    .table tfoot td:first-child { padding-left: var(--pad-card); }
+    .table tfoot td:last-child { padding-right: var(--pad-card); }
+    .table tr.disputed td { background: color-mix(in srgb, var(--danger-subtle) 60%, transparent); }
+    .student-pick { display: flex; flex-direction: column; }
+    .student-pick .list-item[aria-current="true"] { background: var(--bg-selected); }
+  </style>
+</head>
+<body data-page="statement" data-crumbs="Money/Parent statements/Fathima Rahman">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Attendance statement · September 2026</span>
+      <div class="row-lg"><h1 class="t-title">Fathima Rahman</h1><span class="badge warning dot">Shared · awaiting reply</span></div>
+      <p class="muted">Grade 9 · CBSE · Guardian: Rasheed Rahman, +91 98470 12345</p>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="window.print()"><span data-icon="printer"></span>Print</button>
+      <button class="btn btn-primary" data-open="tpl-share"><span data-icon="send"></span>Record statement sharing</button>
+    </div>
+  </header>
+
+  <section class="card card-body">
+    <div class="stepper" aria-label="Statement status">
+      <span class="step" data-state="done">Generated</span><span class="step-line" data-state="done"></span>
+      <span class="step" data-state="done">Shared with parent</span><span class="step-line" data-state="done"></span>
+      <span class="step" data-state="current">Objection window <span class="t-caption">· closes 3 Oct, 18:30 UTC</span></span><span class="step-line"></span>
+      <span class="step">Accepted</span>
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="card span-9">
+      <div class="card-head"><h2 class="t-subhead">Classes delivered</h2>
+        <div class="segmented" role="group" aria-label="Month"><button aria-pressed="false">Aug</button><button aria-pressed="true">Sep</button><button aria-pressed="false">Oct</button></div>
+      </div>
+      <div class="table-wrap" style="margin-top:var(--s-3)">
+        <table class="table">
+          <thead><tr><th>Date and time</th><th>Subject</th><th>Teacher</th><th class="num">Minutes</th><th class="num">Class charge</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">02 Sep · 17:00</td><td>Maths</td><td>Rahul Krishnan</td><td class="num">60</td><td class="num money">₹650.00</td><td></td></tr>
+            <tr><td class="mono">04 Sep · 17:00</td><td>Maths</td><td>Rahul Krishnan</td><td class="num">60</td><td class="num money">₹650.00</td><td></td></tr>
+            <tr><td class="mono">06 Sep · 10:00</td><td>Physics</td><td>Sneha Pillai</td><td class="num">60</td><td class="num money">₹600.00</td><td></td></tr>
+            <tr class="disputed"><td class="mono">09 Sep · 17:00</td><td>Maths</td><td>Rahul Krishnan</td><td class="num"><span class="row-sm end" data-tip="Teacher recorded 45 min · reason: network drop"><span data-icon="alert" class="icon-sm" style="color:var(--warning)"></span>45</span></td><td class="num money">₹487.50</td><td class="num"><span class="badge danger">Disputed</span></td></tr>
+            <tr><td class="mono">11 Sep · 17:00</td><td>Maths</td><td>Rahul Krishnan</td><td class="num">60</td><td class="num money">₹650.00</td><td></td></tr>
+            <tr><td class="mono">13 Sep · 10:00</td><td>Physics</td><td>Sneha Pillai</td><td class="num">60</td><td class="num money">₹600.00</td><td></td></tr>
+            <tr><td class="mono">16 Sep · 17:00</td><td>Maths</td><td>Rahul Krishnan</td><td class="num">60</td><td class="num money">₹650.00</td><td></td></tr>
+            <tr><td class="mono">20 Sep · 10:00</td><td>Physics</td><td>Sneha Pillai</td><td class="num">60</td><td class="num money">₹600.00</td><td></td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3">8 classes</td><td class="num">465</td><td class="num money">₹4,887.50</td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </article>
+
+    <aside class="span-3 stack-lg">
+      <article class="card card-body stack">
+        <span class="t-overline">Balance</span>
+        <dl class="dl">
+          <dt>Opening</dt><dd class="money" style="text-align:right">₹1,200.00</dd>
+          <dt>Charges</dt><dd class="money neg" style="text-align:right">−₹4,887.50</dd>
+          <dt>Payments</dt><dd class="money pos" style="text-align:right">+₹5,000.00</dd>
+        </dl>
+        <hr class="divider" />
+        <div class="row between"><span class="t-small strong">Closing</span><span class="t-heading money pos">₹1,312.50</span></div>
+      </article>
+      <article class="card card-body stack">
+        <span class="t-overline">After sharing</span>
+        <div class="timeline">
+          <div class="tl-item"><span class="tl-dot success"><span data-icon="message"></span></span><div class="tl-body">Shared on WhatsApp<div class="t-caption">30 Sep · by Shahana</div></div></div>
+          <div class="tl-item"><span class="tl-dot warning"><span data-icon="alert"></span></span><div class="tl-body">Parent disputed 09 Sep entry<div class="t-caption">1 Oct · “Class ended early”</div></div></div>
+        </div>
+        <div class="row">
+          <button class="btn btn-sm grow" data-toast="Dispute resolved · statement accepted">Resolve</button>
+          <button class="btn btn-ghost btn-sm" data-menu="parent-review" aria-label="More"><span data-icon="more"></span></button>
+        </div>
+      </article>
+    </aside>
+  </section>
+</main>
+
+<template id="parent-review">
+  <div class="menu-label t-overline">Parent review</div>
+  <button class="menu-item"><span data-icon="send"></span>Statement shared with parent</button>
+  <button class="menu-item"><span data-icon="alert"></span>Parent disputed this entry</button>
+  <button class="menu-item"><span data-icon="check"></span>Parent accepted / dispute resolved</button>
+</template>
+
+<template id="tpl-share">
+  <div class="dialog" role="dialog" aria-label="Record statement sharing">
+    <div class="dialog-head"><span class="kpi-icon"><span data-icon="send"></span></span><div class="stack-xs grow"><div class="t-subhead">Record statement sharing</div><p class="muted t-small">Starts the objection window. After the deadline, unanswered statements count as accepted.</p></div></div>
+    <div class="dialog-body stack">
+      <div class="field"><label class="field-label">Shared via</label><div class="segmented" role="group"><button aria-pressed="true"><span data-icon="message" class="icon-sm"></span>WhatsApp</button><button aria-pressed="false"><span data-icon="mail" class="icon-sm"></span>Email</button><button aria-pressed="false"><span data-icon="phone" class="icon-sm"></span>In person</button></div></div>
+      <div class="field"><label class="field-label">Sharing evidence</label><input class="input" placeholder="Message link or screenshot reference" autofocus /><span class="field-hint">Kept for audit if a dispute comes up later.</span></div>
+      <div class="field"><label class="field-label">Objection deadline <span class="opt">UTC</span></label><input class="input" type="datetime-local" value="2026-10-03T18:30" /></div>
+    </div>
+    <div class="dialog-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Recorded" data-toast="Sharing recorded · objection window open">Record sharing</button></div>
+  </div>
+</template>
+</body>
+</html>

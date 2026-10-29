@@ -23,12 +23,16 @@ class MemoryD1Gateway extends Gateway
         $revision = (int) $this->db->query('SELECT revision FROM erp_d1_revision')->fetchColumn();
         if ($operation === 'rows_batch') {
             $pages = [];
-            foreach ($payload['tables'] as $table) $pages[$table] = $this->call('rows', ['table' => $table, 'cursor' => null]);
+            foreach ($payload['tables'] as $table) $pages[$table] = $this->call('rows', ['table' => $table, 'cursor' => $payload['cursors'][$table] ?? -1, 'limit'=>$payload['limit']??200]);
             return ['pages' => $pages];
         }
         if ($operation === 'state') return ['revision'=>$revision];
         if ($operation === 'schema') return ['revision'=>$revision,'schema'=>$this->db->query("SELECT type,name,sql FROM sqlite_master WHERE name='accounts'")->fetchAll(PDO::FETCH_ASSOC),'sequences'=>$this->db->query('SELECT * FROM sqlite_sequence')->fetchAll(PDO::FETCH_ASSOC)];
-        if ($operation === 'rows') return ['rows'=>$this->db->query('SELECT rowid AS _erp_d1_rowid,* FROM accounts')->fetchAll(PDO::FETCH_ASSOC),'more'=>false];
+        if ($operation === 'rows') {
+            $limit=(int)($payload['limit']??200);$cursor=(int)($payload['cursor']??-1);
+            $rows=$this->db->query('SELECT rowid AS _erp_d1_rowid,* FROM accounts WHERE rowid>'.$cursor.' ORDER BY rowid LIMIT '.$limit)->fetchAll(PDO::FETCH_ASSOC);
+            return ['rows'=>$rows,'more'=>count($rows)===$limit];
+        }
         if (isset($this->receipts[$payload['id']])) return $this->receipts[$payload['id']];
         if ($this->failWrites || $revision !== $payload['revision']) throw new RuntimeException('Rejected');
         $this->db->beginTransaction();
@@ -44,6 +48,26 @@ class MemoryD1Gateway extends Gateway
 }
 class D1TransactionTest extends TestCase
 {
+    public function test_large_cold_snapshot_batches_every_continuation_and_preserves_rowid_gaps(): void
+    {
+        $remote=new class extends MemoryD1Gateway {
+            public int $batches=0;
+            public function call(string $operation,array $payload=[]):array {
+                if($operation==='rows_batch')$this->batches++;
+                return parent::call($operation,$payload);
+            }
+        };
+        $remote->db->beginTransaction();
+        $insert=$remote->db->prepare('INSERT INTO accounts(name,amount) VALUES(?,?)');
+        for($i=0;$i<6205;$i++)$insert->execute(['snapshot-'.$i,$i]);
+        $remote->db->exec('DELETE FROM accounts WHERE id%7=0');
+        $remote->db->commit();
+        $db=$this->connection($remote);
+        $expected=$remote->db->query('SELECT id,name,amount FROM accounts ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+        $actual=array_map(fn($row)=>(array)$row,$db->table('accounts')->orderBy('id')->get()->all());
+        $this->assertSame($expected,$actual);
+        $this->assertSame(3,$remote->batches);
+    }
     private array $paths=[];
     private function connection(MemoryD1Gateway $remote): D1Connection
     {

@@ -1,0 +1,165 @@
+erDiagram
+  %% Logical references only. D1 schema declares zero ERP foreign keys.
+  erp_candidate_interviews {
+    integer id PK
+    integer unit_id
+    integer candidate_id "logical reference"
+    integer score
+  }
+  erp_candidates {
+    integer id PK
+    integer unit_id "logical reference"
+    varchar name
+    varchar status
+  }
+  erp_demos {
+    integer id PK
+    integer unit_id
+    integer lead_id "logical reference"
+    integer student_id "logical reference"
+    integer teacher_id "logical reference"
+    integer subject_id "logical reference"
+    varchar status
+    datetime starts_at
+    datetime ends_at
+    varchar timezone
+    integer duration_minutes
+  }
+  erp_eligibilities {
+    integer id PK
+    integer teacher_id "logical reference"
+    integer subject_id "logical reference"
+  }
+  erp_lead_activities {
+    integer id PK
+    integer unit_id
+    integer lead_id "logical reference"
+    varchar kind
+  }
+  erp_lead_reminders {
+    integer id PK
+    integer unit_id
+    integer lead_id "logical reference"
+  }
+  erp_lead_transfers {
+    integer id PK
+    integer unit_id
+    integer lead_id "logical reference"
+    varchar status
+  }
+  erp_leads {
+    integer id PK
+    integer unit_id "logical reference"
+    varchar name
+    varchar status
+    integer assigned_to "logical reference"
+    integer student_id "logical reference"
+  }
+  erp_memberships {
+    integer id PK
+    integer user_id "logical reference"
+    integer unit_id "logical reference"
+  }
+  erp_student_profiles {
+    integer id PK
+    integer unit_id
+    integer student_id "logical reference"
+    varchar source_external_id
+  }
+  erp_students {
+    integer id PK
+    integer unit_id "logical reference"
+    varchar code
+    varchar name
+    varchar timezone
+    varchar status
+  }
+  erp_subjects {
+    integer id PK
+    varchar name
+  }
+  erp_teacher_candidate_activities {
+    integer id PK
+    integer candidate_id "logical reference"
+    varchar kind
+  }
+  erp_teacher_candidate_sources {
+    integer id PK
+    integer candidate_id "logical reference"
+    varchar source_key
+    varchar kind
+  }
+  erp_teacher_candidates {
+    integer id PK
+    integer business_id
+    varchar identity_key
+    varchar name
+    integer teacher_id "logical reference"
+    varchar stage
+    integer merged_into_id "logical reference"
+  }
+  erp_teacher_enquiries {
+    integer id PK
+    integer unit_id
+    integer staff_id "logical reference"
+  }
+  erp_teacher_matching_profiles {
+    integer id PK
+    integer teacher_id "logical reference"
+  }
+  erp_teacher_profiles {
+    integer id PK
+    integer unit_id
+    integer teacher_id "logical reference"
+    varchar source_external_id
+  }
+  erp_teacher_units {
+    integer id PK
+    integer teacher_id "logical reference"
+    integer unit_id "logical reference"
+  }
+  erp_teachers {
+    integer id PK
+    integer user_id "logical reference"
+    varchar code
+    varchar name
+    varchar timezone
+    varchar status
+  }
+  erp_units {
+    integer id PK
+    varchar code
+    varchar name
+    varchar timezone
+  }
+  users {
+    integer id PK
+  }
+  users ||..o{ erp_memberships : "user_id"
+  erp_units ||..o{ erp_memberships : "unit_id"
+  erp_units ||..o{ erp_students : "unit_id"
+  erp_students ||..o| erp_student_profiles : "student_id"
+  users |o..o| erp_teachers : "user_id"
+  erp_teachers ||..o| erp_teacher_units : "teacher_id"
+  erp_units ||..o{ erp_teacher_units : "unit_id"
+  erp_teachers ||..o| erp_teacher_profiles : "teacher_id"
+  erp_teachers ||..o| erp_teacher_matching_profiles : "teacher_id"
+  erp_teachers ||..o{ erp_eligibilities : "teacher_id"
+  erp_subjects ||..o{ erp_eligibilities : "subject_id"
+  erp_units ||..o{ erp_leads : "unit_id"
+  erp_students |o..o{ erp_leads : "student_id"
+  users |o..o{ erp_leads : "assigned_to"
+  erp_leads ||..o{ erp_lead_activities : "lead_id"
+  erp_leads ||..o{ erp_lead_reminders : "lead_id"
+  erp_leads ||..o{ erp_lead_transfers : "lead_id"
+  erp_leads ||..o{ erp_demos : "lead_id"
+  erp_teachers |o..o{ erp_demos : "teacher_id"
+  erp_students |o..o{ erp_demos : "student_id"
+  erp_subjects |o..o{ erp_demos : "subject_id"
+  users ||..o{ erp_teacher_enquiries : "staff_id"
+  erp_teacher_candidates ||..o{ erp_teacher_candidate_sources : "candidate_id"
+  erp_teacher_candidates ||..o{ erp_teacher_candidate_activities : "candidate_id"
+  erp_teachers |o..o{ erp_teacher_candidates : "teacher_id"
+  erp_teacher_candidates |o..o{ erp_teacher_candidates : "merged_into_id"
+  erp_units ||..o{ erp_candidates : "unit_id"
+  erp_candidates ||..o{ erp_candidate_interviews : "candidate_id"

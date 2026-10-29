@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Team &amp; access · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .matrix th { white-space: normal; line-height: 16px; }
+    .matrix td { height: var(--row-compact); }
+    .perm { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: var(--r-full); }
+    .perm.edit { background: var(--success-subtle); color: var(--success-fg); }
+    .perm.none { color: var(--fg-subtle); }
+    .perm .icon { width: 14px; height: 14px; stroke-width: 2.25; }
+    .matrix .view { font: var(--t-xs); font-weight: var(--w-medium); color: var(--info-fg); }
+    .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font: var(--t-xs); color: var(--fg-muted); }
+    .legend span { display: inline-flex; align-items: center; gap: var(--s-1); }
+  </style>
+</head>
+<body data-page="team" data-crumbs="Admin/Team & access">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <h1 class="t-title">Team &amp; access</h1>
+      <p class="muted">Who can do what in Kochi Tuition. Roles apply per business unit.</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" data-open="tpl-onboard" data-kind="drawer"><span data-icon="plus"></span>Onboard staff</button>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="toolbar">
+      <div class="input-group"><span data-icon="search"></span><input class="input input-sm" placeholder="Search name or email" aria-label="Search members" /></div>
+      <button class="chip" aria-pressed="false"><span data-icon="shield"></span>2FA off</button>
+      <button class="chip" aria-pressed="false"><span data-icon="lock"></span>Suspended</button>
+      <span class="spacer"></span>
+      <span class="t-small muted">9 members · 2 pending invites</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Member</th><th>Role</th><th>Two-factor</th><th>Last active</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="cell-primary"><span class="avatar" data-presence="online">AA</span><div class="stack-xs" style="gap:0"><span class="name">Amnas Ahamed <span class="badge special">Superadmin</span></span><span class="meta">amnas@clapslearn.com</span></div></div></td><td><select class="select select-sm" style="width:208px" aria-label="Role" disabled><option>Team manager</option></select></td><td><span class="badge success dot">Enabled</span></td><td class="t-small">Now</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="member-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td><div class="cell-primary"><span class="avatar" data-presence="online" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">SK</span><div class="stack-xs" style="gap:0"><span class="name">Shahana K.</span><span class="meta">shahana@clapslearn.com</span></div></div></td><td><select class="select select-sm" style="width:208px" aria-label="Role" onchange="toast('Shahana K. is now ' + this.value)"><option>Team manager</option><option selected>Finance</option><option>Academics / attendance</option><option>Sales / follow-ups</option><option>Read-only</option></select></td><td><span class="badge success dot">Enabled</span></td><td class="t-small">12 min ago</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="member-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td><div class="cell-primary"><span class="avatar" data-presence="busy" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">NH</span><div class="stack-xs" style="gap:0"><span class="name">Nihal Hassan</span><span class="meta">nihal@clapslearn.com</span></div></div></td><td><select class="select select-sm" style="width:208px" aria-label="Role" onchange="toast('Nihal Hassan is now ' + this.value)"><option>Team manager</option><option>Finance</option><option>Academics / attendance</option><option selected>Sales / follow-ups</option><option>Read-only</option></select></td><td><span class="badge warning dot">Not set up</span></td><td class="t-small">1 hour ago</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="member-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td><div class="cell-primary"><span class="avatar" data-presence="offline" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">DM</span><div class="stack-xs" style="gap:0"><span class="name">Divya Menon</span><span class="meta">divya@clapslearn.com</span></div></div></td><td><select class="select select-sm" style="width:208px" aria-label="Role" onchange="toast('Divya Menon is now ' + this.value)"><option>Team manager</option><option>Finance</option><option selected>Academics / attendance</option><option>Sales / follow-ups</option><option>Read-only</option></select></td><td><span class="badge success dot">Enabled</span></td><td class="t-small">Yesterday</td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="member-row" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          <tr><td><div class="cell-primary"><span class="avatar" style="opacity:.5">JT</span><div class="stack-xs" style="gap:0"><span class="name muted">Joseph Thomas</span><span class="meta">joseph@clapslearn.com</span></div></div></td><td><select class="select select-sm" style="width:208px" aria-label="Role" disabled><option>Read-only</option></select></td><td><span class="badge">—</span></td><td><span class="badge danger">Suspended</span></td><td class="num"><span class="row-actions"><button class="btn btn-sm" data-toast="Joseph Thomas reactivated">Activate</button></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><div class="stack-xs grow" style="gap:0"><h2 class="t-subhead">What each role can do</h2><span class="t-caption">Superadmins bypass this matrix. Legacy admin/staff accounts behave as Team manager.</span></div>
+      <div class="legend"><span><span class="perm edit"><span data-icon="check"></span></span>Full access</span><span><span class="view">View</span>· view only</span><span><span class="perm none">—</span>Hidden</span></div>
+    </div>
+    <div class="table-wrap" style="margin-top:var(--s-4)">
+      <table class="table matrix">
+        <thead><tr><th>Page</th><th>Team manager</th><th>Academics /<br />attendance</th><th>Finance</th><th>Sales /<br />follow-ups</th><th>Read-only</th></tr></thead>
+        <tbody id="matrix-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<template id="member-row">
+  <button class="menu-item"><span data-icon="key"></span>Reset password</button>
+  <button class="menu-item" data-toast="All sessions signed out"><span data-icon="logout"></span>Sign out all sessions</button>
+  <button class="menu-item"><span data-icon="shield"></span>Grant superadmin access</button>
+  <div class="menu-sep"></div>
+  <button class="menu-item danger" data-action="confirm-delete"><span data-icon="lock"></span>Suspend account</button>
+</template>
+
+<template id="tpl-onboard">
+  <div class="drawer" role="dialog" aria-label="Onboard staff">
+    <div class="drawer-head"><div class="stack-xs grow" style="gap:0"><span class="t-subhead">Onboard staff</span><span class="t-caption">They’ll get an email to set a password and 2FA</span></div><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field full"><label class="field-label">Full name</label><input class="input" placeholder="e.g. Anjali Suresh" autofocus /></div>
+        <div class="field full"><label class="field-label">Email</label><div class="input-group"><span data-icon="mail"></span><input class="input" type="email" placeholder="name@clapslearn.com" /></div></div>
+        <div class="field"><label class="field-label">Phone</label><div class="input-group"><span class="affix">+91</span><input class="input num" placeholder="98470 12345" /></div></div>
+        <div class="field"><label class="field-label">Gender</label><select class="select"><option>Female</option><option>Male</option><option>Prefer not to say</option></select></div>
+        <div class="field full"><label class="field-label">Timezone</label><select class="select"><option>Asia/Kolkata (IST)</option><option>Asia/Dubai (GST)</option></select></div>
+      </div>
+      <div class="field"><span class="field-label">Initial role</span>
+        <div class="stack-sm">
+          <label class="check"><input type="radio" name="role" checked /><span class="stack-xs" style="gap:0"><span class="t-small strong">Sales / follow-ups</span><span class="t-caption">Admissions, recruitment, matching, follow-ups</span></span></label>
+          <label class="check"><input type="radio" name="role" /><span class="stack-xs" style="gap:0"><span class="t-small strong">Academics / attendance</span><span class="t-caption">People, academics, timetable, attendance</span></span></label>
+          <label class="check"><input type="radio" name="role" /><span class="stack-xs" style="gap:0"><span class="t-small strong">Finance</span><span class="t-caption">Money &amp; receipts only</span></span></label>
+          <label class="check"><input type="radio" name="role" /><span class="stack-xs" style="gap:0"><span class="t-small strong">Read-only</span><span class="t-caption">Sees everything, changes nothing</span></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Invited" data-toast="Invite sent"><span data-icon="send"></span>Send invite</button></div>
+  </div>
+</template>
+
+<script>
+  /* Matrix generated from the TeamPermissions rules: E = full, V = view, - = hidden */
+  const M = [
+    ['Admissions & CRM',     'E', '-', '-', 'E', 'V'],
+    ['Teacher matching',     'E', 'E', '-', 'E', 'V'],
+    ['Teacher recruitment',  'E', 'V', '-', 'V', 'V'],
+    ['Students & teachers',  'E', 'E', '-', '-', 'V'],
+    ['Academics',            'E', 'E', '-', '-', 'V'],
+    ['Timetable',            'E', 'E', '-', '-', 'V'],
+    ['Attendance',           'E', 'E', '-', '-', 'V'],
+    ['Money & receipts',     'E', '-', 'E', '-', 'V'],
+    ['Follow-ups',           'E', '-', '-', 'E', 'V'],
+    ['Team access',          'E', '-', '-', '-', 'V'],
+    ['Migration & exports',  'E', '-', '-', '-', 'V'],
+  ];
+  const cell = v => v === 'E' ? `<span class="perm edit" aria-label="Full access">${icon('check')}</span>` : v === 'V' ? '<span class="view">View</span>' : '<span class="perm none" aria-label="Hidden">—</span>';
+  document.addEventListener('app-ready', () => {
+    document.getElementById('matrix-body').innerHTML = M.map(([p, ...r]) => `<tr><td class="strong">${p}</td>${r.map(v => `<td>${cell(v)}</td>`).join('')}</tr>`).join('');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "review_date": "2026-10-26",
+  "base_commit": "9a1d720",
+  "includes_preexisting_uncommitted_changes": true,
+  "production_mutated": false,
+  "php_version": "8.5.12",
+  "node_verified_version": "22.23.4",
+  "phpunit": {
+    "tests": 456,
+    "assertions": 3934,
+    "passed": true
+  },
+  "d1_compatibility_phpunit": {
+    "tests": 456,
+    "assertions": 3934,
+    "passed": true,
+    "remote_d1": false
+  },
+  "node_tests": {
+    "tests": 52,
+    "passed": true
+  },
+  "typescript": {
+    "passed": true
+  },
+  "composer_audit": {
+    "advisories": 0,
+    "abandoned": 0
+  },
+  "npm_audit": {
+    "reported_vulnerabilities": 0
+  },
+  "recovery_drill": {
+    "scope": "synthetic_sqlite_only",
+    "checks": 14,
+    "passed": true
+  },
+  "diagram_rendering": {
+    "tool": "Mermaid CLI",
+    "version": "12.0.0",
+    "svg_count": 5,
+    "passed": true
+  },
+  "production_readiness": "blocked_by_findings_in_README"
+}

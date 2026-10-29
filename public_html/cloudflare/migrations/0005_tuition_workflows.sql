@@ -1,0 +1,24 @@
+-- Additive tuition workflows. Restart the container after applying.
+ALTER TABLE erp_attendance ADD COLUMN actual_starts_at DATETIME NULL;
+ALTER TABLE erp_attendance ADD COLUMN change_reason TEXT NULL;
+ALTER TABLE erp_attendance ADD COLUMN submitted_late TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE erp_attendance ADD COLUMN parent_shared_at DATETIME NULL;
+ALTER TABLE erp_attendance ADD COLUMN parent_deadline_at DATETIME NULL;
+ALTER TABLE erp_attendance ADD COLUMN parent_review_status VARCHAR NOT NULL DEFAULT 'unshared';
+ALTER TABLE erp_attendance ADD COLUMN parent_review_note TEXT NULL;
+CREATE TABLE erp_internal_notes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, unit_id INTEGER NOT NULL, lesson_id INTEGER NOT NULL, created_by INTEGER NOT NULL, kind VARCHAR NOT NULL, outcome VARCHAR NULL, note TEXT NULL, created_at DATETIME NULL, updated_at DATETIME NULL);
+CREATE INDEX erp_internal_notes_unit_id_lesson_id_index ON erp_internal_notes(unit_id,lesson_id);
+CREATE TABLE erp_candidates (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, unit_id INTEGER NOT NULL, name VARCHAR NOT NULL, contact VARCHAR NOT NULL, qualification TEXT NOT NULL, subjects TEXT NOT NULL, levels TEXT NOT NULL, languages TEXT NULL, availability TEXT NULL, status VARCHAR NOT NULL DEFAULT 'pool', created_by INTEGER NOT NULL, created_at DATETIME NULL, updated_at DATETIME NULL);
+CREATE INDEX erp_candidates_unit_id_status_index ON erp_candidates(unit_id,status);
+CREATE TABLE erp_candidate_interviews (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, unit_id INTEGER NOT NULL, candidate_id INTEGER NOT NULL, created_by INTEGER NOT NULL, score INTEGER NOT NULL, recording_url TEXT NULL, strengths TEXT NULL, concerns TEXT NULL, decision VARCHAR NOT NULL, created_at DATETIME NULL, updated_at DATETIME NULL);
+CREATE INDEX erp_candidate_interviews_unit_id_candidate_id_index ON erp_candidate_interviews(unit_id,candidate_id);
+CREATE TRIGGER erp_d1_rev_erp_internal_notes_insert AFTER INSERT ON erp_internal_notes BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_internal_notes_update AFTER UPDATE ON erp_internal_notes BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_internal_notes_delete AFTER DELETE ON erp_internal_notes BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_candidates_insert AFTER INSERT ON erp_candidates BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_candidates_update AFTER UPDATE ON erp_candidates BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_candidates_delete AFTER DELETE ON erp_candidates BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_candidate_interviews_insert AFTER INSERT ON erp_candidate_interviews BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_candidate_interviews_update AFTER UPDATE ON erp_candidate_interviews BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+CREATE TRIGGER erp_d1_rev_erp_candidate_interviews_delete AFTER DELETE ON erp_candidate_interviews BEGIN UPDATE erp_d1_revision SET revision=revision+1 WHERE id=1; END;
+INSERT INTO migrations(migration,batch) SELECT '2026_10_25_180000_add_erp_tuition_workflows', COALESCE(MAX(batch),0)+1 FROM migrations;

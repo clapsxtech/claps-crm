@@ -15,7 +15,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        if (config('integrations.sheets.enabled', false)) {
+        if (config('sheet_transition.enabled', false)) {
+            $schedule->command('erp:sheets-refresh all --publish')->everyFifteenMinutes()->withoutOverlapping(30);
+            $schedule->command('erp:sheets-prune')->daily()->withoutOverlapping();
+        }
+        if (config('integrations.sheets.enabled', false) && !config('sheet_transition.enabled') && config('sheet_transition.authority') !== 'sheets') {
             $schedule->command('fetch:sheet-data')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('integration:deliver-outbox --limit=100')->everyMinute()->withoutOverlapping();
         }

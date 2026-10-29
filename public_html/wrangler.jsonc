@@ -44,7 +44,10 @@
         }
     },
     "vars": {
-        "APP_URL": "https://erp.clapslearn.in"
+        "APP_URL": "https://erp.clapslearn.in",
+        "ERP_SHEETS_TRANSITION_ENABLED": "false",
+        "ERP_DATA_AUTHORITY": "application",
+        "ERP_SHEETS_BAND_UNITS": "{}"
     },
     "secrets": {
         "required": [

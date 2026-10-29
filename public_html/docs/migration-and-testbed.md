@@ -3,7 +3,7 @@
 ## Decisions still pending
 
 1. **Account creation policy:** administrator-created staff or public self-signup. The existing public registration route/controller has deliberately not been disabled or given new provisioning privileges without this answer. Its original schema mismatch remains a release blocker. Staff creation through the authorized administrator interface is repaired and tested.
-2. **Attendance source of truth:** database ledger or Sheets-led workflow. Local-submission snapshot replacement now fails with a reconciliation-required response instead of erasing accepted records. Do not bypass this guard or bulk-delete submission keys to make an import run. Review the actual Sheet and choose an explicit reconciliation model.
+2. **Attendance and payment source of truth — decided:** the user confirmed application authority after cutover, with Sheets retained as read-only history/exports. Follow [the source-authority decision](architecture-review/source-authority.md). Cutoff and reconciliation remain release gates. Local-submission snapshot replacement must continue to fail rather than erase accepted application records; do not bypass the guard or bulk-delete submission keys to make an import run.
 
 The prepared changes must not be described as production-ready or fully resolved while these decisions remain open.
 

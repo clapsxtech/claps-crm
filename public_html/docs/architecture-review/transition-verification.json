@@ -1,0 +1,56 @@
+{
+  "verified_at": "2026-10-26T13:43:05.815685+00:00",
+  "scope": "Local implementation; no production database migration, Sheet write, or deployment.",
+  "php_sqlite": {
+    "tests": 480,
+    "assertions": 4026,
+    "passed": true,
+    "runtime": "PHP 8.5.12"
+  },
+  "php_d1_compatibility": {
+    "tests": 480,
+    "assertions": 4026,
+    "passed": true,
+    "backend": "Disposable SQLite-backed D1 gateway; not remote D1"
+  },
+  "node_tests": {
+    "tests": 52,
+    "passed": true,
+    "runtime": "Node 22"
+  },
+  "typescript": {
+    "passed": true
+  },
+  "image_build": {
+    "passed": true,
+    "platform": "linux/amd64",
+    "runtime": "PHP 8.2",
+    "local_tag": "claps-sheet-transition:local"
+  },
+  "container_smoke": {
+    "status": "passed",
+    "database": "disposable SQLite",
+    "network": "none",
+    "scheduler_restart": true,
+    "legacy_delivery_scheduled": false
+  },
+  "schema": {
+    "erp_table_count": 48,
+    "declared_erp_foreign_keys": 3,
+    "missing_revision_triggers": [],
+    "synthetic_constraint_probes": {
+      "orphan_student_profile": "ACCEPTED_INVALID_DATA",
+      "cross_team_student_profile": "ACCEPTED_INVALID_DATA",
+      "negative_attendance_with_missing_lesson": "ACCEPTED_INVALID_DATA",
+      "duplicate_task_source_identity": "ACCEPTED_INVALID_DATA"
+    }
+  },
+  "not_verified": [
+    "Production Google credentials and sharing",
+    "Full source-data reconciliation",
+    "Actual Sheet band to ERP team mapping",
+    "Remote D1 behavior and capacity under production load",
+    "Production rollout and final cutover"
+  ],
+  "production_ready_certified": false
+}

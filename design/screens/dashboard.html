@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Today · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: var(--s-8); padding: var(--s-8); }
+    .hero-side { display: flex; flex-direction: column; gap: var(--s-2); }
+    .glass-row { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-radius: var(--r-lg); background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); backdrop-filter: blur(8px); transition: background var(--d-fast); color: #fff; }
+    .glass-row:hover { background: rgba(255,255,255,.14); text-decoration: none; }
+    .glass-row .icon { width: 18px; height: 18px; opacity: .8; }
+    .glass-row b { display: block; font: var(--t-md); font-weight: 650; letter-spacing: -0.01em; }
+    .glass-row span { font: var(--t-xs); color: rgba(255,255,255,.7); }
+    .donut-body { display: flex; flex-direction: column; align-items: center; gap: var(--s-4); }
+    .donut-body .viz-legend { width: 100%; }
+    @media (max-width: 1180px) { .hero-grid { grid-template-columns: 1fr; } .hero-side { flex-direction: row; flex-wrap: wrap; } .glass-row { flex: 1 1 200px; } }
+    @media (max-width: 640px) { .hero-grid { padding: var(--s-6); } .hero-figure { font-size: 40px; line-height: 44px; } }
+  </style>
+</head>
+<body data-page="home" data-crumbs="Today">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <span class="t-overline">Thursday, 29 October</span>
+      <h1 class="t-title">Good morning, Amnas</h1>
+      <p class="muted">46 lessons today, 18 attendance entries waiting on you, and ₹38,400 due this week.</p>
+    </div>
+    <div class="actions">
+      <div class="segmented" role="group" aria-label="Period">
+        <button aria-pressed="true">Today</button><button aria-pressed="false">Week</button><button aria-pressed="false">Month</button>
+      </div>
+      <button class="btn btn-primary" data-menu="quick-create"><span data-icon="plus"></span>New</button>
+    </div>
+  </header>
+  <template id="quick-create">
+    <div class="menu-label t-overline">Create</div>
+    <button class="menu-item" data-open="tpl-enquiry" data-kind="drawer"><span data-icon="funnel"></span>Enquiry<span class="kbd">E</span></button>
+    <button class="menu-item"><span data-icon="video"></span>Demo class<span class="kbd">D</span></button>
+    <button class="menu-item"><span data-icon="wallet"></span>Payment<span class="kbd">P</span></button>
+    <button class="menu-item"><span data-icon="inbox"></span>Follow-up task<span class="kbd">T</span></button>
+  </template>
+
+  <!-- Row 1 — the one hero figure on the page, plus composition by syllabus -->
+  <section class="grid">
+    <article class="hero-panel span-8">
+      <div class="hero-grid">
+        <div class="stack-lg" style="justify-content:space-between">
+          <div class="stack-sm">
+            <span class="t-overline">Collected this month</span>
+            <div class="hero-figure"><span class="cur">₹</span><span data-count="482300">0</span></div>
+            <div class="row wrap"><span class="hero-chip"><span data-icon="trendUp" class="icon-sm"></span>8.4% vs September</span><span class="hero-chip"><span data-icon="receipt" class="icon-sm"></span>142 receipts</span></div>
+          </div>
+          <div class="stack-xs"><span class="t-caption" style="color:rgba(255,255,255,.65)">Daily receipts · 1–29 Oct</span><svg class="hero-spark" viewBox="0 0 400 56" preserveAspectRatio="none" role="img" aria-label="Daily receipts, 1–29 October"><defs><linearGradient id="hero-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path class="a" d="M0.0,31.2 L14.3,18.7 L28.6,19.5 L42.9,23.2 L57.1,20.7 L71.4,18.0 L85.7,22.4 L100.0,17.5 L114.3,7.7 L128.6,14.5 L142.9,24.9 L157.1,23.6 L171.4,28.3 L185.7,20.6 L200.0,24.1 L214.3,26.3 L228.6,23.7 L242.9,25.2 L257.1,30.2 L271.4,31.0 L285.7,36.8 L300.0,37.9 L314.3,21.4 L328.6,34.1 L342.9,30.1 L357.1,26.9 L371.4,27.0 L385.7,18.4 L400.0,16.0 L400,56 L0,56 Z"/><path class="l" d="M0.0,31.2 L14.3,18.7 L28.6,19.5 L42.9,23.2 L57.1,20.7 L71.4,18.0 L85.7,22.4 L100.0,17.5 L114.3,7.7 L128.6,14.5 L142.9,24.9 L157.1,23.6 L171.4,28.3 L185.7,20.6 L200.0,24.1 L214.3,26.3 L228.6,23.7 L242.9,25.2 L257.1,30.2 L271.4,31.0 L285.7,36.8 L300.0,37.9 L314.3,21.4 L328.6,34.1 L342.9,30.1 L357.1,26.9 L371.4,27.0 L385.7,18.4 L400.0,16.0" vector-effect="non-scaling-stroke"/></svg></div>
+          <div class="stack" style="gap:var(--s-6)">
+            <div class="stack-sm">
+              <div class="row between t-small"><span class="muted">88% of the ₹5,50,000 target</span><span class="muted">3 days left</span></div>
+              <div class="hero-target"><span style="width:88%"></span></div>
+            </div>
+            <div class="row wrap">
+              <button class="btn btn-light" data-open="tpl-payment" data-kind="drawer"><span data-icon="plus"></span>Record payment</button>
+              <a class="btn" href="finance.html">Open ledger<span data-icon="arrowRight"></span></a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-side">
+          <a class="glass-row" href="finance.html"><span data-icon="wallet"></span><div class="grow"><b>₹1,10,781</b><span>Outstanding · 31 students</span></div></a>
+          <a class="glass-row" href="payment-requests.html"><span data-icon="clock"></span><div class="grow"><b>₹38,400</b><span>Due this week · 9 requests</span></div></a>
+          <a class="glass-row" href="finance.html"><span data-icon="users"></span><div class="grow"><b>₹1,40,784</b><span>Teacher payouts · 18 of 24</span></div></a>
+        </div>
+      </div>
+    </article>
+
+    <article class="card span-4">
+      <div class="card-head"><h2 class="t-subhead">Students by syllabus</h2><a class="btn btn-ghost btn-sm" href="students.html">All</a></div>
+      <div class="card-body">
+        <div class="donut-body" data-chart="donut" data-size="152" data-center-label="active students" aria-label="Active students by syllabus"
+             data-series='[{"l":"CBSE","v":112},{"l":"State board","v":61},{"l":"ICSE","v":54},{"l":"Other","v":21}]'></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Row 2 — stat tiles share one anatomy so values sit on one baseline -->
+  <section class="grid" aria-label="Key numbers">
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon"><span data-icon="grad"></span></span>Active students</div>
+      <div class="kpi-value" data-count="248">0</div>
+      <div class="kpi-foot"><span class="row-sm"><span class="delta up"><span data-icon="arrowUp" class="icon-sm"></span>12</span>vs last month</span>
+        <svg class="spark" viewBox="0 0 88 28" aria-hidden="true"><path class="area" d="M0 22 L8 21 L16 20 L24 21 L32 18 L40 16 L48 17 L56 13 L64 11 L72 9 L80 7 L88 4 L88 28 L0 28Z"/><path d="M0 22 L8 21 L16 20 L24 21 L32 18 L40 16 L48 17 L56 13 L64 11 L72 9 L80 7 L88 4"/></svg></div>
+    </article>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--info-subtle);color:var(--info-fg)"><span data-icon="calendar"></span></span>Lessons today</div>
+      <div class="kpi-value"><span data-count="46">0</span><span class="muted" style="font-size:18px;font-weight:500;letter-spacing:0"> / 52</span></div>
+      <div class="kpi-foot"><span>6 cancelled or moved</span><div class="progress" style="width:88px"><span style="width:88%"></span></div></div>
+    </article>
+    <a class="card span-3 kpi card-interactive" href="attendance.html" style="color:inherit;text-decoration:none">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--warning-subtle);color:var(--warning-fg)"><span data-icon="alert"></span></span>Awaiting review<span data-icon="arrowRight" class="icon-sm" style="margin-left:auto"></span></div>
+      <div class="kpi-value" data-count="18">0</div>
+      <div class="kpi-foot"><span>3 possible duplicates</span><span class="badge warning dot">Oldest 2d</span></div>
+    </a>
+    <article class="card span-3 kpi">
+      <div class="kpi-top"><span class="kpi-icon" style="background:var(--special-subtle);color:var(--special-fg)"><span data-icon="target"></span></span>Lead conversion</div>
+      <div class="kpi-value">26.6%</div>
+      <div class="kpi-foot"><span class="row-sm"><span class="delta up"><span data-icon="arrowUp" class="icon-sm"></span>3.1 pts</span>17 of 64 joined</span></div>
+    </article>
+  </section>
+
+  <!-- Row 3 — trend + attention queue -->
+  <section class="grid">
+    <article class="card span-8">
+      <div class="card-head">
+        <div class="grow stack-xs" style="gap:0"><h2 class="t-subhead">Collections</h2><span class="t-caption">Monthly receipts, Nov 2025 – Oct 2026 · ₹48.2L total, up 14% on last year</span></div>
+        <div class="segmented" role="group" aria-label="Range"><button aria-pressed="false">6M</button><button aria-pressed="true">12M</button></div>
+      </div>
+      <div class="card-body">
+        <div data-chart="area" data-format="inr" data-axis-format="inrCompact" data-height="252" aria-label="Monthly collections, last 12 months"
+             data-series='[{"l":"Nov","full":"November 2025","v":310000},{"l":"Dec","full":"December 2025","v":290000},{"l":"Jan","full":"January 2026","v":360000},{"l":"Feb","full":"February 2026","v":400000},{"l":"Mar","full":"March 2026","v":430000},{"l":"Apr","full":"April 2026","v":350000},{"l":"May","full":"May 2026","v":320000},{"l":"Jun","full":"June 2026","v":460000},{"l":"Jul","full":"July 2026","v":500000},{"l":"Aug","full":"August 2026","v":470000},{"l":"Sep","full":"September 2026","v":445000},{"l":"Oct","full":"October 2026 · so far","v":482300}]'></div>
+      </div>
+    </article>
+
+    <article class="card span-4">
+      <div class="card-head"><h2 class="t-subhead">Needs your attention</h2><span class="count accent">7</span></div>
+      <div class="list" style="margin-top:var(--s-3)">
+        <a class="list-item" href="attendance.html"><span class="tl-dot warning"><span data-icon="alert"></span></span><span class="grow"><span class="t-small strong" style="display:block">Review 3 duplicate attendance</span><span class="t-caption">Super · current month</span></span><span data-icon="chevronRight" class="chev"></span></a>
+        <a class="list-item" href="pipeline.html"><span class="tl-dot danger"><span data-icon="phone"></span></span><span class="grow"><span class="t-small strong" style="display:block">Call back Arjun Menon</span><span class="t-caption">Hot lead · overdue 2h</span></span><span data-icon="chevronRight" class="chev"></span></a>
+        <a class="list-item" href="statement.html"><span class="tl-dot info"><span data-icon="file"></span></span><span class="grow"><span class="t-small strong" style="display:block">Share Sept statement · 4 parents</span><span class="t-caption">High · previous month</span></span><span data-icon="chevronRight" class="chev"></span></a>
+        <a class="list-item" href="matching.html"><span class="tl-dot success"><span data-icon="link"></span></span><span class="grow"><span class="t-small strong" style="display:block">Confirm teacher for Meera K.</span><span class="t-caption">Demo feedback received</span></span><span data-icon="chevronRight" class="chev"></span></a>
+      </div>
+      <div class="card-foot"><a href="tasks.html" class="t-small">Open all tasks</a></div>
+    </article>
+  </section>
+
+  <!-- Row 4 — today's schedule + when lessons happen -->
+  <section class="grid">
+    <article class="card span-8">
+      <div class="card-head">
+        <h2 class="t-subhead">Today’s lessons</h2>
+        <button class="chip" aria-pressed="false"><span data-icon="filter"></span>My students</button>
+        <a class="btn btn-ghost btn-sm" href="timetable.html">Timetable<span data-icon="arrowRight"></span></a>
+      </div>
+      <div class="card-body flush" style="margin-top:var(--s-3)">
+        <table class="table">
+          <thead><tr><th>Time</th><th>Student</th><th>Teacher</th><th>Subject</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">09:00</td><td><div class="cell-primary"><span class="avatar sm">FR</span><span class="name">Fathima Rahman</span></div></td><td>Rahul K.</td><td>Maths · G9</td><td><span class="badge success dot">Completed</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="mono">10:30</td><td><div class="cell-primary"><span class="avatar sm">AN</span><span class="name">Aarav Nair</span></div></td><td>Sneha P.</td><td>Physics · G7</td><td><span class="badge info dot live">In progress</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-sm">Join</button></span></td></tr>
+            <tr><td class="mono">12:00</td><td><div class="cell-primary"><span class="avatar sm">ZA</span><span class="name">Zainab Ali</span></div></td><td>Rahul K.</td><td>Chemistry · G11</td><td><span class="badge">Scheduled</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="mono">15:30</td><td><div class="cell-primary"><span class="avatar sm">IM</span><span class="name">Ibrahim M.</span></div></td><td>Anjali S.</td><td>English · G5</td><td><span class="badge warning dot">Rescheduled</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+            <tr><td class="mono">17:00</td><td><div class="cell-primary"><span class="avatar sm">MK</span><span class="name">Meera Krishnan</span></div></td><td>Sneha P.</td><td>Maths · G10</td><td><span class="badge special dot">Demo</span></td><td class="num"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-menu="row-menu" aria-label="More"><span data-icon="more"></span></button></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-foot"><span>Showing 5 of 46</span><a href="timetable.html">View all lessons</a></div>
+    </article>
+
+    <article class="card span-4">
+      <div class="card-head"><div class="grow stack-xs" style="gap:0"><h2 class="t-subhead">When lessons happen</h2><span class="t-caption">Delivered lessons by hour · last 4 weeks</span></div></div>
+      <div class="card-body">
+        <div data-chart="heatmap" aria-label="Lessons by weekday and hour"
+             data-series='{"rows":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"cols":["08","09","10","11","12","13","14","15","16","17","18","19","20"],"values":[[2,2,4,0,0,3,1,6,12,12,18,11,4],[0,4,4,0,1,0,5,7,8,16,14,11,8],[0,5,5,3,0,0,1,8,9,14,17,11,8],[0,5,3,4,1,0,5,8,9,14,14,14,4],[4,1,5,1,3,3,4,6,11,16,17,12,6],[7,11,12,9,9,4,7,8,8,7,4,4,0],[3,10,10,6,3,0,2,3,0,0,2,2,0]]}'></div>
+        <p class="t-caption" style="margin-top:var(--s-3)">Weekday evenings 17:00–19:00 are at capacity. Saturday mornings have room for 9 more lessons.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- Row 5 — activity + funnel -->
+  <section class="grid">
+    <article class="card span-8">
+      <div class="card-head"><h2 class="t-subhead">Recent activity</h2><button class="btn btn-ghost btn-sm" data-toast="Activity refreshed"><span data-icon="refresh"></span>Refresh</button></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="tl-item"><span class="tl-dot success"><span data-icon="wallet"></span></span><div class="tl-body"><b>Shahana</b> recorded <b>₹12,500</b> from Fathima Rahman · <a href="receipt.html">CL-2291</a><div class="t-caption">22 minutes ago</div></div></div>
+          <div class="tl-item"><span class="tl-dot info"><span data-icon="funnel"></span></span><div class="tl-body"><b>Arjun Menon</b> moved to <span class="badge special">Demo scheduled</span><div class="t-caption">1 hour ago · by Nihal</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><span data-icon="calendar"></span></span><div class="tl-body"><b>Rahul K.</b> marked unavailable Friday 14:00–18:00 · 3 lessons need moving<div class="t-caption">3 hours ago</div></div></div>
+          <div class="tl-item"><span class="tl-dot warning"><span data-icon="alert"></span></span><div class="tl-body">Gallabox flagged <b>2 attendance entries</b> as possible duplicates<div class="t-caption">Yesterday, 19:42</div></div></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card span-4">
+      <div class="card-head"><h2 class="t-subhead">Pipeline this month</h2><a class="btn btn-ghost btn-sm" href="pipeline.html">Open</a></div>
+      <div class="card-body stack">
+        <div class="stack-xs"><div class="row between t-small"><span>New enquiries</span><span class="num strong">64</span></div><div class="progress"><span style="width:100%"></span></div></div>
+        <div class="stack-xs"><div class="row between t-small"><span>Contacted</span><span class="num strong">51</span></div><div class="progress"><span style="width:80%"></span></div></div>
+        <div class="stack-xs"><div class="row between t-small"><span>Demo attended</span><span class="num strong">29</span></div><div class="progress"><span style="width:45%"></span></div></div>
+        <div class="stack-xs"><div class="row between t-small"><span>Registered</span><span class="num strong">17</span></div><div class="progress"><span style="width:27%"></span></div></div>
+      </div>
+    </article>
+  </section>
+</main>
+
+<template id="tpl-enquiry">
+  <div class="drawer" role="dialog" aria-label="New enquiry">
+    <div class="drawer-head"><span class="t-subhead grow">New enquiry</span><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field full"><label class="field-label">Student name</label><input class="input" placeholder="e.g. Fathima Rahman" autofocus /></div>
+        <div class="field"><label class="field-label">Class / grade</label><select class="select"><option>Grade 9</option><option>Grade 10</option></select></div>
+        <div class="field"><label class="field-label">Syllabus</label><select class="select"><option>CBSE</option><option>ICSE</option><option>State</option></select></div>
+        <div class="field full"><label class="field-label">Parent / contact phone</label><div class="input-group"><span class="affix">+91</span><input class="input num" placeholder="98470 12345" /></div><span class="field-hint">We’ll check for a repeat enquiry or shared family number.</span></div>
+        <div class="field"><label class="field-label">Source</label><select class="select"><option>Instagram</option><option>Referral</option><option>Google</option></select></div>
+        <div class="field"><label class="field-label">Next follow-up</label><input class="input" type="date" /></div>
+        <div class="field full"><label class="field-label">Notes <span class="opt">Optional</span></label><textarea class="textarea"></textarea></div>
+      </div>
+      <label class="switch"><input type="checkbox" checked /><span class="t-small">Mark as hot lead</span></label>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Created" data-toast="Enquiry created · assigned to you">Create enquiry</button></div>
+  </div>
+</template>
+<template id="tpl-payment">
+  <div class="drawer" role="dialog" aria-label="Record payment">
+    <div class="drawer-head"><span class="t-subhead grow">Record a received payment</span><button class="btn btn-ghost btn-icon" data-action="close" aria-label="Close"><span data-icon="x"></span></button></div>
+    <div class="drawer-body">
+      <div class="field"><label class="field-label">Student</label><select class="select"><option>Fathima Rahman · CL-1042</option><option>Aarav Nair · CL-1031</option></select></div>
+      <div class="field"><label class="field-label">Amount</label><div class="input-group"><span class="affix">₹</span><input class="input num" value="12,500" style="font-size:20px;height:var(--control-lg);font-weight:600" /></div><span class="field-hint">Balance after this payment: ₹0</span></div>
+      <div class="field"><label class="field-label">Method</label><div class="segmented" role="group"><button aria-pressed="true">UPI</button><button aria-pressed="false">Bank</button><button aria-pressed="false">Cash</button></div></div>
+      <div class="field"><label class="field-label">Receipt reference <span class="opt">Optional</span></label><input class="input mono" placeholder="UPI ref / cheque no." /></div>
+    </div>
+    <div class="drawer-foot"><button class="btn" data-action="close">Cancel</button><button class="btn btn-primary" data-async data-close data-done="Recorded" data-toast="₹12,500 recorded · receipt CL-2292">Record payment</button></div>
+  </div>
+</template>
+</body>
+</html>

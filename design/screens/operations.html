@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Operations &amp; audit · ClapsLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" />
+  <link rel="stylesheet" href="../system/tokens.css" />
+  <link rel="stylesheet" href="../system/components.css" />
+  <script src="../system/app.js" defer></script>
+  <script src="../system/charts.js" defer></script>
+  <style>
+    .health { padding: var(--pad-card); display: flex; flex-direction: column; gap: var(--s-3); }
+    .health .metric { font: var(--t-xl); font-weight: var(--w-semibold); letter-spacing: var(--tracking-tight); font-variant-numeric: tabular-nums; }
+    .uptime { display: grid; grid-template-columns: repeat(30, 1fr); gap: 2px; height: 20px; }
+    .uptime i { border-radius: 2px; background: var(--g-300); transform-origin: bottom; animation: rise-bar var(--d-slower) var(--ease-standard) both; }
+    .uptime i.w { background: var(--amber-500); }
+    .uptime i.d { background: var(--red-500); }
+  </style>
+</head>
+<body data-page="ops" data-crumbs="Admin/Operations & audit">
+<main>
+  <header class="page-header">
+    <div class="titles">
+      <div class="row-lg"><h1 class="t-title">Operations &amp; audit</h1><span class="badge success dot live">All systems normal</span></div>
+      <p class="muted">Health, backups and a record of every change. Times shown in UTC.</p>
+    </div>
+    <div class="actions"><button class="btn" data-toast="Health re-checked · all green"><span data-icon="refresh"></span>Re-check</button></div>
+  </header>
+
+  <section class="grid" aria-label="System health">
+    <article class="card span-3 health">
+      <div class="row between"><span class="kpi-top"><span class="kpi-icon"><span data-icon="database"></span></span>Database</span><span class="badge success dot live">Healthy</span></div>
+      <div class="row-sm" style="align-items:baseline"><span class="metric">38</span><span class="t-small muted">ms p95</span></div>
+      <div class="uptime" id="up-db"></div>
+    </article>
+    <article class="card span-3 health">
+      <div class="row between"><span class="kpi-top"><span class="kpi-icon" style="background:var(--info-subtle);color:var(--info-fg)"><span data-icon="layers"></span></span>Queue workers</span><span class="badge success dot live">4 running</span></div>
+      <div class="row-sm" style="align-items:baseline"><span class="metric">12</span><span class="t-small muted">jobs waiting</span></div>
+      <div class="uptime" id="up-q"></div>
+    </article>
+    <article class="card span-3 health">
+      <div class="row between"><span class="kpi-top"><span class="kpi-icon" style="background:var(--warning-subtle);color:var(--warning-fg)"><span data-icon="shield"></span></span>Backups</span><span class="badge warning dot">26h ago</span></div>
+      <div class="row-sm" style="align-items:baseline"><span class="metric">2.4</span><span class="t-small muted">GB · last snapshot</span></div>
+      <div class="uptime" id="up-b"></div>
+    </article>
+    <article class="card span-3 health">
+      <div class="row between"><span class="kpi-top"><span class="kpi-icon" style="background:var(--special-subtle);color:var(--special-fg)"><span data-icon="database"></span></span>D1 storage</span><span class="badge success dot">61%</span></div>
+      <div class="row-sm" style="align-items:baseline"><span class="metric">6.1</span><span class="t-small muted">of 10 GB</span></div>
+      <div class="progress"><span style="width:61%"></span></div>
+    </article>
+  </section>
+
+  <section class="grid">
+    <article class="card span-4">
+      <div class="card-head"><h2 class="t-subhead">Backup &amp; recovery</h2></div>
+      <div class="card-body stack">
+        <div class="callout warning"><span data-icon="alert"></span><span>Last backup is older than 24 hours. Run one before importing data.</span></div>
+        <dl class="dl">
+          <dt>Last backup</dt><dd class="mono">2026-10-28 13:05 UTC</dd>
+          <dt>Reference</dt><dd><button class="btn btn-link mono" data-copy="bk_20261028_1305">bk_20261028_1305</button></dd>
+          <dt>Retention</dt><dd>30 daily · 12 monthly</dd>
+          <dt>Recovery check</dt><dd><span class="badge success dot">Verified 21 Oct</span></dd>
+        </dl>
+        <div class="row">
+          <button class="btn btn-primary grow" data-async data-done="Backup complete" data-toast="Backup bk_20261029_1412 created"><span data-icon="shield"></span>Run backup now</button>
+          <button class="btn" data-toast="Recovery rehearsal queued">Test restore</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="card span-8">
+      <div class="card-head"><h2 class="t-subhead">Recent activity</h2><button class="btn btn-ghost btn-sm" data-async data-done="Exported" data-toast="audit-log.csv downloaded"><span data-icon="download"></span>Export</button></div>
+      <div class="toolbar" style="margin-top:var(--s-3);border-top:1px solid var(--border-subtle)">
+        <div class="input-group"><span data-icon="search"></span><input class="input input-sm" placeholder="Search action or record" aria-label="Search audit log" /></div>
+        <select class="select select-sm" style="width:auto" aria-label="Actor"><option>Any actor</option><option>Shahana K.</option><option>Nihal Hassan</option></select>
+        <select class="select select-sm" style="width:auto" aria-label="Team"><option>All teams</option><option>Kochi Tuition</option><option>Gulf Online</option></select>
+        <span class="spacer"></span>
+        <div class="segmented" role="group" aria-label="Range"><button aria-pressed="true">24h</button><button aria-pressed="false">7d</button><button aria-pressed="false">30d</button></div>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Time UTC</th><th>Actor</th><th>Team</th><th>Action</th><th>Record</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">14:02:11</td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">SK</span>Shahana K.</div></td><td class="muted">#2 Kochi</td><td><span class="badge success">payment.recorded</span></td><td><a href="receipt.html" class="mono">CL-2291</a></td></tr>
+            <tr><td class="mono">13:48:37</td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--blue-50);--av-fg:var(--blue-700)">NH</span>Nihal Hassan</div></td><td class="muted">#2 Kochi</td><td><span class="badge info">lead.stage_changed</span></td><td class="mono">LD-5521</td></tr>
+            <tr><td class="mono">13:12:04</td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--amber-50);--av-fg:var(--amber-700)">DM</span>Divya Menon</div></td><td class="muted">#2 Kochi</td><td><span class="badge">attendance.approved</span></td><td class="mono">AT-30917</td></tr>
+            <tr><td class="mono">12:40:59</td><td><div class="cell-primary"><span class="avatar sm">AA</span>Amnas Ahamed</div></td><td class="muted">—</td><td><span class="badge special">role.granted</span></td><td class="mono">user:14</td></tr>
+            <tr><td class="mono">11:05:22</td><td><div class="cell-primary"><span class="avatar sm" style="--av-bg:var(--violet-50);--av-fg:var(--violet-700)">SK</span>Shahana K.</div></td><td class="muted">#2 Kochi</td><td><span class="badge danger">receipt.reversed</span></td><td class="mono">CL-2264</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-foot"><span>5 of 214 events today</span><a href="#">Load more</a></div>
+    </article>
+  </section>
+</main>
+<script>
+  /* 30-day status strips; staggered bars rise in sequence */
+  const strip = (id, warn = [], down = []) => {
+    document.getElementById(id).innerHTML = Array.from({ length: 30 }, (_, i) =>
+      `<i class="${down.includes(i) ? 'd' : warn.includes(i) ? 'w' : ''}" style="animation-delay:${i * 15}ms" title="Day ${i + 1}"></i>`).join('');
+  };
+  strip('up-db', [11]); strip('up-q', [4, 5], [19]); strip('up-b', [28, 29]);
+</script>
+</body>
+</html>

@@ -1,0 +1,1968 @@
+{
+  "verified_on": "2026-10-26",
+  "scope": "Laravel registered routes; middleware is route-declared only, not full authorization",
+  "routes": [
+    {
+      "method": "GET|HEAD",
+      "uri": "/sanctum/csrf-cookie",
+      "name": "sanctum.csrf-cookie",
+      "action": "Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController@show",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/api/user",
+      "name": null,
+      "action": "Closure",
+      "middleware": [
+        "api",
+        "auth:api"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/login",
+      "name": "login",
+      "action": "App\\Http\\Controllers\\Auth\\LoginController@showLoginForm",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/login",
+      "name": null,
+      "action": "App\\Http\\Controllers\\Auth\\LoginController@login",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/logout",
+      "name": "logout",
+      "action": "App\\Http\\Controllers\\Auth\\LoginController@logout",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/password/reset",
+      "name": "password.request",
+      "action": "App\\Http\\Controllers\\Auth\\ForgotPasswordController@showLinkRequestForm",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/password/email",
+      "name": "password.email",
+      "action": "App\\Http\\Controllers\\Auth\\ForgotPasswordController@sendResetLinkEmail",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/password/reset/{token}",
+      "name": "password.reset",
+      "action": "App\\Http\\Controllers\\Auth\\ResetPasswordController@showResetForm",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/password/reset",
+      "name": "password.update",
+      "action": "App\\Http\\Controllers\\Auth\\ResetPasswordController@reset",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/password/confirm",
+      "name": "password.confirm",
+      "action": "App\\Http\\Controllers\\Auth\\ConfirmPasswordController@showConfirmForm",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/password/confirm",
+      "name": null,
+      "action": "App\\Http\\Controllers\\Auth\\ConfirmPasswordController@confirm",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/superadmin/login",
+      "name": "superadmin.login",
+      "action": "App\\Http\\Controllers\\Auth\\LoginController@showSuperadminLogin",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/staff/login",
+      "name": "staff.login",
+      "action": "App\\Http\\Controllers\\Auth\\LoginController@showStaffLogin",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/ready",
+      "name": null,
+      "action": "Closure",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/health",
+      "name": null,
+      "action": "Closure",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/timetableReport",
+      "name": "timetableReport",
+      "action": "App\\Http\\Controllers\\TimeTableController@timetableReport",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/timetable",
+      "name": "timetable",
+      "action": "App\\Http\\Controllers\\TimeTableController@timetableReport",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/get-teacher-dob",
+      "name": "get-teacher-dob",
+      "action": "App\\Http\\Controllers\\TimeTableController@getTeacherDOB",
+      "middleware": [
+        "web",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|POST|HEAD",
+      "uri": "/student-attendance-report",
+      "name": "student-attendance-report",
+      "action": "App\\Http\\Controllers\\WorkHourController@studentsAttendanceReport",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/get-teachers",
+      "name": "get-teachers",
+      "action": "App\\Http\\Controllers\\WorkHourController@getTeachersData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/get-teacher",
+      "name": "get-teacher",
+      "action": "App\\Http\\Controllers\\WorkHourController@getTeachers",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/get-students",
+      "name": "get-students",
+      "action": "App\\Http\\Controllers\\WorkHourController@getStudentData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/get-student",
+      "name": "get-student",
+      "action": "App\\Http\\Controllers\\WorkHourController@getStudent",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|POST|HEAD",
+      "uri": "/attendanceReport",
+      "name": "attendanceReport",
+      "action": "App\\Http\\Controllers\\WorkHourController@attendanceReport",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/get-students-mark",
+      "name": "get-students-mark",
+      "action": "App\\Http\\Controllers\\MarklistReportController@getStudentData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|POST|HEAD",
+      "uri": "/markreport",
+      "name": "markreport",
+      "action": "App\\Http\\Controllers\\MarklistReportController@MarklistReport",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/attendance",
+      "name": "attendance",
+      "action": "App\\Http\\Controllers\\WorkHourController@frontetHourUploadCreate",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/studentinfom",
+      "name": "studentinfom",
+      "action": "App\\Http\\Controllers\\WorkHourController@getStudentinfo",
+      "middleware": [
+        "web",
+        "web",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/upload-workhour",
+      "name": "upload-workhour",
+      "action": "App\\Http\\Controllers\\WorkHourController@store",
+      "middleware": [
+        "web",
+        "web",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/resultform",
+      "name": "resultform",
+      "action": "App\\Http\\Controllers\\MarkListFrontentController@frontetMarkUploadCreate",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/studentinforesult",
+      "name": "studentinforesult",
+      "action": "App\\Http\\Controllers\\MarkListFrontentController@getStudentinfo",
+      "middleware": [
+        "web",
+        "web",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/upload-result",
+      "name": "upload-result",
+      "action": "App\\Http\\Controllers\\MarkListFrontentController@store",
+      "middleware": [
+        "web",
+        "web",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/performance",
+      "name": "performenceform",
+      "action": "App\\Http\\Controllers\\PerformanceController@create",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/performnce-upload",
+      "name": "performnce-upload",
+      "action": "App\\Http\\Controllers\\PerformanceController@store",
+      "middleware": [
+        "web",
+        "web",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/submit-application",
+      "name": "submit-application",
+      "action": "App\\Http\\Controllers\\MarkListFrontentController@store",
+      "middleware": [
+        "web",
+        "web",
+        "throttle:teacher-credentials"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/",
+      "name": "erp.index",
+      "action": "App\\Http\\Controllers\\Erp\\WorkspaceController@index",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS",
+      "uri": "/home",
+      "name": "home",
+      "action": "\\Illuminate\\Routing\\RedirectController",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS",
+      "uri": "/legacy",
+      "name": "legacy.index",
+      "action": "\\Illuminate\\Routing\\RedirectController",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/tools",
+      "name": "tools.index",
+      "action": "App\\Http\\Controllers\\Erp\\LegacyToolsController@index",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/legacy/dashboard",
+      "name": "legacy.dashboard",
+      "action": "App\\Http\\Controllers\\HomeController@index",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/backend",
+      "name": null,
+      "action": "App\\Http\\Controllers\\Auth\\LoginController@showLoginForm",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/maintenance-on",
+      "name": "maintenance.on",
+      "action": "App\\Http\\Controllers\\admin\\CommonController@maintenance_on",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/maintenance-off",
+      "name": "maintenance.off",
+      "action": "App\\Http\\Controllers\\admin\\CommonController@maintenance_off",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/settings",
+      "name": "settings.index",
+      "action": "App\\Http\\Controllers\\SettingsController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/update-settings",
+      "name": null,
+      "action": "App\\Http\\Controllers\\SettingsController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/roles",
+      "name": "roles.index",
+      "action": "App\\Http\\Controllers\\admin\\RoleController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/roles/create",
+      "name": "roles.create",
+      "action": "App\\Http\\Controllers\\admin\\RoleController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/roles",
+      "name": "roles.store",
+      "action": "App\\Http\\Controllers\\admin\\RoleController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/roles/{role}/edit",
+      "name": "roles.edit",
+      "action": "App\\Http\\Controllers\\admin\\RoleController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/roles/{role}",
+      "name": "roles.update",
+      "action": "App\\Http\\Controllers\\admin\\RoleController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "DELETE",
+      "uri": "/admin/roles/{role}",
+      "name": "roles.destroy",
+      "action": "App\\Http\\Controllers\\admin\\RoleController@destroy",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/users",
+      "name": "users.index",
+      "action": "App\\Http\\Controllers\\admin\\UsersController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/users/create",
+      "name": "users.create",
+      "action": "App\\Http\\Controllers\\admin\\UsersController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/users",
+      "name": "users.store",
+      "action": "App\\Http\\Controllers\\admin\\UsersController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/users/{user}/edit",
+      "name": "users.edit",
+      "action": "App\\Http\\Controllers\\admin\\UsersController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/users/{user}",
+      "name": "users.update",
+      "action": "App\\Http\\Controllers\\admin\\UsersController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/delete/{route}/{id}",
+      "name": "delete",
+      "action": "App\\Http\\Controllers\\admin\\CommonController@delete",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/subjects",
+      "name": "subjects.index",
+      "action": "App\\Http\\Controllers\\admin\\SubjectController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/subjects/create",
+      "name": "subjects.create",
+      "action": "App\\Http\\Controllers\\admin\\SubjectController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/subjects",
+      "name": "subjects.store",
+      "action": "App\\Http\\Controllers\\admin\\SubjectController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/subjects/{subject}/edit",
+      "name": "subjects.edit",
+      "action": "App\\Http\\Controllers\\admin\\SubjectController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/subjects/{subject}",
+      "name": "subjects.update",
+      "action": "App\\Http\\Controllers\\admin\\SubjectController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/topics",
+      "name": "topics.index",
+      "action": "App\\Http\\Controllers\\admin\\TopicController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/topics/create",
+      "name": "topics.create",
+      "action": "App\\Http\\Controllers\\admin\\TopicController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/topics",
+      "name": "topics.store",
+      "action": "App\\Http\\Controllers\\admin\\TopicController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/topics/{topic}/edit",
+      "name": "topics.edit",
+      "action": "App\\Http\\Controllers\\admin\\TopicController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/topics/{topic}",
+      "name": "topics.update",
+      "action": "App\\Http\\Controllers\\admin\\TopicController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/profile",
+      "name": "profile",
+      "action": "App\\Http\\Controllers\\admin\\UsersController@Profile",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/teachers",
+      "name": "teachers.index",
+      "action": "App\\Http\\Controllers\\admin\\GoogleSpreadsheetController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/students",
+      "name": "students.index",
+      "action": "App\\Http\\Controllers\\admin\\StudentsController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/marklist",
+      "name": "marklist.index",
+      "action": "App\\Http\\Controllers\\admin\\MarklistController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/marklist/create",
+      "name": "marklist.create",
+      "action": "App\\Http\\Controllers\\admin\\MarklistController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/marklist",
+      "name": "marklist.store",
+      "action": "App\\Http\\Controllers\\admin\\MarklistController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/marklist/{marklist}/edit",
+      "name": "marklist.edit",
+      "action": "App\\Http\\Controllers\\admin\\MarklistController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/marklist/{marklist}",
+      "name": "marklist.update",
+      "action": "App\\Http\\Controllers\\admin\\MarklistController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/master",
+      "name": "master.index",
+      "action": "App\\Http\\Controllers\\admin\\MasterController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/monthlyreport",
+      "name": "monthlyreport.index",
+      "action": "App\\Http\\Controllers\\admin\\WorkHourReportController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workhour",
+      "name": "workhour.index",
+      "action": "App\\Http\\Controllers\\WorkHourController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workhour/create",
+      "name": "workhour.create",
+      "action": "App\\Http\\Controllers\\WorkHourController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/workhour",
+      "name": "workhour.store",
+      "action": "App\\Http\\Controllers\\WorkHourController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workhour/{workhour}",
+      "name": "workhour.show",
+      "action": "App\\Http\\Controllers\\WorkHourController@show",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workhour/{workhour}/edit",
+      "name": "workhour.edit",
+      "action": "App\\Http\\Controllers\\WorkHourController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/workhour/{workhour}",
+      "name": "workhour.update",
+      "action": "App\\Http\\Controllers\\WorkHourController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "DELETE",
+      "uri": "/admin/workhour/{workhour}",
+      "name": "workhour.destroy",
+      "action": "App\\Http\\Controllers\\WorkHourController@destroy",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/studentinfoedit",
+      "name": "studentinfoedit",
+      "action": "App\\Http\\Controllers\\WorkHourController@getStudentedit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/teacherinfo",
+      "name": "teacherinfo",
+      "action": "App\\Http\\Controllers\\admin\\MarklistController@getTeacherInfo",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/studentinfo",
+      "name": "studentinfo",
+      "action": "App\\Http\\Controllers\\WorkHourController@getStudentinfo",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workreport",
+      "name": "workreport.index",
+      "action": "App\\Http\\Controllers\\TeacherReportController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workreport/create",
+      "name": "workreport.create",
+      "action": "App\\Http\\Controllers\\TeacherReportController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/workreport",
+      "name": "workreport.store",
+      "action": "App\\Http\\Controllers\\TeacherReportController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workreport/{workreport}",
+      "name": "workreport.show",
+      "action": "App\\Http\\Controllers\\TeacherReportController@show",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/workreport/{workreport}/edit",
+      "name": "workreport.edit",
+      "action": "App\\Http\\Controllers\\TeacherReportController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/workreport/{workreport}",
+      "name": "workreport.update",
+      "action": "App\\Http\\Controllers\\TeacherReportController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "DELETE",
+      "uri": "/admin/workreport/{workreport}",
+      "name": "workreport.destroy",
+      "action": "App\\Http\\Controllers\\TeacherReportController@destroy",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncTeachers",
+      "name": "syncTeachers",
+      "action": "App\\Http\\Controllers\\admin\\GoogleSpreadsheetController@sheetData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncStudents",
+      "name": "syncStudents",
+      "action": "App\\Http\\Controllers\\admin\\StudentsController@sheetData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncMasters",
+      "name": "syncMasters",
+      "action": "App\\Http\\Controllers\\admin\\MasterController@MastersSynkdata",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncTeacherReportData",
+      "name": "syncTeacherReportData",
+      "action": "App\\Http\\Controllers\\TeacherReportController@syncTeacherReportData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/marklistreport",
+      "name": "marklistreport.index",
+      "action": "App\\Http\\Controllers\\MarklistReportController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/marklistreport/create",
+      "name": "marklistreport.create",
+      "action": "App\\Http\\Controllers\\MarklistReportController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/marklistreport",
+      "name": "marklistreport.store",
+      "action": "App\\Http\\Controllers\\MarklistReportController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/marklistreport/{marklistreport}",
+      "name": "marklistreport.show",
+      "action": "App\\Http\\Controllers\\MarklistReportController@show",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/marklistreport/{marklistreport}/edit",
+      "name": "marklistreport.edit",
+      "action": "App\\Http\\Controllers\\MarklistReportController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/marklistreport/{marklistreport}",
+      "name": "marklistreport.update",
+      "action": "App\\Http\\Controllers\\MarklistReportController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "DELETE",
+      "uri": "/admin/marklistreport/{marklistreport}",
+      "name": "marklistreport.destroy",
+      "action": "App\\Http\\Controllers\\MarklistReportController@destroy",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncMarklistReportData",
+      "name": "syncMarklistReportData",
+      "action": "App\\Http\\Controllers\\MarklistReportController@syncMarklistReportData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncWorkHoureReportData",
+      "name": "syncWorkHoureReportData",
+      "action": "App\\Http\\Controllers\\WorkHourController@syncWorkHoureReportData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/duereport",
+      "name": "duereport.index",
+      "action": "App\\Http\\Controllers\\DueController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/duereport/create",
+      "name": "duereport.create",
+      "action": "App\\Http\\Controllers\\DueController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/duereport",
+      "name": "duereport.store",
+      "action": "App\\Http\\Controllers\\DueController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/duereport/{duereport}",
+      "name": "duereport.show",
+      "action": "App\\Http\\Controllers\\DueController@show",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/duereport/{duereport}/edit",
+      "name": "duereport.edit",
+      "action": "App\\Http\\Controllers\\DueController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/duereport/{duereport}",
+      "name": "duereport.update",
+      "action": "App\\Http\\Controllers\\DueController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "DELETE",
+      "uri": "/admin/duereport/{duereport}",
+      "name": "duereport.destroy",
+      "action": "App\\Http\\Controllers\\DueController@destroy",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncDueReportData",
+      "name": "syncDueReportData",
+      "action": "App\\Http\\Controllers\\DueController@syncDueReportData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/timetable",
+      "name": "timetable.index",
+      "action": "App\\Http\\Controllers\\TimeTableController@index",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/timetable/create",
+      "name": "timetable.create",
+      "action": "App\\Http\\Controllers\\TimeTableController@create",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/timetable",
+      "name": "timetable.store",
+      "action": "App\\Http\\Controllers\\TimeTableController@store",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/timetable/{timetable}",
+      "name": "timetable.show",
+      "action": "App\\Http\\Controllers\\TimeTableController@show",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/timetable/{timetable}/edit",
+      "name": "timetable.edit",
+      "action": "App\\Http\\Controllers\\TimeTableController@edit",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "PUT|PATCH",
+      "uri": "/admin/timetable/{timetable}",
+      "name": "timetable.update",
+      "action": "App\\Http\\Controllers\\TimeTableController@update",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "DELETE",
+      "uri": "/admin/timetable/{timetable}",
+      "name": "timetable.destroy",
+      "action": "App\\Http\\Controllers\\TimeTableController@destroy",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/admin/syncTimeTableData",
+      "name": "syncTimeTableData",
+      "action": "App\\Http\\Controllers\\TimeTableController@syncTimeTableData",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/studentTimetable",
+      "name": "studentTimetable",
+      "action": "App\\Http\\Controllers\\TimeTableController@studentTimetable",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/admin/work-hours/export",
+      "name": "work_hours.export",
+      "action": "App\\Http\\Controllers\\WorkHourController@exportWorkHours",
+      "middleware": [
+        "web",
+        "auth:web",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/two-factor",
+      "name": "two-factor.challenge",
+      "action": "App\\Http\\Controllers\\Auth\\TwoFactorController@challenge",
+      "middleware": [
+        "web",
+        "guest"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/two-factor",
+      "name": "two-factor.verify",
+      "action": "App\\Http\\Controllers\\Auth\\TwoFactorController@verify",
+      "middleware": [
+        "web",
+        "guest",
+        "throttle:6,1"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/account/security",
+      "name": "account.security",
+      "action": "App\\Http\\Controllers\\Auth\\TwoFactorController@settings",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/account/two-factor/setup",
+      "name": "two-factor.setup",
+      "action": "App\\Http\\Controllers\\Auth\\TwoFactorController@setup",
+      "middleware": [
+        "web",
+        "auth",
+        "throttle:6,1"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/account/two-factor/enable",
+      "name": "two-factor.enable",
+      "action": "App\\Http\\Controllers\\Auth\\TwoFactorController@enable",
+      "middleware": [
+        "web",
+        "auth",
+        "throttle:6,1"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/account/two-factor/disable",
+      "name": "two-factor.disable",
+      "action": "App\\Http\\Controllers\\Auth\\TwoFactorController@disable",
+      "middleware": [
+        "web",
+        "auth",
+        "throttle:6,1"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/from-sheets",
+      "name": "erp.sheets",
+      "action": "App\\Http\\Controllers\\Erp\\SheetTransitionController@index",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/teacher",
+      "name": "teacher.portal",
+      "action": "App\\Http\\Controllers\\Erp\\TeacherController@entry",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD|POST|PUT|PATCH|DELETE|OPTIONS",
+      "uri": "/erp",
+      "name": "erp.compatibility",
+      "action": "\\Illuminate\\Routing\\RedirectController",
+      "middleware": [
+        "web"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/my-tasks",
+      "name": "erp.tasks.mine",
+      "action": "App\\Http\\Controllers\\Erp\\OwnTasksController@index",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/my-tasks/{task}/complete",
+      "name": "erp.tasks.complete",
+      "action": "App\\Http\\Controllers\\Erp\\OwnTasksController@complete",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "task": "[0-9]+"
+      }
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/my-tasks/{task}/items/{item}/complete",
+      "name": "erp.tasks.item.complete",
+      "action": "App\\Http\\Controllers\\Erp\\OwnTasksController@completeItem",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "task": "[0-9]+",
+        "item": "[0-9]+"
+      }
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/teacher/results",
+      "name": "erp.teacher.result",
+      "action": "App\\Http\\Controllers\\Erp\\TeacherController@result",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/teacher",
+      "name": "erp.teacher.index",
+      "action": "App\\Http\\Controllers\\Erp\\TeacherController@index",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/teacher/attendance",
+      "name": "erp.teacher.submit",
+      "action": "App\\Http\\Controllers\\Erp\\TeacherController@submit",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/academics/export",
+      "name": "erp.academics.export",
+      "action": "App\\Http\\Controllers\\Erp\\AcademicsController@export",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/students/{student}",
+      "name": "erp.student-profile",
+      "action": "App\\Http\\Controllers\\Erp\\StudentProfileController@show",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+",
+        "student": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/business/{page?}",
+      "name": "erp.business",
+      "action": "App\\Http\\Controllers\\Erp\\BusinessController@page",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/units/{unit}/business-actions/{action}",
+      "name": "erp.business.mutate",
+      "action": "App\\Http\\Controllers\\Erp\\BusinessController@mutate",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/exports/{dataset}",
+      "name": "erp.export",
+      "action": "App\\Http\\Controllers\\Erp\\BusinessController@export",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/reconciliation",
+      "name": "erp.reconciliation",
+      "action": "App\\Http\\Controllers\\Erp\\BusinessController@reconciliation",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/lookup",
+      "name": "erp.lookup",
+      "action": "App\\Http\\Controllers\\Erp\\BusinessController@lookup",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/payment-requests/{id}",
+      "name": "erp.request.print",
+      "action": "App\\Http\\Controllers\\Erp\\BusinessController@requestPrint",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+",
+        "id": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}",
+      "name": "erp.workspace",
+      "action": "App\\Http\\Controllers\\Erp\\WorkspaceController@workspace",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/units/{unit}/{action}",
+      "name": "erp.mutate",
+      "action": "App\\Http\\Controllers\\Erp\\WorkspaceController@mutate",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/receipts/{entry}",
+      "name": "erp.receipt",
+      "action": "App\\Http\\Controllers\\Erp\\WorkspaceController@receipt",
+      "middleware": [
+        "web",
+        "auth",
+        "App\\Http\\Middleware\\TeamAuthorization"
+      ],
+      "constraints": {
+        "unit": "[0-9]+",
+        "entry": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/administration",
+      "name": "erp.administration",
+      "action": "App\\Http\\Controllers\\Erp\\AdministrationController@index",
+      "middleware": [
+        "web",
+        "auth",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/administration/teams",
+      "name": "erp.teams.create",
+      "action": "App\\Http\\Controllers\\Erp\\AdministrationController@team",
+      "middleware": [
+        "web",
+        "auth",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/administration/teams/{id}",
+      "name": "erp.teams.update",
+      "action": "App\\Http\\Controllers\\Erp\\AdministrationController@team",
+      "middleware": [
+        "web",
+        "auth",
+        "admin"
+      ],
+      "constraints": {
+        "id": "[0-9]+"
+      }
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/administration/teams/{id}/archive",
+      "name": "erp.teams.archive",
+      "action": "App\\Http\\Controllers\\Erp\\AdministrationController@archive",
+      "middleware": [
+        "web",
+        "auth",
+        "admin"
+      ],
+      "constraints": {
+        "id": "[0-9]+"
+      }
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/administration/onboard",
+      "name": "erp.onboard",
+      "action": "App\\Http\\Controllers\\Erp\\AdministrationController@onboard",
+      "middleware": [
+        "web",
+        "auth",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/administration/accounts/{id}",
+      "name": "erp.accounts.update",
+      "action": "App\\Http\\Controllers\\Erp\\AdministrationController@account",
+      "middleware": [
+        "web",
+        "auth",
+        "admin",
+        "throttle:20,1"
+      ],
+      "constraints": {
+        "id": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/administration/operations",
+      "name": "erp.operations",
+      "action": "App\\Http\\Controllers\\Erp\\AdministrationController@operations",
+      "middleware": [
+        "web",
+        "auth",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/migration-center",
+      "name": "erp.migration.center",
+      "action": "App\\Http\\Controllers\\Erp\\MigrationCenterController@index",
+      "middleware": [
+        "web",
+        "auth",
+        "admin"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/migration-center/preview",
+      "name": "erp.migration.preview",
+      "action": "App\\Http\\Controllers\\Erp\\MigrationCenterController@preview",
+      "middleware": [
+        "web",
+        "auth",
+        "admin",
+        "throttle:10,1"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/migration-center/execute",
+      "name": "erp.migration.execute",
+      "action": "App\\Http\\Controllers\\Erp\\MigrationCenterController@execute",
+      "middleware": [
+        "web",
+        "auth",
+        "admin",
+        "throttle:5,1"
+      ],
+      "constraints": []
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/tuition",
+      "name": "erp.tuition",
+      "action": "App\\Http\\Controllers\\Erp\\TuitionController@index",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "GET|HEAD",
+      "uri": "/erp/units/{unit}/tuition/statement",
+      "name": "erp.tuition.statement",
+      "action": "App\\Http\\Controllers\\Erp\\TuitionController@statement",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    },
+    {
+      "method": "POST",
+      "uri": "/erp/units/{unit}/tuition/{operation}",
+      "name": "erp.tuition.mutate",
+      "action": "App\\Http\\Controllers\\Erp\\TuitionController@mutate",
+      "middleware": [
+        "web",
+        "auth"
+      ],
+      "constraints": {
+        "unit": "[0-9]+"
+      }
+    }
+  ]
+}

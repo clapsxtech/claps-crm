@@ -95,7 +95,8 @@ class TeacherController extends Controller
     public function submit(Request $request)
     {
         [$teacher,$unitId,$actorId]=$this->identity($request);
-        $payload=Validator::make($request->only(['lesson_id','actual_minutes']),['lesson_id'=>'required|integer|min:1','actual_minutes'=>'required|integer|min:1|max:480'])->validate();
+        $payload=Validator::make($request->only(['lesson_id','actual_minutes','actual_starts_at','change_reason']),['actual_starts_at'=>'nullable|date_format:Y-m-d\\TH:i','change_reason'=>'nullable|string|max:4000','lesson_id'=>'required|integer|min:1','actual_minutes'=>'required|integer|min:1|max:480'])->validate();
+        if (!empty($payload['actual_starts_at'])) $payload['actual_starts_at']=\Carbon\CarbonImmutable::createFromFormat('Y-m-d\\TH:i',$payload['actual_starts_at'],$teacher->timezone)->utc()->format('Y-m-d H:i:s');
         DB::transaction(function() use ($unitId,$actorId,$teacher,$payload,$request) {
             // Stable teacher lock also serializes scheduling and explicit pool changes.
             DB::table('erp_teachers')->where('id',$teacher->id)->lockForUpdate()->first();

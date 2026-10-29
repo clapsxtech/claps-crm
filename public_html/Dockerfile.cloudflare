@@ -48,6 +48,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y --no-install-recommends supervisor \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN sed -ri 's!Listen 80!Listen 8080!g' /etc/apache2/ports.conf \
@@ -62,6 +65,7 @@ COPY --from=assets /app/public ./public
 COPY cloudflare/php-performance.ini /usr/local/etc/php/conf.d/erp-performance.ini
 COPY cloudflare/apache.conf /etc/apache2/conf-available/laravel.conf
 COPY cloudflare/start-container.sh /usr/local/bin/start-container
+COPY cloudflare/supervisord.conf /etc/supervisor/erp.conf
 
 RUN a2enconf laravel \
     && chmod +x /usr/local/bin/start-container \
