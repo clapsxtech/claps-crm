@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 class Operations
 {
     private function invalid(string $message): void { throw ValidationException::withMessages(['operations'=>$message]); }
-    private function now(): string { return gmdate('Y-m-d H:i:s'); }
+    private function now(): string { return now('UTC')->format('Y-m-d H:i:s'); }
     private function actor(int $unitId,int $actorId) {
         // Serialize unit administration and membership changes on a stable unit row first.
         $unit=DB::table('erp_units')->where('id',$unitId)->lockForUpdate()->first();

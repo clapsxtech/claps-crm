@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 class Scheduling
 {
     private function fail($message) { throw ValidationException::withMessages(['schedule' => $message]); }
-    private function now() { return gmdate('Y-m-d H:i:s'); }
+    private function now() { return now('UTC')->format('Y-m-d H:i:s'); }
     private function required(array $p, array $keys) { foreach ($keys as $key) if (!isset($p[$key]) || $p[$key] === '') $this->fail("{$key} is required."); }
     private function date($value) {
         $d = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $value, new DateTimeZone('UTC'));
@@ -92,7 +92,7 @@ class Scheduling
             $e = $this->row('erp_enrollments',$e->id,$unitId,true);
             $end = $this->date($p['ends_on']);
             if ($e->ends_on && $end > $e->ends_on) $this->fail('An ended assignment cannot be extended. Create a new effective-dated assignment.');
-            if ($end < gmdate('Y-m-d') || $end < $e->starts_on) $this->fail('Close assignments prospectively, not in the past.');
+            if ($end < now('UTC')->format('Y-m-d') || $end < $e->starts_on) $this->fail('Close assignments prospectively, not in the past.');
             $cutoff = $this->localToUtc((new DateTimeImmutable($end))->modify('+1 day')->format('Y-m-d'),'00:00',$this->row('erp_students',$e->student_id,$unitId,true)->timezone);
             if (DB::table('erp_lessons')->where('enrollment_id',$e->id)->where('starts_at','>=',$cutoff)->whereIn('status',['scheduled','completed','no_show'])->lockForUpdate()->first()) $this->fail('Cancel or resolve later lessons before ending this assignment.');
             DB::table('erp_enrollments')->where('id',$e->id)->update(['ends_on'=>$end,'updated_at'=>$this->now()]);
