@@ -54,3 +54,13 @@ into a second student or payment database.
 
 Validation: admissions tests (6 tests, 66 assertions); D1 compatibility run of
 admissions and teacher allocation (12 tests, 134 assertions).
+
+## Sales feedback changes (19 November 2026)
+
+- **New enquiry:** student name is optional. Cards show "Student name pending" until it is added. Registration (Convert to student) asks for the name and fails without one.
+- **Demos:** teacher name is shown larger on demo cards. Each demo has Call and "Send demo details" WhatsApp buttons for the parent and the teacher. The message is prefilled with student, subject, date/time, teacher, duration and meeting link. Teacher phones come from the teacher's recruitment record.
+- **Registered students:** "Share joined details on WhatsApp" on a joined enquiry opens WhatsApp with the admission summary. The sales person picks the admin group and sends it.
+- **Teachers tab (Sales CRM):** sales can browse teachers, filter by level (LP, UP, HS), category (Standard, Advanced) and subject, and order by CT code (natural order) or registration time. Each card shows weekly TT hours in the avatar circle, from confirmed recurring agreements active today. Cards have Call, WhatsApp and "Send profile". From an enquiry, "Send teacher profile" opens this tab so Send profile goes straight to that parent.
+- **Teacher matching:** results use the same CT code / registration order and level/category filters, and show TT hours.
+- Levels and category are set by academics or team managers ("Set level & category" on the teacher card, action `teacher-classify`). Migration: `2026_11_19_100000_add_teacher_classification.php` / D1 `0012_teacher_classification.sql`. Existing teachers start with no level or category until they are set.
+- WhatsApp buttons open WhatsApp with the text filled in. Nothing is sent automatically.

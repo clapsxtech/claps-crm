@@ -8,7 +8,7 @@
     $crmStages = \App\Modules\Erp\Services\SalesPipeline::STAGES;
     $crmCan = [];
     foreach (['create-lead','update-lead','followup','reminder','complete-reminder','convert','schedule-demo','update-demo','transfer','resolve-transfer'] as $action) $crmCan[$action] = $permissions->allows(auth()->user(), $business->id, 'action', 'admission-'.$action);
-    $crmViews = ['pipeline'=>['Pipeline','grid'], 'today'=>['Today','check'], 'demos'=>['Demos','calendar'], 'reminders'=>['Reminders','clock'], 'transfers'=>['Transfers','people'], 'reports'=>['Reports','chart']];
+    $crmViews = ['pipeline'=>['Pipeline','grid'], 'today'=>['Today','check'], 'demos'=>['Demos','calendar'], 'teachers'=>['Teachers','book'], 'reminders'=>['Reminders','clock'], 'transfers'=>['Transfers','people'], 'reports'=>['Reports','chart']];
 @endphp
 <div class="sales-crm">
 <header class="crm-heading"><div><div class="eyebrow">{{ $business->name }} <span>SALES WORKSPACE</span></div><h1>Sales CRM<span class="crm-live-dot" aria-hidden="true"></span></h1><p>Your conversations. Your next steps. Your admissions.</p></div>@if($crmCan['create-lead'] && $crmView !== 'new')<a class="button crm-create" href="{{ $crmUrl(['view'=>'new']) }}">@include('erp.icon',['name'=>'plus']) New enquiry</a>@endif</header>
@@ -43,6 +43,7 @@
     {{ $leads->fragment('admissions-leads')->links('pagination::simple-bootstrap-4') }}</div>
     @endif
     @if($demos !== null)@include('erp.crm.demos')@endif
+    @if($teacherDirectory !== null)@include('erp.crm.teachers')@endif
     @if($reminders !== null)@include('erp.crm.reminders')@endif
     @if($crmView==='transfers')@include('erp.crm.transfers')@endif
     @if($crmView==='reports')

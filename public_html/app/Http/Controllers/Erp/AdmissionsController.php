@@ -21,7 +21,7 @@ class AdmissionsController extends Controller
         $request->validate([
             'q'=>'nullable|string|max:100', 'status'=>'nullable|in:LEAD,JOINED,LOST',
             'followup'=>'nullable|in:today,overdue,unscheduled', 'lead_id'=>'nullable|integer|min:1',
-            'report'=>'nullable|boolean', 'view'=>'nullable|in:pipeline,today,demos,reminders,transfers,reports,new',
+            'report'=>'nullable|boolean', 'view'=>'nullable|in:pipeline,today,demos,teachers,reminders,transfers,reports,new', 'for_lead'=>'nullable|integer|min:1',
             'stage'=>'nullable|in:'.implode(',', array_keys(SalesPipeline::STAGES)), 'hot'=>'nullable|boolean',
             'demo_scope'=>'nullable|in:upcoming,all',
         ]);
@@ -64,8 +64,12 @@ class AdmissionsController extends Controller
             $activities = DB::table('erp_lead_activities as a')->leftJoin('users as u', 'u.id', '=', 'a.actor_id')
                 ->where('a.unit_id', $unit)->where('a.lead_id', $selectedLead->id)->select('a.*', 'u.name as actor_name')
                 ->orderByDesc('a.occurred_at')->orderByDesc('a.id')->paginate(20, ['*'], 'history_page')->withQueryString();
-            $leadDemos = DB::table('erp_demos')->where('unit_id', $unit)->where('lead_id', $selectedLead->id)
-                ->orderByDesc('scheduled_on')->orderByDesc('id')->paginate(10, ['*'], 'history_demos_page')->withQueryString();
+            $leadDemos = DB::table('erp_demos as d')->leftJoin('erp_teachers as t','t.id','=','d.teacher_id')->leftJoin('erp_subjects as s','s.id','=','d.subject_id')
+                ->leftJoinSub(SalesPipeline::teacherPhones(),'tp','tp.teacher_id','=','d.teacher_id')
+                ->where('d.unit_id', $unit)->where('d.lead_id', $selectedLead->id)
+                ->select('d.*','t.name as teacher_name','tp.phone as teacher_phone','s.name as subject_name')
+                ->orderByDesc('d.scheduled_on')->orderByDesc('d.id')->paginate(10, ['*'], 'history_demos_page')->withQueryString();
+            foreach ($leadDemos as $demo) { $demo->lead_name = $selectedLead->name; $demo->canonical_student_name = $selectedLead->canonical_student_name; $demo->lead_grade = $selectedLead->grade; $demo->lead_syllabus = $selectedLead->syllabus; }
             $members = DB::table('users as u')->join('erp_memberships as m', 'm.user_id', '=', 'u.id')
                 ->where('m.unit_id', $unit)->whereIn('m.role', ['sales_followups','team_manager','admin','staff'])
                 ->where('u.status', 1)->whereNull('u.deleted_at')->select('u.id','u.name')->orderBy('u.name')->get();
@@ -75,11 +79,21 @@ class AdmissionsController extends Controller
             $query = DB::table('erp_demos as d')
                 ->join('erp_leads as l', function ($join) { $join->on('l.id','=','d.lead_id')->on('l.unit_id','=','d.unit_id'); })
                 ->leftJoin('erp_teachers as t','t.id','=','d.teacher_id')->leftJoin('erp_subjects as s','s.id','=','d.subject_id')
+                ->leftJoinSub(SalesPipeline::teacherPhones(),'tp','tp.teacher_id','=','d.teacher_id')
                 ->where('d.unit_id',$unit)->whereIn('d.lead_id',$visibleIds())
-                ->select('d.*','l.name as lead_name','t.name as teacher_name','s.name as subject_name');
+                ->select('d.*','l.name as lead_name','l.phone','l.country','l.grade as lead_grade','l.syllabus as lead_syllabus','t.name as teacher_name','tp.phone as teacher_phone','s.name as subject_name');
             if ($request->query('demo_scope','upcoming') === 'upcoming') $query->whereIn('d.status',['SCHEDULED','RESCHEDULED'])->where('d.scheduled_on','>=',$today)->orderBy('d.scheduled_on')->orderBy('d.scheduled_time');
             else $query->orderByDesc('d.scheduled_on')->orderByDesc('d.id');
             $demos = $query->paginate(20, ['*'], 'demos_page')->withQueryString();
+        }
+        $teacherDirectory = null;
+        $teacherSubjects = collect();
+        $profileLead = null;
+        if ($crmView === 'teachers' && !$selectedLead) {
+            $teacherDirectory = (new \App\Modules\Erp\Services\TeacherDirectory())->list($unit, $request->query(), $business->timezone);
+            $teacherSubjects = DB::table('erp_subjects')->whereIn('id', DB::table('erp_eligibilities')->whereIn('teacher_id', DB::table('erp_teacher_units')->where('unit_id', $unit)->select('teacher_id'))->select('subject_id'))->orderBy('name')->get(['id','name']);
+            // Opened from an enquiry: "Send profile" goes straight to that parent's WhatsApp.
+            if ($request->filled('for_lead')) $profileLead = $visible()->where('l.id', $request->integer('for_lead'))->first();
         }
         $reminders = null;
         if (in_array($crmView, ['today','reminders'], true) && !$selectedLead) {
@@ -106,7 +120,7 @@ class AdmissionsController extends Controller
             'Joined this month' => $visible()->where('l.status','JOINED')->whereBetween('l.joined_on',[now($business->timezone)->startOfMonth()->toDateString(),now($business->timezone)->endOfMonth()->toDateString()])->count(),
         ];
         $salesReport = $crmView === 'reports' ? (new \App\Modules\Erp\Services\SalesReporting())->read($unit, $request->user(), $request->only('report_from','report_to')) : null;
-        return view('erp.admissions', compact('business','crmView','canManage','stageCounts','followupCounts','followup','leads','selectedLead','activities','leadDemos','members','demos','reminders','transfers','transferCount','stats','today','salesReport'));
+        return view('erp.admissions', compact('business','crmView','canManage','stageCounts','followupCounts','followup','leads','selectedLead','activities','leadDemos','members','demos','teacherDirectory','teacherSubjects','profileLead','reminders','transfers','transferCount','stats','today','salesReport'));
     }
 
     public function mutate(Request $request, int $unit, string $action)

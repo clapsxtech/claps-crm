@@ -59,6 +59,11 @@ class BusinessController extends Controller
         if (str_starts_with($action, 'allocation-')) return app(TeacherAllocationController::class)->mutate($request, $unit, $action);
         if (str_starts_with($action, 'teacher-candidate-')) return app(TeacherRecruitmentController::class)->mutate($request, $unit, $action);
         if (str_starts_with($action, 'admission-')) return app(AdmissionsController::class)->mutate($request, $unit, $action);
+        if ($action === 'teacher-classify') {
+            $teacher = (new \App\Modules\Erp\Services\TeacherDirectory())->classify($unit, (int) $request->user()->id, $request->only('teacher_id','levels','category'));
+            if ($request->expectsJson()) return response()->json(['result' => $teacher]);
+            return redirect()->back()->with('status', 'Teacher level and category saved.');
+        }
         $map=[
             'student-update'=>[Operations::class,'updateStudent'],'task-update'=>[Operations::class,'updateTask'],'task-item'=>[Operations::class,'addTaskItem'],'task-item-complete'=>[Operations::class,'completeTaskItem'],'followup'=>[Operations::class,'recordFollowup'],'membership-grant'=>[Operations::class,'grantMembership'],'membership-revoke'=>[Operations::class,'revokeMembership'],'teacher-link'=>[Operations::class,'linkTeacherUser'],'teacher-unlink'=>[Operations::class,'unlinkTeacherUser'],
             'salary-paid'=>[MoneyOperations::class,'recordTeacherPayment'],'salary-reverse'=>[MoneyOperations::class,'reverseTeacherPayment'],'receipt-reverse'=>[MoneyOperations::class,'reverseReceipt'],'receipt-correct'=>[MoneyOperations::class,'correctReceipt'],'request-create'=>[MoneyOperations::class,'createPaymentRequest'],'request-cancel'=>[MoneyOperations::class,'cancelPaymentRequest'],'request-allocate'=>[MoneyOperations::class,'allocateReceipt']];

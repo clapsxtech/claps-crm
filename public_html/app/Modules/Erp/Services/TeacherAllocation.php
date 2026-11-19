@@ -27,7 +27,7 @@ class TeacherAllocation
             return (object)['student_id'=>(int)$row->id,'lead_id'=>null,'name'=>$row->name,'grade'=>$row->grade,'syllabus'=>$row->syllabus,'timezone'=>$row->timezone,'status'=>$row->status];
         }
         $row=$this->lead($unit,$actor,(int)$p['lead_id']);
-        return (object)['student_id'=>$row->student_id?(int)$row->student_id:null,'lead_id'=>(int)$row->id,'name'=>$row->name,'grade'=>$row->grade,'syllabus'=>$row->syllabus,'timezone'=>DB::table('erp_units')->where('id',$unit)->value('timezone'),'status'=>$row->status];
+        return (object)['student_id'=>$row->student_id?(int)$row->student_id:null,'lead_id'=>(int)$row->id,'name'=>SalesPipeline::name($row),'grade'=>$row->grade,'syllabus'=>$row->syllabus,'timezone'=>DB::table('erp_units')->where('id',$unit)->value('timezone'),'status'=>$row->status];
     }
     private function lead(int $unit,User $actor,int $id,bool $lock=false): object
     {
@@ -81,7 +81,14 @@ class TeacherAllocation
             ->leftJoin('erp_teacher_matching_profiles as m','m.teacher_id','=','t.id')->where('u.unit_id',$unit)->where('t.status','active');
         if(empty($p['include_unverified']))$q->whereExists(function($e)use($slot){$e->selectRaw('1')->from('erp_eligibilities')->whereColumn('teacher_id','t.id')->where('subject_id',$slot['subject_id'])->where('grade',$slot['grade'])->where('syllabus',$slot['syllabus']);});
         if(!empty($p['teacher_q']))$q->where(fn($w)=>$w->where('t.name','like','%'.$p['teacher_q'].'%')->orWhere('t.code','like','%'.$p['teacher_q'].'%'));
-        $teachers=$q->select('t.id','t.code','t.name','t.timezone','m.verified_at')->orderBy('t.name')->paginate(25,['*'],'matches_page')->withQueryString();
+        if(!empty($p['level']) && isset(TeacherDirectory::LEVELS[$p['level']]))$q->where('t.levels','like','%'.$p['level'].'%');
+        if(!empty($p['category']) && in_array($p['category'],TeacherDirectory::CATEGORIES,true))$q->where('t.category',$p['category']);
+        $today=CarbonImmutable::now(DB::table('erp_units')->where('id',$unit)->value('timezone')?:'UTC')->toDateString();
+        $q->leftJoinSub(TeacherDirectory::weeklyMinutes($unit,$today),'tt','tt.teacher_id','=','t.id')->select('t.id','t.code','t.name','t.timezone','t.levels','t.category','m.verified_at')->selectRaw('COALESCE(tt.minutes,0) AS tt_minutes');
+        // Teachers are listed by CT code or registration time, not alphabetically.
+        $sort=$p['sort']??'code';
+        if($sort==='code')TeacherDirectory::orderByCode($q);else $q->orderBy('t.created_at',$sort==='registered_asc'?'asc':'desc')->orderBy('t.id',$sort==='registered_asc'?'asc':'desc');
+        $teachers=$q->paginate(25,['*'],'matches_page')->withQueryString();
         $ids=$teachers->pluck('id')->all();$start=$slot['starts_at'];$weekEnd=CarbonImmutable::parse($start,'UTC')->addDays(7)->format('Y-m-d H:i:s');
         $loads=DB::table('erp_lessons')->whereIn('teacher_id',$ids)->where('status','scheduled')->where('starts_at','<',$weekEnd)->where('ends_at','>',$start)->get(['teacher_id','starts_at','ends_at'])->groupBy('teacher_id');
         foreach($teachers as $teacher){
@@ -89,6 +96,7 @@ class TeacherAllocation
             try{$this->checkTeacher($unit,$teacher->id,$slot,$context);}catch(ValidationException $e){$teacher->blockers=array_values(array_unique(array_merge(...array_values($e->errors()))));}
             $teacher->hours=round(collect($loads[$teacher->id]??[])->sum(fn($l)=>max(0,strtotime(min($l->ends_at,$weekEnd).' UTC')-strtotime(max($l->starts_at,$start).' UTC')))/3600,1);
             $teacher->local_time=CarbonImmutable::parse($start,'UTC')->setTimezone($teacher->timezone)->format('D d M H:i');
+            $teacher->tt_hours=TeacherDirectory::hours((int)$teacher->tt_minutes);
         }
         return compact('context','slot','teachers');
     }

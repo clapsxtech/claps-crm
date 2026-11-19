@@ -133,7 +133,8 @@ class Admissions
     {
         $this->assertUnitUser($unitId, $actorId, 'created_by');
         $v = $this->validation($payload, [
-            'name' => 'required|string|max:255',
+            // Parents often call before sharing the student's name; it is required again at registration.
+            'name' => 'nullable|string|max:255',
             'phone' => 'required|string|max:40',
             'email' => 'nullable|email|max:255',
             'enquiry_date' => 'nullable|date_format:Y-m-d',
@@ -180,7 +181,7 @@ class Admissions
                     $q->where('l.phone', $phone)->orWhere('l.phone', 'like', '%'.$tail);
                 })->limit(5)->get();
                 if ($matches->isNotEmpty()) {
-                    $choices = $matches->map(fn ($lead) => '#'.$lead->id.' '.$lead->name)->implode('; ');
+                    $choices = $matches->map(fn ($lead) => '#'.$lead->id.' '.SalesPipeline::name($lead))->implode('; ');
                     $this->fail('existing_lead_id', 'Possible existing enquiries: '.$choices.'. Enter an existing enquiry ID, or select Separate student to keep a sibling distinct.');
                 }
             }
@@ -201,7 +202,7 @@ class Admissions
             $id = DB::table('erp_leads')->insertGetId([
                 'unit_id' => $unitId,
                 'external_id' => $externalId !== '' ? $externalId : null,
-                'name' => trim($v['name']),
+                'name' => trim((string) ($v['name'] ?? '')),
                 'phone' => $phone,
                 'email' => isset($v['email']) ? trim($v['email']) : null,
                 'enquiry_date' => $enquiryDate,
@@ -229,7 +230,7 @@ class Admissions
     {
         $v = $this->validation($payload, [
             'lead_id' => 'required|integer|min:1',
-            'name' => 'sometimes|required|string|max:255',
+            'name' => 'sometimes|nullable|string|max:255',
             'phone' => 'sometimes|required|string|max:40',
             'email' => 'sometimes|nullable|email|max:255',
             'grade' => 'sometimes|nullable|string|max:100',
@@ -256,6 +257,7 @@ class Admissions
             }
             $values = $v;
             unset($values['lead_id']);
+            if (array_key_exists('name', $values)) $values['name'] = trim((string) $values['name']);
             if (array_key_exists('phone', $values)) $values['phone'] = $this->normalizePhone($values['phone']);
             if (array_key_exists('student_phone', $values) && $values['student_phone']) $values['student_phone'] = $this->normalizePhone($values['student_phone']);
             if (array_key_exists('assigned_to', $values)) {
@@ -445,6 +447,7 @@ class Admissions
     {
         $v = $this->validation($payload, [
             'lead_id' => 'required|integer|min:1',
+            'student_name' => 'nullable|string|max:255',
             'joined_on' => 'nullable|date_format:Y-m-d',
             'student_code' => 'nullable|string|max:100',
             'student_phone' => 'nullable|string|max:40',
@@ -465,6 +468,8 @@ class Admissions
             if ($lead->status === 'JOINED' && $lead->student_id) return DB::table('erp_students')->where('unit_id', $unitId)->where('id', $lead->student_id)->first();
             $unit = DB::table('erp_units')->where('id', $unitId)->lockForUpdate()->first();
             abort_unless($unit, 404, 'Business unit not found.');
+            $studentName = trim((string) ($v['student_name'] ?? '')) ?: trim((string) $lead->name);
+            if ($studentName === '') $this->fail('student_name', 'Add the student name before registering this enquiry.');
             $joinedOn = $this->dateValue($v['joined_on'] ?? null, 'joined_on', now($unit->timezone)->toDateString());
             $studentPhone = !empty($v['student_phone']) ? $this->normalizePhone($v['student_phone']) : ($lead->student_phone ?: $lead->phone);
             $admissionCode = $lead->admission_code ?: $this->newAdmissionCode($unitId);
@@ -474,7 +479,7 @@ class Admissions
             $studentId = DB::table('erp_students')->insertGetId([
                 'unit_id' => $unitId,
                 'code' => $studentCode,
-                'name' => $lead->name,
+                'name' => $studentName,
                 'registered_on' => $joinedOn,
                 'timezone' => $unit->timezone,
                 'status' => 'active',
@@ -486,7 +491,7 @@ class Admissions
                 'updated_at' => $now,
             ]);
             $leadValues = [
-                'status' => 'JOINED', 'student_id' => $studentId, 'joined_on' => $joinedOn,
+                'status' => 'JOINED', 'student_id' => $studentId, 'joined_on' => $joinedOn, 'name' => $studentName,
                 'admission_code' => $admissionCode, 'student_phone' => $studentPhone,
                 'monthly_fee_paise' => $v['monthly_fee_paise'] ?? $lead->monthly_fee_paise,
                 'fee_per_hour_paise' => $v['fee_per_hour_paise'] ?? $lead->fee_per_hour_paise,
