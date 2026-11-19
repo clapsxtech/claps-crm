@@ -53,6 +53,31 @@ this operation. The `/health` endpoint is a process-readiness check; `/ready` al
 database without creating sessions; live
 sign-in and a database-backed screen are separate database checks.
 
+## Git-connected deploys (Workers Builds)
+
+The `clapslearn-logs` Worker is connected to this repository with Workers Builds.
+Every push to `main` deploys to production. Configure it under
+**Workers & Pages > clapslearn-logs > Settings > Build**:
+
+| Setting | Value |
+| --- | --- |
+| Git branch | `main` |
+| Root directory | `public_html` |
+| Build command | `npm run cf:verify` |
+| Deploy command | `npm run cf:deploy:git` |
+| Non-production branch builds | Disabled |
+| Build secret | `INTERNAL_TOKEN` = the Worker secret of the same name |
+
+`cf:deploy:git` fails before deploying if `INTERNAL_TOKEN` is missing, runs
+`npm run cf:deploy`, then calls `scripts/restart-container.mjs`, which restarts the
+container (retrying up to three times) and verifies `/health` and `/ready`. A
+failed restart fails the build; the new Worker is already live at that point, so
+check the site and roll back with `npx wrangler rollback <version-id>` if needed.
+
+When you rotate `INTERNAL_TOKEN`, update the build secret too. Do not also deploy
+from another pipeline, or the two will overwrite each other. PHPUnit is not part
+of the build; run it before merging to `main`.
+
 ## Database changes
 
 The initial schema is in `cloudflare/migrations/0001_initial.sql`, generated from

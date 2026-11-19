@@ -10,6 +10,8 @@
     "production": "node scripts/build-assets.mjs --production",
     "cf:dev": "wrangler dev",
     "cf:deploy": "npm run cf:assets && wrangler deploy",
+    "cf:deploy:git": "node scripts/restart-container.mjs --check && npm run cf:deploy && node scripts/restart-container.mjs",
+    "cf:verify": "npm test && tsc --noEmit",
     "cf:types": "wrangler types",
     "test:deployment": "node --test tests/Deployment/*.test.cjs",
     "build": "npm run production",
