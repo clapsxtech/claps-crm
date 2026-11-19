@@ -338,7 +338,7 @@ class Admissions
             if($demo->starts_at){
                 if($demo->enrollment_id)$this->fail('demo_id','This demo already has a regular allocation. Manage the class through its timetable.');
                 if(isset($v['scheduled_on']) || isset($v['scheduled_time']) || in_array($v['status']??'', ['RESCHEDULED','SCHEDULED','CONVERTED','JOINED'],true))$this->fail('demo_id','Cancel and rebook a matched demo through Teacher matching. Conversion uses its successful feedback handoff.');
-                if(in_array($v['status']??'', ['ATTENDED','NO_SHOW'],true) && $demo->ends_at>gmdate('Y-m-d H:i:s'))$this->fail('status','Wait until the demo has ended before recording its outcome.');
+                if(in_array($v['status']??'', ['ATTENDED','NO_SHOW'],true) && $demo->ends_at>now('UTC')->format('Y-m-d H:i:s'))$this->fail('status','Wait until the demo has ended before recording its outcome.');
             }
             $values = $v; unset($values['demo_id']);
             if (($values['status'] ?? null) === 'ATTENDED' || ($values['status'] ?? null) === 'CONVERTED' || ($values['status'] ?? null) === 'JOINED') $values['completed_at'] = $demo->completed_at ?: $this->now();
