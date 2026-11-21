@@ -1,0 +1,20 @@
+{
+    // sales.clapslearn.in: the sales app. It stores no data; /api/* is forwarded to the
+    // ERP's SalesGateway entrypoint (Worker clapslearn-logs) over a service binding.
+    "$schema": "./node_modules/wrangler/config-schema.json",
+    "name": "claps-crm",
+    "account_id": "74ad8d10da1568cedacdd379a246cefc",
+    "main": "worker/index.ts",
+    "compatibility_date": "2026-11-19",
+    "routes": [{ "pattern": "sales.clapslearn.in", "custom_domain": true }],
+    "workers_dev": true,
+    "preview_urls": true,
+    "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/api/*"]
+    },
+    "services": [{ "binding": "ERP", "service": "clapslearn-logs", "entrypoint": "SalesGateway" }],
+    "observability": { "enabled": true }
+}

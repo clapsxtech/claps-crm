@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-brand-bg: #f1f5f9;
+  --color-brand-card: #ffffff;
+  --color-brand-fill: #f8fafc;
+  --color-brand-border: #dbe2ea;
+  --color-brand-ink: #0f172a;
+  --color-brand-muted: #64748b;
+  --color-brand-soft: #334155;
+  --color-brand-primary: #2563eb;
+  --color-brand-primary-hover: #1d4ed8;
+  --color-brand-danger: #dc2626;
+  --color-brand-success: #15803d;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-brand-bg text-brand-ink antialiased; font-family: var(--font-sans); }
+  :focus-visible { outline: 2px solid var(--color-brand-primary); outline-offset: 2px; }
+  input, select, textarea, button { font: inherit; }
+}
+
+@layer components {
+  .card { @apply rounded-2xl border border-brand-border bg-brand-card; }
+  .field-label { @apply block text-[11px] font-semibold uppercase tracking-wider text-brand-muted; }
+  .control { @apply w-full rounded-xl border border-brand-border bg-white px-3 py-2.5 text-sm text-brand-ink placeholder:text-slate-400 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/15 disabled:bg-brand-fill disabled:text-brand-muted; }
+}
