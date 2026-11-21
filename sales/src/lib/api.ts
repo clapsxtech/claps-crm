@@ -53,6 +53,7 @@ export interface Lead {
   about_student: string | null;
   about_parent: string | null;
   canonical_student_name: string | null;
+  canonical_student_code: string | null;
   monthly_fee_paise: number | null;
   crm_stage: Stage;
   created_at: string;
@@ -84,6 +85,13 @@ export interface Demo {
   lead_name?: string;
   phone?: string;
   lead_grade?: string | null;
+  lead_syllabus?: string | null;
+  country?: string | null;
+  timezone?: string | null;
+  duration_minutes?: number | null;
+  matching_grade?: string | null;
+  matching_syllabus?: string | null;
+  matching_medium?: string | null;
   starts_at: string | null;
   ends_at: string | null;
   feedback_outcome: string | null;
@@ -139,15 +147,17 @@ export interface Teacher {
   id: Id;
   code: string;
   name: string;
-  phone?: string | null;
-  qualification?: string | null;
-  subjects?: string | null;
-  levels?: string | null;
-  category?: string | null;
-  tt_hours?: string | number | null;
-  registered_at?: string | null;
-  eligibilities?: { name: string; grade: string | null; syllabus: string | null }[];
-  [key: string]: unknown;
+  phone: string | null;
+  qualification: string | null;
+  subjects: string | null;
+  classes: string | null;
+  mediums: string | null;
+  levels: string | null;
+  level_list: string[];
+  category: string | null;
+  tt_hours: string;
+  registered_at: string | null;
+  created_at: string | null;
 }
 
 export interface TeacherPage extends Partial<Page<Teacher>> {

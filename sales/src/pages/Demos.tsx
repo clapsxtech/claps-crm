@@ -4,8 +4,9 @@ import { Link2, Video } from "lucide-react";
 import { unitPath, type Demo, type Page } from "../lib/api";
 import { useUnit } from "../lib/session";
 import { useApi } from "../lib/useApi";
-import { DEMO_STATUS, formatTime, leadName, relativeDay, todayIn, whatsappLink } from "../lib/format";
+import { DEMO_STATUS, formatTime, leadName, relativeDay, todayIn } from "../lib/format";
 import { PageHeader } from "../components/Layout";
+import { DemoContacts } from "../components/DemoContacts";
 import { Card, EmptyState, ErrorNote, Pager, Pill, Segmented, Spinner } from "../components/ui";
 
 export function Demos() {
@@ -27,7 +28,6 @@ export function Demos() {
             <ul className="grid gap-3 md:grid-cols-2">
               {demos.data.data.map((demo) => {
                 const info = DEMO_STATUS[demo.status] ?? DEMO_STATUS.SCHEDULED;
-                const wa = whatsappLink(demo.phone);
                 return (
                   <li key={demo.id} className="card flex flex-col p-4">
                     <div className="flex items-start gap-3">
@@ -35,14 +35,15 @@ export function Demos() {
                       <div className="min-w-0 flex-1">
                         <Link to={`/leads/${demo.lead_id}`} className="block truncate font-semibold hover:text-brand-primary">{leadName({ name: demo.lead_name ?? "" })}</Link>
                         <p className="truncate text-xs text-brand-muted">{[demo.lead_grade, demo.subject_name].filter(Boolean).join(" · ") || "Course not recorded"}</p>
-                        <p className="mt-1 truncate text-xs text-brand-soft">Teacher: {demo.teacher_name ?? "to be confirmed"}</p>
+                        <p className="mt-1.5 truncate text-base font-semibold">{demo.teacher_name ?? <span className="text-sm font-medium text-brand-muted">Teacher to be confirmed</span>}</p>
                       </div>
                       <Pill className={info.className}>{info.label}</Pill>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2 border-t border-brand-border pt-3 text-xs font-semibold">
+                    <div className="mt-3 border-t border-brand-border pt-3">
+                      <DemoContacts demo={demo} unit={unit} parentPhone={demo.phone} parentCountry={demo.country} studentName={leadName({ name: demo.lead_name ?? "" })} />
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
                       {demo.meet_link && <a href={demo.meet_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1.5 text-brand-primary"><Link2 className="size-3.5" />Join link</a>}
-                      {wa && <a href={wa} target="_blank" rel="noreferrer" className="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-emerald-700">WhatsApp parent</a>}
-                      {demo.teacher_phone && whatsappLink(demo.teacher_phone) && <a href={whatsappLink(demo.teacher_phone)!} target="_blank" rel="noreferrer" className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-brand-soft">WhatsApp teacher</a>}
                       <Link to={`/leads/${demo.lead_id}`} className="ml-auto rounded-lg px-2.5 py-1.5 text-brand-primary">Open lead</Link>
                     </div>
                   </li>

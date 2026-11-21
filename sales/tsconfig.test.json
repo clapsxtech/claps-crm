@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/test.tsbuildinfo",
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "types": [
+      "@cloudflare/workers-types"
+    ]
+  },
+  "include": [
+    "test",
+    "worker",
+    "src/lib/messages.ts",
+    "src/lib/api.ts"
+  ]
+}
