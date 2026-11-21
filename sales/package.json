@@ -1,0 +1,33 @@
+{
+  "name": "claps-sales",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22 <23" },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "check": "tsc -b && vitest run",
+    "cf:dry-run": "npm run build && wrangler deploy --dry-run",
+    "cf:preview": "npm run build && wrangler versions upload",
+    "cf:deploy": "npm run build && wrangler deploy"
+  },
+  "dependencies": {
+    "lucide-react": "0.468.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.28.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261024.1",
+    "@tailwindcss/vite": "4.1.18",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "4.3.4",
+    "tailwindcss": "4.1.18",
+    "typescript": "5.7.2",
+    "vite": "6.0.3",
+    "vitest": "2.1.8",
+    "wrangler": "4.152.0"
+  }
+}
